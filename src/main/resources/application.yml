@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:test;DB_CLOSE_ON_EXIT=FALSE  # Prevent H2 from closing when JVM shuts down
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true  # H2 console activation
+      path: /h2-console  # Access H2 console at /h2-console
+  jpa:
+    defer-datasource-initialization: true  # Correctly defers initialization for H2 database
+    show-sql: true  # Log SQL statements
+    hibernate:
+      ddl-auto: update  # Auto-update schema
+    database-platform: org.hibernate.dialect.H2Dialect  # Explicit dialect (optional for H2)
+    properties:
+      hibernate:
+        format_sql: true  # Pretty-print SQL in logs
+  sql:
+    init:
+      mode: always  # Always run SQL scripts during initialization
