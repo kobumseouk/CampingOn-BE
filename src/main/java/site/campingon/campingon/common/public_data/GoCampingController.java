@@ -45,13 +45,16 @@ public class GoCampingController {
     //위치기반정보 목록 조회
     @GetMapping("/locationBasedList")
     public ResponseEntity<?> GetGoCampingLocationBasedList(@RequestParam("numOfRows") Long numOfRows,
-                                                           @RequestParam("pageNo") Long pageNo) throws URISyntaxException {
+                                                           @RequestParam("pageNo") Long pageNo,
+                                                           @RequestParam("mapX") String mapX,
+                                                           @RequestParam("mapY") String mapY,
+                                                           @RequestParam("radius") String radius) throws URISyntaxException {
         String url = buildUrl("/locationBasedList",
                 "numOfRows", numOfRows.toString()
                 , "pageNo", pageNo.toString(),
-                "mapX", "128.6142847",
-                "mapY", "36.0345423",
-                "radius", "2000");
+                "mapX", mapX,
+                "mapY", mapY,
+                "radius", radius);
         String response = fetchData(url);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
