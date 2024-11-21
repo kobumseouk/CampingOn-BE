@@ -10,7 +10,6 @@ import site.campingon.campingon.common.entity.BaseEntity;
 
 
 @Entity
-@Table(name = "users")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter

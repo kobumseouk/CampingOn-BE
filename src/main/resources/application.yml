@@ -17,6 +17,7 @@ spring:
     properties:
       hibernate:
         format_sql: true  # Pretty-print SQL in logs
+        auto_quote_keyword: true
   sql:
     init:
       mode: always  # Always run SQL scripts during initialization
