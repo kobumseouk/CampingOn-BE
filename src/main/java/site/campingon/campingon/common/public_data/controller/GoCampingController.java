@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import site.campingon.campingon.common.public_data.dto.GoCampingRequestDto;
+import site.campingon.campingon.common.public_data.dto.GoCampingResponseDto;
 import site.campingon.campingon.common.public_data.service.GoCampingService;
 
 import java.net.URI;
@@ -44,7 +45,7 @@ public class GoCampingController {
         String url = buildUrl("/basedList",
                 "numOfRows",numOfRows.toString(),
                 "pageNo",pageNo.toString());
-        GoCampingRequestDto response = fetchData(url);
+        GoCampingResponseDto response = fetchData(url);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -61,7 +62,7 @@ public class GoCampingController {
                 "mapX", mapX,
                 "mapY", mapY,
                 "radius", radius);
-        GoCampingRequestDto response = fetchData(url);
+        GoCampingResponseDto response = fetchData(url);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -76,7 +77,7 @@ public class GoCampingController {
                 "numOfRows",numOfRows.toString(),
                 "pageNo",pageNo.toString(),
                 "keyword", encodedKeyword);
-        GoCampingRequestDto response = fetchData(url);
+        GoCampingResponseDto response = fetchData(url);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -90,7 +91,7 @@ public class GoCampingController {
                 "numOfRows",numOfRows.toString(),
                 "pageNo",pageNo.toString(),
                 "contentId", contentId.toString());
-        GoCampingRequestDto response = fetchData(url);
+        GoCampingResponseDto response = fetchData(url);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -104,7 +105,7 @@ public class GoCampingController {
                 "numOfRows",numOfRows.toString(),
                 "pageNo",pageNo.toString(),
                 "syncStatus", syncStatus);
-        GoCampingRequestDto response = fetchData(url);
+        GoCampingResponseDto response = fetchData(url);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -124,8 +125,9 @@ public class GoCampingController {
     }
 
     // 공공데이터 요청 및 응답 처리
-    private GoCampingRequestDto fetchData(String url) throws URISyntaxException {
+    private GoCampingResponseDto fetchData(String url) throws URISyntaxException {
         URI uri = new URI(url);
-        return restTemplate.getForObject(uri, GoCampingRequestDto.class);
+        GoCampingRequestDto request = restTemplate.getForObject(uri, GoCampingRequestDto.class);
+        return goCampingService.publicDataFilter(request);
     }
 }
