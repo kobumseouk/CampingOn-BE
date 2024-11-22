@@ -17,6 +17,10 @@ public class CampSiteListResponseDto {
   private String imageUrl;
   private String indoor_facility;
 
-  private LocalTime checkInTime;   // 15:00 고정
-  private LocalTime checkOutTime;   // 11:00 고정
+  @Builder.Default  // 기본값 자동 설정
+  private LocalTime checkInTime = LocalTime.of(15, 0);  // 15:00
+
+  @Builder.Default  // 기본값 자동 설정
+  private LocalTime checkOutTime = LocalTime.of(11, 0);  // 11:00
+
 }
