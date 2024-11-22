@@ -16,7 +16,7 @@ public class Camp extends BaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "id")
+  @Column(columnDefinition = "INT UNSIGNED")
   private Long id;
 
   @Column(name = "camp_name", length = 50, nullable = false)
