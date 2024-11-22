@@ -16,6 +16,7 @@ public class CampSite {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(columnDefinition = "INT UNSIGNED")
     private Long id;
 
     @ManyToOne
@@ -37,6 +38,6 @@ public class CampSite {
     @Column(length = 100, nullable = false)
     private String induty; // 업종 구분
 
-    @Column(length = 255)
+    @Column(name = "indoor_facility", length = 255)
     private String indoorFacility;
 }

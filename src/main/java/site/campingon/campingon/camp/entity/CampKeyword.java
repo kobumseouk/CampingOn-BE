@@ -16,6 +16,7 @@ public class CampKeyword {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(columnDefinition = "INT UNSIGNED")
     private Long id;
 
     @ManyToOne
