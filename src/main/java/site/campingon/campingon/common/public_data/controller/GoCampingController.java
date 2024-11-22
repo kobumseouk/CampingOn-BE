@@ -1,4 +1,4 @@
-package site.campingon.campingon.common.public_data;
+package site.campingon.campingon.common.public_data.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
