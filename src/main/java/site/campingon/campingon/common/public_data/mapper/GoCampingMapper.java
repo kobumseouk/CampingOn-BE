@@ -14,4 +14,5 @@ public interface GoCampingMapper {
     // GoCampingRequestDto의 Item을 GoCampingResponseDto로 매핑
     GoCampingResponseDto toGoCampingResponseDto(GoCampingRequestDto.Item item);
 
+    List<GoCampingResponseDto> toGoCampingResponseDtoList(List<GoCampingRequestDto.Item> items);
 }

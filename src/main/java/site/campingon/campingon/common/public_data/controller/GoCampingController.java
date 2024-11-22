@@ -18,6 +18,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import static site.campingon.campingon.common.public_data.PublicDataConstants.*;
 
@@ -78,7 +79,8 @@ public class GoCampingController {
                 "numOfRows",numOfRows.toString(),
                 "pageNo",pageNo.toString(),
                 "keyword", encodedKeyword);
-        GoCampingResponseDto response = fetchData(url);
+        List<GoCampingResponseDto> response = fetchDatas(url);
+        System.out.println(response.get(0).getAddr1());
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -125,10 +127,17 @@ public class GoCampingController {
         return uriBuilder.build().toUriString();
     }
 
-    // 공공데이터 요청 및 응답 처리
+    // 공공데이터 요청 및 응답 처리(단일 조회)
     private GoCampingResponseDto fetchData(String url) throws URISyntaxException {
         URI uri = new URI(url);
         GoCampingRequestDto request = restTemplate.getForObject(uri, GoCampingRequestDto.class);
         return goCampingService.publicDataFilter(request);
+    }
+
+    //공공데이터 요청 및 응답 처리(리스트)
+    private List<GoCampingResponseDto> fetchDatas(String url) throws URISyntaxException {
+        URI uri = new URI(url);
+        GoCampingRequestDto request = restTemplate.getForObject(uri, GoCampingRequestDto.class);
+        return goCampingService.publicDataFilters(request);
     }
 }

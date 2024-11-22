@@ -19,6 +19,7 @@ public class GoCampingRequestDto {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
+    @Builder
     @JsonNaming(PropertyNamingStrategies.LowerCamelCaseStrategy.class)
     public static class Response {
         private Body body;
@@ -27,6 +28,7 @@ public class GoCampingRequestDto {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
+    @Builder
     @JsonNaming(PropertyNamingStrategies.LowerCamelCaseStrategy.class)
     public static class Body {
         private Items items;
@@ -35,6 +37,7 @@ public class GoCampingRequestDto {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
+    @Builder
     @JsonNaming(PropertyNamingStrategies.LowerCamelCaseStrategy.class)
     public static class Items {
         private List<Item> item;
@@ -43,6 +46,7 @@ public class GoCampingRequestDto {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
+    @Builder
     @JsonNaming(PropertyNamingStrategies.LowerCamelCaseStrategy.class)
     public static class Item {
         private long contentId; //콘텐츠 ID

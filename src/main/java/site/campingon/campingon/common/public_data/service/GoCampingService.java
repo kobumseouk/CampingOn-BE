@@ -14,9 +14,15 @@ public class GoCampingService {
 
     private final GoCampingMapper goCampingMapper;
 
-    public GoCampingResponseDto publicDataFilter(GoCampingRequestDto response) {
-        GoCampingRequestDto.Item item = response.getResponse().getBody().getItems().getItem().getFirst();
+    public GoCampingResponseDto publicDataFilter(GoCampingRequestDto request) {
+        GoCampingRequestDto.Item item = request.getResponse().getBody().getItems().getItem().getFirst();
 
         return goCampingMapper.toGoCampingResponseDto(item);
+    }
+
+    public List<GoCampingResponseDto> publicDataFilters(GoCampingRequestDto request) {
+        List<GoCampingRequestDto.Item> items = request.getResponse().getBody().getItems().getItem();
+        List<GoCampingResponseDto> goCampingResponseDtoList = goCampingMapper.toGoCampingResponseDtoList(items);
+        return goCampingResponseDtoList;
     }
 }
