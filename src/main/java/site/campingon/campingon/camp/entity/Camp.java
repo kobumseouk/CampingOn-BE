@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import site.campingon.campingon.common.entity.BaseEntity;
 
+import java.util.List;
+
 @Entity
 @Getter
 @Builder
@@ -38,4 +40,15 @@ public class Camp extends BaseEntity {
 
   @Column(name = "thumb_image", length = 255)
   private String thumbImage; // 썸네일 이미지
+
+
+  @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private List<CampKeyword> keywords;
+
+  @OneToOne(mappedBy = "camp", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private CampAddr address;
+
+  @OneToOne(mappedBy = "camp", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private CampInfo campInfo;
+
 }

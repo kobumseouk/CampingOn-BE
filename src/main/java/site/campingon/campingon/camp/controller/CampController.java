@@ -16,9 +16,9 @@ import site.campingon.campingon.user.entity.User;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.access.prepost.PreAuthorize;
+import site.campingon.campingon.user.repository.UserKeywordRepository;
 
-
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @RestController
@@ -27,6 +27,7 @@ import java.util.List;
 public class CampController {
 
   private final CampService campService;
+  private final UserKeywordRepository userKeywordRepository;
 
   private static final int RECOMMENDED_CAMP_SIZE = 3;
   private static final int DEFAULT_PAGE_SIZE = 12;
@@ -36,7 +37,7 @@ public class CampController {
   @GetMapping("/recommended")
   @PreAuthorize("isAuthenticated()")  // 로그인 확인
   public ResponseEntity<List<CampListResponseDto>> getRecommendedCamps(
-      @AuthenticationPrincipal UserDetails userDetails   // 추후 UserDto로 커스텀 
+      @AuthenticationPrincipal UserDetails userDetails   // 추후 UserDto로 커스텀
   ) {
     User user = (User) userDetails;
     List<CampListResponseDto> recommendedCamps =
@@ -44,24 +45,25 @@ public class CampController {
             user.getId(),
             RECOMMENDED_CAMP_SIZE
         );
-    return ResponseEntity.ok(recommendedCamps);
+
+    return ResponseEntity.ok(Optional.ofNullable(recommendedCamps).orElseGet(ArrayList::new));
   }
 
-  // 캠핑장 인기 목록 조회
+  // 캠핑장 인기 목록 조회 (페이지네이션)
   @GetMapping("/popular")
-  @PreAuthorize("isAuthenticated()")  // 로그인 확인
+  @PreAuthorize("isAuthenticated()")
   public ResponseEntity<Page<CampListResponseDto>> getPopularCamps(
       @RequestParam(defaultValue = "0") int page,
       @AuthenticationPrincipal UserDetails userDetails
   ) {
     User user = (User) userDetails;
-    int pageSize = user.hasKeywords() ? KEYWORD_MATCHED_PAGE_SIZE : DEFAULT_PAGE_SIZE;
+    boolean hasKeywords = userKeywordRepository.existsByUserId(user.getId());
+    int pageSize = hasKeywords ? KEYWORD_MATCHED_PAGE_SIZE : DEFAULT_PAGE_SIZE;
 
     PageRequest pageRequest = PageRequest.of(page, pageSize);
-    Page<CampListResponseDto> popularCamps =
-        campService.getPopularCamps(user.getId(), pageRequest);  // 추천 수 내림차순 정렬
-
-    return ResponseEntity.ok(popularCamps);
+    return ResponseEntity.ok(
+        campService.getPopularCamps(user.getId(), pageRequest)
+    );
   }
 
 /*
@@ -84,7 +86,7 @@ public class CampController {
 
   // 캠핑장 상세 조회  -  찜 버튼 활성화 시 유저 확인 추가
   @GetMapping("/{campId}")
-  @PreAuthorize("isAuthenticated()")  // 로그인 확인 
+  @PreAuthorize("isAuthenticated()")  // 로그인 확인
   public ResponseEntity<CampDetailResponseDto> getCampDetail(
       @PathVariable Long campId
   ) {
