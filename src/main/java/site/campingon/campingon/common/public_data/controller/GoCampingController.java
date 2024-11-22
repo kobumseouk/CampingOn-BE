@@ -37,6 +37,7 @@ public class GoCampingController {
 
     private final GoCampingService goCampingService;
 
+    //todo 엔티티 주입시 numOfRows 상수화, 키워드검색인 경우 보류
     //기본 정보 목록 조회
     @GetMapping("/basedList")
     public ResponseEntity<?> GetGoCampingBasedList(@RequestParam("numOfRows") Long numOfRows,
