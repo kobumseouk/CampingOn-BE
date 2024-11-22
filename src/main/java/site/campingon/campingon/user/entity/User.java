@@ -13,7 +13,7 @@ import site.campingon.campingon.common.entity.BaseEntity;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@Builder
+@Builder(toBuilder = true)
 public class User extends BaseEntity {
 
     @Id
@@ -24,8 +24,11 @@ public class User extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
+//    @Column(nullable = false)
     private String password;
+
+    // oauth 로그인인 경우에 생성되는 값
+    private String oauthName;
 
     @Column(nullable = false, length = 24, unique = true)
     private String nickname;
