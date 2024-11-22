@@ -34,9 +34,9 @@ public class CampController {
 
   // 사용자 키워드 맞춤 캠핑장 목록 조회
   @GetMapping("/recommended")
-  @PreAuthorize("isAuthenticated()")  // 로그인 필수
+  @PreAuthorize("isAuthenticated()")  // 로그인 확인
   public ResponseEntity<List<CampListResponseDto>> getRecommendedCamps(
-      @AuthenticationPrincipal UserDetails userDetails
+      @AuthenticationPrincipal UserDetails userDetails   // 추후 UserDto로 커스텀 
   ) {
     User user = (User) userDetails;
     List<CampListResponseDto> recommendedCamps =
@@ -49,7 +49,7 @@ public class CampController {
 
   // 캠핑장 인기 목록 조회
   @GetMapping("/popular")
-  @PreAuthorize("isAuthenticated()")  // 로그인 필수
+  @PreAuthorize("isAuthenticated()")  // 로그인 확인
   public ResponseEntity<Page<CampListResponseDto>> getPopularCamps(
       @RequestParam(defaultValue = "0") int page,
       @AuthenticationPrincipal UserDetails userDetails
@@ -67,7 +67,7 @@ public class CampController {
 /*
   // 검색한 캠핑장 목록 (페이지네이션)
   @GetMapping("/search")
-  @PreAuthorize("isAuthenticated()")  // 로그인 필수
+  @PreAuthorize("isAuthenticated()")  // 로그인 확인
   public ResponseEntity<Page<CampListResponseDto>> searchCamps(
       @RequestParam String keyword,
       @RequestParam(required = false) String location,
@@ -84,7 +84,7 @@ public class CampController {
 
   // 캠핑장 상세
   @GetMapping("/{campId}")
-  @PreAuthorize("isAuthenticated()")  // 로그인 필수
+  @PreAuthorize("isAuthenticated()")  // 로그인 확인 
   public ResponseEntity<CampDetailResponseDto> getCampDetail(
       @PathVariable Long campId
   ) {
@@ -94,7 +94,7 @@ public class CampController {
 
   // 캠핑지 목록
   @GetMapping("/{campId}/sites")
-  @PreAuthorize("isAuthenticated()")  // 로그인 필수
+  @PreAuthorize("isAuthenticated()")  // 로그인 확인
   public ResponseEntity<List<CampSiteListResponseDto>> getCampSites(
       @PathVariable Long campId
   ) {
@@ -105,7 +105,7 @@ public class CampController {
 
 /*  // 찜하기
   @PostMapping("/{campId}/likes")
-  @PreAuthorize("isAuthenticated()")  // 로그인 필수
+  @PreAuthorize("isAuthenticated()")  // 로그인 확인
   public ResponseEntity<Void> likeCamp(
       @PathVariable Long campId
   ) {
@@ -114,7 +114,7 @@ public class CampController {
 
   // 찜 해제
   @DeleteMapping("/{campId}/likes")
-  @PreAuthorize("isAuthenticated()")  // 로그인 필수
+  @PreAuthorize("isAuthenticated()")  // 로그인 확인
   public ResponseEntity<Void> unlikeCamp(
       @PathVariable Long campId
   ) {
@@ -123,7 +123,7 @@ public class CampController {
 
   // 사용자 찜 목록 조회
   @GetMapping("/likes")
-  @PreAuthorize("isAuthenticated()")  // 로그인 필수
+  @PreAuthorize("isAuthenticated()")  // 로그인 확인
   public ResponseEntity<List<CampListResponseDto>> getLikedCamps(
       UserDto currentUser
   ) {

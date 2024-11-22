@@ -6,7 +6,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CampAddressDto {
+public class CampAddrDto {
   private String city;   // 경기도
   private String state;   // 하남시
   private String streetAddr;   // 미사대로
