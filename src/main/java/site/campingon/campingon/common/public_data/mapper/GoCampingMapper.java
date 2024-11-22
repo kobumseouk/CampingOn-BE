@@ -1,8 +1,6 @@
 package site.campingon.campingon.common.public_data.mapper;
 
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
 import site.campingon.campingon.common.public_data.dto.GoCampingRequestDto;
 import site.campingon.campingon.common.public_data.dto.GoCampingResponseDto;
 
