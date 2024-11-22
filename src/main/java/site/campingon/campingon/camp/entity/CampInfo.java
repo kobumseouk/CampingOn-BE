@@ -14,17 +14,18 @@ import lombok.NoArgsConstructor;
 @Table(name = "camp_info")
 public class CampInfo {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(columnDefinition = "INT UNSIGNED")
+    private Long id;
 
-  @OneToOne
-  @JoinColumn(name = "camp_id", nullable = false)
-  private Camp camp;
+    @OneToOne
+    @JoinColumn(name = "camp_id", nullable = false)
+    private Camp camp;
 
-  @Column(name = "recommend_cnt")
-  private Integer recommendCnt;
+    @Column(name = "recommend_cnt")
+    private Integer recommendCnt;
 
-  @Column(name = "like_cnt")
-  private Integer likeCnt;
+    @Column(name = "like_cnt")
+    private Integer likeCnt;
 }

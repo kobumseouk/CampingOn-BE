@@ -14,28 +14,29 @@ import lombok.NoArgsConstructor;
 @Table(name = "camp_addr")
 public class CampAddr {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(columnDefinition = "INT UNSIGNED")
+    private Long id;
 
-  @OneToOne
-  @JoinColumn(name = "camp_id", nullable = false)
-  private Camp camp;
+    @OneToOne
+    @JoinColumn(name = "camp_id", nullable = false)
+    private Camp camp;
 
-  @Column(length = 50)
-  private String city; // 도/광역시
+    @Column(length = 50)
+    private String city; // 도/광역시
 
-  @Column(length = 50)
-  private String state; // 시/군/구
+    @Column(length = 50)
+    private String state; // 시/군/구
 
-  @Column(length = 20)
-  private String zipcode;
+    @Column(length = 20)
+    private String zipcode;
 
-  @Column(name = "street_addr", length = 50)
-  private String streetAddr;
+    @Column(name = "street_addr", length = 50)
+    private String streetAddr;
 
-  @Column(name = "detailed_addr", length = 50)
-  private String detailedAddr;
+    @Column(name = "detailed_addr", length = 50)
+    private String detailedAddr;
 
   // 도로명 주소 총 출력
   public String getFullAddress() {

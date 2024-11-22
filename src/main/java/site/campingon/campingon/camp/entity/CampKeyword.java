@@ -1,6 +1,5 @@
 package site.campingon.campingon.camp.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,14 +14,15 @@ import lombok.NoArgsConstructor;
 @Table(name = "camp_keyword")
 public class CampKeyword {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(columnDefinition = "INT UNSIGNED")
+    private Long id;
 
-  @ManyToOne
-  @JoinColumn(name = "camp_id", nullable = false)
-  private Camp camp;
+    @ManyToOne
+    @JoinColumn(name = "camp_id", nullable = false)
+    private Camp camp;
 
-  @Column(length = 50, nullable = false)
-  private String keyword;
+    @Column(length = 50, nullable = false)
+    private String keyword;
 }
