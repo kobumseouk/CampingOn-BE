@@ -14,8 +14,9 @@ public class CampSiteListResponseDto {
   private String roomName;
   private Integer maxPeople;
   private Integer price;
-  private String type;
   private String imageUrl;
+  private String indoor_facility;
+
   private LocalTime checkInTime;   // 15:00 고정
   private LocalTime checkOutTime;   // 11:00 고정
 }
