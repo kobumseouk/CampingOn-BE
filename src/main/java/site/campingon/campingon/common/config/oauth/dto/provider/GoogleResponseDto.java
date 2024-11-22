@@ -1,11 +1,11 @@
-package site.campingon.campingon.common.config.oauth.dto;
+package site.campingon.campingon.common.config.oauth.dto.provider;
 
 import lombok.RequiredArgsConstructor;
 
 import java.util.Map;
 
 @RequiredArgsConstructor
-public class GoogleResponse implements OAuth2Response{
+public class GoogleResponseDto implements OAuth2ResponseDto {
 
     private final Map<String, Object> attribute;
 

@@ -7,9 +7,8 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-import site.campingon.campingon.common.config.oauth.dto.CustomOAuth2User;
-import site.campingon.campingon.common.config.oauth.dto.GoogleResponse;
-import site.campingon.campingon.common.config.oauth.dto.OAuth2Response;
+import site.campingon.campingon.common.config.oauth.dto.provider.GoogleResponseDto;
+import site.campingon.campingon.common.config.oauth.dto.provider.OAuth2ResponseDto;
 import site.campingon.campingon.common.config.oauth.dto.OAuth2UserDto;
 import site.campingon.campingon.user.entity.Role;
 import site.campingon.campingon.user.entity.User;
@@ -30,12 +29,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         log.info("\n\n\n[oAuth2User확인]\n" + oAuth2User + "\n\n\n");
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
-        OAuth2Response oAuth2Response = null;
+        OAuth2ResponseDto oAuth2ResponseDto = null;
 
         // 리팩토링 시 다른 소셜 연동을 위한 분기점
         if (registrationId.equals("google")) {
 
-            oAuth2Response = new GoogleResponse(oAuth2User.getAttributes());
+            oAuth2ResponseDto = new GoogleResponseDto(oAuth2User.getAttributes());
         }
         else {
 
@@ -43,7 +42,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         }
 
         // 리소스 서버에서 발급 받은 정보로 유저의 특정 아이디값 생성
-        String oauthName = oAuth2Response.getProvider() + " " + oAuth2Response.getProviderId();
+        String oauthName = oAuth2ResponseDto.getProvider() + " " + oAuth2ResponseDto.getProviderId();
 
         // DB에 존재하는 oauth 로그인 계정인지 확인
         User existUser = userRepository.findByOauthName(oauthName);
@@ -51,9 +50,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // 한번도 로그인 한 적 x -> 새 데이터 삽입
         if(existUser == null) {
             User newUser = User.builder()
-                    .email(oAuth2Response.getEmail())
+                    .email(oAuth2ResponseDto.getEmail())
                     .oauthName(oauthName)
-                    .nickname(oAuth2Response.getName())
+                    .nickname(oAuth2ResponseDto.getName())
                     .role(Role.USER)
                     .build();
 
@@ -61,8 +60,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
             OAuth2UserDto OAuthUserDto = OAuth2UserDto.builder()
                     .oauthName(oauthName)
-                    .email(oAuth2Response.getEmail())
-                    .nickname(oAuth2Response.getName())
+                    .email(oAuth2ResponseDto.getEmail())
+                    .nickname(oAuth2ResponseDto.getName())
                     .role(String.valueOf(Role.USER))
                     .build();
 
@@ -80,8 +79,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             }
 
             existUser.toBuilder()
-                    .email(oAuth2Response.getEmail())
-                    .nickname(oAuth2Response.getName())
+                    .email(oAuth2ResponseDto.getEmail())
+                    .nickname(oAuth2ResponseDto.getName())
                     .build();
 
             userRepository.save(existUser);

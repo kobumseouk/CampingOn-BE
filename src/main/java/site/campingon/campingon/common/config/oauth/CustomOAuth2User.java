@@ -1,8 +1,9 @@
-package site.campingon.campingon.common.config.oauth.dto;
+package site.campingon.campingon.common.config.oauth;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import site.campingon.campingon.common.config.oauth.dto.OAuth2UserDto;
 
 import java.util.ArrayList;
 import java.util.Collection;
