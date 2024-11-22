@@ -1,5 +1,6 @@
 package site.campingon.campingon.common.public_data.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -9,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import site.campingon.campingon.common.public_data.dto.GoCampingRequestDto;
+import site.campingon.campingon.common.public_data.service.GoCampingService;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -31,14 +34,17 @@ public class GoCampingController {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
+    private final GoCampingService goCampingService;
+
     //기본 정보 목록 조회
     @GetMapping("/basedList")
     public ResponseEntity<?> GetGoCampingBasedList(@RequestParam("numOfRows") Long numOfRows,
-                                                   @RequestParam("pageNo") Long pageNo) throws URISyntaxException {
+                                                   @RequestParam("pageNo") Long pageNo)
+            throws URISyntaxException, JsonProcessingException {
         String url = buildUrl("/basedList",
                 "numOfRows",numOfRows.toString(),
                 "pageNo",pageNo.toString());
-        String response = fetchData(url);
+        GoCampingRequestDto response = fetchData(url);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -55,7 +61,7 @@ public class GoCampingController {
                 "mapX", mapX,
                 "mapY", mapY,
                 "radius", radius);
-        String response = fetchData(url);
+        GoCampingRequestDto response = fetchData(url);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -70,7 +76,7 @@ public class GoCampingController {
                 "numOfRows",numOfRows.toString(),
                 "pageNo",pageNo.toString(),
                 "keyword", encodedKeyword);
-        String response = fetchData(url);
+        GoCampingRequestDto response = fetchData(url);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -84,7 +90,7 @@ public class GoCampingController {
                 "numOfRows",numOfRows.toString(),
                 "pageNo",pageNo.toString(),
                 "contentId", contentId.toString());
-        String response = fetchData(url);
+        GoCampingRequestDto response = fetchData(url);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -98,7 +104,7 @@ public class GoCampingController {
                 "numOfRows",numOfRows.toString(),
                 "pageNo",pageNo.toString(),
                 "syncStatus", syncStatus);
-        String response = fetchData(url);
+        GoCampingRequestDto response = fetchData(url);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -118,8 +124,8 @@ public class GoCampingController {
     }
 
     // 공공데이터 요청 및 응답 처리
-    private String fetchData(String url) throws URISyntaxException {
+    private GoCampingRequestDto fetchData(String url) throws URISyntaxException {
         URI uri = new URI(url);
-        return restTemplate.getForObject(uri, String.class);
+        return restTemplate.getForObject(uri, GoCampingRequestDto.class);
     }
 }
