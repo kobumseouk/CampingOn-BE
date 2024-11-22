@@ -13,4 +13,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // user email로 검색
     Optional<User> findByEmailAndIsDeletedFalse(String email);
+
+    // user email로 중복유무 검색 - oauth 인증 절차
+    User findByOauthName(String oauthName);
 }
