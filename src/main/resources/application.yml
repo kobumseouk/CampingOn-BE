@@ -21,3 +21,6 @@ spring:
   sql:
     init:
       mode: always  # Always run SQL scripts during initialization
+
+public-data:
+  go-camping: ${GO_CAMPING_SERVICE_KEY}
