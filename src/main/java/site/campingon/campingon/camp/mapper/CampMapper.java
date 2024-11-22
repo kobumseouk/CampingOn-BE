@@ -2,15 +2,13 @@ package site.campingon.campingon.camp.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import site.campingon.campingon.camp.dto.CampAddrDto;
-import site.campingon.campingon.camp.dto.CampDetailResponseDto;
-import site.campingon.campingon.camp.dto.CampListResponseDto;
-import site.campingon.campingon.camp.dto.CampSiteListResponseDto;
+import site.campingon.campingon.camp.dto.*;
 import site.campingon.campingon.camp.entity.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
 
 @Mapper(componentModel = "spring")
 public class CampMapper {

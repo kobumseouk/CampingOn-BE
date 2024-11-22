@@ -6,13 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import site.campingon.campingon.camp.dto.CampDetailResponseDto;
 import site.campingon.campingon.camp.dto.CampListResponseDto;
 import site.campingon.campingon.camp.dto.CampSiteListResponseDto;
 import site.campingon.campingon.camp.service.CampService;
+import site.campingon.campingon.user.entity.User;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -82,7 +82,7 @@ public class CampController {
   }
 */
 
-  // 캠핑장 상세
+  // 캠핑장 상세 조회  -  찜 버튼 활성화 시 유저 확인 추가
   @GetMapping("/{campId}")
   @PreAuthorize("isAuthenticated()")  // 로그인 확인 
   public ResponseEntity<CampDetailResponseDto> getCampDetail(
@@ -92,7 +92,7 @@ public class CampController {
     return ResponseEntity.ok(camp);
   }
 
-  // 캠핑지 목록
+  // 캠핑지 목록 조회
   @GetMapping("/{campId}/sites")
   @PreAuthorize("isAuthenticated()")  // 로그인 확인
   public ResponseEntity<List<CampSiteListResponseDto>> getCampSites(
@@ -107,7 +107,8 @@ public class CampController {
   @PostMapping("/{campId}/likes")
   @PreAuthorize("isAuthenticated()")  // 로그인 확인
   public ResponseEntity<Void> likeCamp(
-      @PathVariable Long campId
+      @PathVariable Long campId,
+      UserDto currentUser
   ) {
 
   }
@@ -116,7 +117,8 @@ public class CampController {
   @DeleteMapping("/{campId}/likes")
   @PreAuthorize("isAuthenticated()")  // 로그인 확인
   public ResponseEntity<Void> unlikeCamp(
-      @PathVariable Long campId
+      @PathVariable Long campId,
+      UserDto currentUser
   ) {
 
   }
