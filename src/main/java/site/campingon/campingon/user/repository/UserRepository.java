@@ -16,4 +16,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // user email로 중복유무 검색 - oauth 인증 절차
     User findByOauthName(String oauthName);
+
+    // 이메일 중복 여부 확인
+    boolean existsByEmailAndIsDeletedFalse(String email);
+
+    // 닉네임 중복여부 확인
+    boolean existsByNicknameAndIsDeletedFalse(String nickname);
 }
