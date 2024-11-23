@@ -1,6 +1,5 @@
 package site.campingon.campingon.camp.dto;
 
-
 import lombok.*;
 
 import java.util.List;
