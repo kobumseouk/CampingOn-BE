@@ -40,6 +40,29 @@ public class CampAddr {
 
   // 도로명 주소 총 출력
   public String getFullAddress() {
-    return String.format("%s %s %s %s", city, state, streetAddr, detailedAddr);
+      StringBuilder fullAddress = new StringBuilder();
+
+      // city 추가
+      if (city != null && !city.isBlank()) {
+          fullAddress.append(city).append(" ");
+      }
+
+      // state 추가
+      if (state != null && !state.isBlank()) {
+          fullAddress.append(state).append(" ");
+      }
+
+      // streetAddr 추가
+      if (streetAddr != null && !streetAddr.isBlank()) {
+          fullAddress.append(streetAddr).append(" ");
+      }
+
+      // detailedAddr 추가
+      if (detailedAddr != null && !detailedAddr.isBlank()) {
+          fullAddress.append(detailedAddr).append(" ");
+      }
+
+      // 공백 제거 후 반환
+      return fullAddress.toString().trim();
   }
 }

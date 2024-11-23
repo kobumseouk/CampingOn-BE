@@ -16,13 +16,13 @@ import java.util.List;
 public interface CampRepository extends JpaRepository<Camp, Long> {
 
   @Query("""
-    SELECT c FROM Camp c
+    SELECT DISTINCT c FROM Camp c
     JOIN CampKeyword ck ON c.id = ck.camp.id
     WHERE ck.keyword IN :keywords
     GROUP BY c
     ORDER BY COUNT(ck.keyword) DESC
   """)
-  List<Camp> findRecommendedCampsByKeywords(@Param("keywords") List<String> keywords, Pageable pageable);
+  Page<Camp> findRecommendedCampsByKeywords(@Param("keywords") List<String> keywords, Pageable pageable);
 
   @Query("""
     SELECT c FROM Camp c

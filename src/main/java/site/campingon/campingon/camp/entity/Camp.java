@@ -46,7 +46,7 @@ public class Camp extends BaseEntity {
   private List<CampKeyword> keywords;
 
   @OneToOne(mappedBy = "camp", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-  private CampAddr address;
+  private CampAddr campAddr;
 
   @OneToOne(mappedBy = "camp", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private CampInfo campInfo;
