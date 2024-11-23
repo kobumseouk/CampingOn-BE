@@ -28,6 +28,6 @@ public class Like {
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
-  @Column(name = "is_like", nullable = false)
-  private boolean isLike;
+  @Column(name = "is_like", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 1")  // 새로 찜관계 DB 삽입 시 true
+  private boolean isLike = true;  // 객체 생성 시 true
 }
