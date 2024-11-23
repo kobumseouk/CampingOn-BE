@@ -60,11 +60,11 @@ public class GoCampingRequestDto {
         private String addr2;   //상세주소
         private String tel; //전화
         private String homepage;    //홈페이지
-        private String gnrlSiteCo;  //주요시설 일반야영장
-        private String autoSiteCo;  //주요시설 자동차야영장
-        private String glampSiteCo; //주요시설 글램핑
-        private String caravSiteCo; //주요시설 카라반
-        private String indvdlCaravSiteCo;   //주요시설 개인 카라반
+        private Integer gnrlSiteCo;  //주요시설 일반야영장
+        private Integer autoSiteCo;  //주요시설 자동차야영장
+        private Integer glampSiteCo; //주요시설 글램핑
+        private Integer caravSiteCo; //주요시설 카라반
+        private Integer indvdlCaravSiteCo;   //주요시설 개인 카라반
         private String glampInnerFclty; //글램핑 - 내부시설
         private String caravInnerFclty; //카라반 - 내부시설
         private String sbrsCl;  //부대시설(외부시설)
