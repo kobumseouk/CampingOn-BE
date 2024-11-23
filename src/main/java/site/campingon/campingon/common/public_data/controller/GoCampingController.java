@@ -39,21 +39,23 @@ public class GoCampingController {
     private final GoCampingService goCampingService;
 
     //todo 엔티티 주입시 numOfRows 상수화, 키워드검색인 경우 보류
+    //todo 데이터 응답시 리스트 or 단일 조회 선택
+
     //기본 정보 목록 조회
     @GetMapping("/basedList")
-    public ResponseEntity<?> GetGoCampingBasedList(@RequestParam("numOfRows") Long numOfRows,
+    public ResponseEntity<List<GoCampingResponseDto>> GetGoCampingBasedList(@RequestParam("numOfRows") Long numOfRows,
                                                    @RequestParam("pageNo") Long pageNo)
             throws URISyntaxException, JsonProcessingException {
         String url = buildUrl("/basedList",
                 "numOfRows",numOfRows.toString(),
                 "pageNo",pageNo.toString());
-        GoCampingResponseDto response = fetchData(url);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        List<GoCampingResponseDto> goCampingResponseDtos = fetchDatas(url);
+        return ResponseEntity.status(HttpStatus.OK).body(goCampingResponseDtos);
     }
 
     //위치기반정보 목록 조회
     @GetMapping("/locationBasedList")
-    public ResponseEntity<?> GetGoCampingLocationBasedList(@RequestParam("numOfRows") Long numOfRows,
+    public ResponseEntity<GoCampingResponseDto> GetGoCampingLocationBasedList(@RequestParam("numOfRows") Long numOfRows,
                                                            @RequestParam("pageNo") Long pageNo,
                                                            @RequestParam("mapX") String mapX,
                                                            @RequestParam("mapY") String mapY,
@@ -70,7 +72,7 @@ public class GoCampingController {
 
     //키워드 검색 목록 조회
     @GetMapping("/searchList")
-    public ResponseEntity<?> GetGoCampingKeywordList(@RequestParam("numOfRows") Long numOfRows,
+    public ResponseEntity<List<GoCampingResponseDto>> GetGoCampingKeywordList(@RequestParam("numOfRows") Long numOfRows,
                                                      @RequestParam("pageNo") Long pageNo,
                                                      @RequestParam("keyword") String keyword)
             throws URISyntaxException {
@@ -80,13 +82,12 @@ public class GoCampingController {
                 "pageNo",pageNo.toString(),
                 "keyword", encodedKeyword);
         List<GoCampingResponseDto> response = fetchDatas(url);
-        System.out.println(response.get(0).getAddr1());
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     //이미지정보 목록 조회
     @GetMapping("/imageList")
-    public ResponseEntity<?> GetGoCampingImageList(@RequestParam("numOfRows") Long numOfRows,
+    public ResponseEntity<GoCampingResponseDto> GetGoCampingImageList(@RequestParam("numOfRows") Long numOfRows,
                                                    @RequestParam("pageNo") Long pageNo,
                                                    @RequestParam("contentId") Long contentId)
             throws URISyntaxException {
@@ -100,7 +101,7 @@ public class GoCampingController {
 
     //동기화 목록 조회
     @GetMapping("/basedSyncList")
-    public ResponseEntity<?> GetGoCampingBasedSyncList(@RequestParam("numOfRows") Long numOfRows,
+    public ResponseEntity<GoCampingResponseDto> GetGoCampingBasedSyncList(@RequestParam("numOfRows") Long numOfRows,
                                                        @RequestParam("pageNo") Long pageNo,
                                                        @RequestParam("syncStatus") String syncStatus)
             throws URISyntaxException {
