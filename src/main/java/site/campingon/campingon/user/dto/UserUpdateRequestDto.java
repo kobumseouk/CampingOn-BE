@@ -1,10 +1,10 @@
 package site.campingon.campingon.user.dto;
 
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-@Setter
+@Builder
 public class UserUpdateRequestDto {
     private String nickname;
     private String currentPassword; // 비밀번호 변경을 위해 기존 비밀번호 확인

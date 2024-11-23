@@ -1,13 +1,13 @@
 package site.campingon.campingon.common.config;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import site.campingon.campingon.common.config.oauth.CustomOAuth2UserService;
 
@@ -42,5 +42,11 @@ public class SecurityConfig {
                         .anyRequest().permitAll());
 
         return http.build();
+    }
+
+    // 비밀번호 암호화 저장을 위한 Encoder Bean 등록
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
