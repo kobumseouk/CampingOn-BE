@@ -11,7 +11,7 @@ import site.campingon.campingon.user.entity.User;
 
 @Entity
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class Like {
@@ -28,6 +28,13 @@ public class Like {
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
+  @Builder.Default
   @Column(name = "is_like", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 1")  // 새로 찜관계 DB 삽입 시 true
   private boolean isLike = true;  // 객체 생성 시 true
+
+  @Builder
+  public Like(Camp camp, User user) {
+    this.camp = camp;
+    this.user = user;
+  }
 }

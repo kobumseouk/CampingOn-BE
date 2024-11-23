@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface CampSiteRepository extends JpaRepository<CampSite, Long> {
 
-    List<CampSite> findByCampId(Long campId);
+  List<CampSite> findByCampId(Long campId);
 }
