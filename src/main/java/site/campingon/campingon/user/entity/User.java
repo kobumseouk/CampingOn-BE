@@ -24,8 +24,11 @@ public class User extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String email;
 
-//    @Column(nullable = false)
+    @Column(length = 60)
     private String password;
+
+    @Column(nullable = true, length = 50)
+    private String name;
 
     // oauth 로그인인 경우에 생성되는 값
     private String oauthName;
@@ -52,6 +55,23 @@ public class User extends BaseEntity {
         this.isDeleted = true;
         this.deletedAt = LocalDateTime.now();
         this.deleteReason = deleteReason;
+    }
+
+    // 회원 닉네임 변경 로직
+    public void updateNickname(String newNickname) {
+        if (newNickname == null || newNickname.isBlank()) {
+            throw new IllegalArgumentException("닉네임은 비어 있을 수 없습니다.");
+        }
+        this.nickname = newNickname;
+    }
+
+
+    // 회원 비밀번호 변경 로직
+    public void updatePassword(String newPassword) {
+        if (newPassword == null || newPassword.isBlank()) {
+            throw new IllegalArgumentException("비밀번호는 비어 있을 수 없습니다.");
+        }
+        this.password = newPassword;
     }
 
 }
