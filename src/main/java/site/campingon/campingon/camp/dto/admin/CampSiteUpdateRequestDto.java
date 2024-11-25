@@ -33,11 +33,4 @@ public class CampSiteUpdateRequestDto {
 
     @NotNull(message = "사용 가능 여부는 필수입니다.")
     private boolean isAvailable;
-
-    @NotNull(message = "체크인 시간은 필수입니다.")
-    @FutureOrPresent(message = "체크인 시간은 현재 시각 또는 미래여야 합니다.")
-    private LocalTime checkInTime;
-
-    @NotNull(message = "체크아웃 시간은 필수입니다.")
-    private LocalTime checkOutTime;
 }
