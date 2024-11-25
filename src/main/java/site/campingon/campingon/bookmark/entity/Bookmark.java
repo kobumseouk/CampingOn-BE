@@ -14,7 +14,7 @@ import site.campingon.campingon.user.entity.User;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class BookMark {
+public class Bookmark {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(columnDefinition = "INT UNSIGNED")
