@@ -13,22 +13,17 @@ public interface CampMapper {
   // Camp -> CampListResponseDto로 매핑
   @Mapping(target = "name", source = "campName")
   @Mapping(target = "keywords", source = "keywords", qualifiedByName = "keywordsToStringList")
-  @Mapping(target = "address", source = "campAddr", qualifiedByName = "addressToString")
+  @Mapping(target = "address", source = "campAddr.streetAddr")
   CampListResponseDto toCampListDto(Camp camp);
 
   // Camp -> CampDetailResponseDto 매핑
   @Mapping(target = "name", source = "campName")
-  @Mapping(target = "address", source = "campAddr", qualifiedByName = "addressToString")
+  @Mapping(target = "address", source = "campAddr.streetAddr")
   @Mapping(target = "recommendCnt", source = "campInfo.recommendCnt")
-  @Mapping(target = "likeCnt", source = "campInfo.likeCnt")
+  @Mapping(target = "bookmarkCnt", source = "campInfo.bookmarkCnt")
   CampDetailResponseDto toCampDetailDto(Camp camp);
 
   CampSiteListResponseDto toCampSiteListDto(CampSite campSite);
-
-  @Named("addressToString")
-  default String addressToString(CampAddr address) {
-    return address != null ? address.getFullAddress() : null;
-  }
 
   @Named("keywordsToStringList")
   default List<String> keywordsToStringList(List<CampKeyword> keywords) {
