@@ -36,10 +36,6 @@ public class User extends BaseEntity {
     @Column(nullable = false, length = 24, unique = true)
     private String nickname;
 
-    @Builder.Default
-    @Column(name="is_deleted", nullable = false)
-    private boolean isDeleted = false;
-
     @Column(name="delete_reason", columnDefinition = "TEXT")
     private String deleteReason;
 
@@ -52,25 +48,18 @@ public class User extends BaseEntity {
 
     // 회원 탈퇴 로직
     public void deleteUser(String deleteReason) {
-        this.isDeleted = true;
         this.deletedAt = LocalDateTime.now();
         this.deleteReason = deleteReason;
     }
 
-    // 회원 닉네임 변경 로직
+    // 회원 닉네임 변경
     public void updateNickname(String newNickname) {
-        if (newNickname == null || newNickname.isBlank()) {
-            throw new IllegalArgumentException("닉네임은 비어 있을 수 없습니다.");
-        }
         this.nickname = newNickname;
     }
 
 
-    // 회원 비밀번호 변경 로직
+    // 회원 비밀번호 변경
     public void updatePassword(String newPassword) {
-        if (newPassword == null || newPassword.isBlank()) {
-            throw new IllegalArgumentException("비밀번호는 비어 있을 수 없습니다.");
-        }
         this.password = newPassword;
     }
 

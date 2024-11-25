@@ -1,5 +1,6 @@
 package site.campingon.campingon.user.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ public class UserController {
 
     // 회원 가입 api
     @PostMapping("/signup")
-    public ResponseEntity<UserSignUpResponseDto> registerUser(@RequestBody UserSignUpRequestDto userSignUpRequestDto) {
+    public ResponseEntity<UserSignUpResponseDto> registerUser(@RequestBody @Valid UserSignUpRequestDto userSignUpRequestDto) {
         UserSignUpResponseDto userSignUpResponseDto = userService.registerUser(userSignUpRequestDto);
         log.info("회원가입 성공: email={}", userSignUpRequestDto.getEmail());
         return ResponseEntity.ok(userSignUpResponseDto);
