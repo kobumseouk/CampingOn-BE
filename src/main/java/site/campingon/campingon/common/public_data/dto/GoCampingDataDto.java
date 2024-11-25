@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class GoCampingRequestDto {
+public class GoCampingDataDto {
     private Response response;
 
     @Getter

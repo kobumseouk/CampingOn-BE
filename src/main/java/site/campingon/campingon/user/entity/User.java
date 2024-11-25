@@ -14,6 +14,9 @@ import site.campingon.campingon.common.entity.BaseEntity;
 @NoArgsConstructor
 @Getter
 @Builder(toBuilder = true)
+@Table(uniqueConstraints = {
+    @UniqueConstraint(name = "up_email_deleted_at", columnNames = {"email", "deleted_at"})
+})
 public class User extends BaseEntity {
 
     @Id
@@ -21,7 +24,7 @@ public class User extends BaseEntity {
     @Column(columnDefinition = "INT UNSIGNED")
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String email;
 
     @Column(length = 60)
