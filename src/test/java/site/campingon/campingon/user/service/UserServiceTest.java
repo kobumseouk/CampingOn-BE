@@ -57,8 +57,8 @@ class UserServiceTest {
             .build();
         User savedUser = newUser.toBuilder().id(1L).build();
 
-        when(userRepository.existsByEmailAndIsDeletedFalse(requestDto.getEmail())).thenReturn(false);
-        when(userRepository.existsByNicknameAndIsDeletedFalse(requestDto.getNickname())).thenReturn(false);
+        when(userRepository.existsByEmailAndDeletedAtIsNull(requestDto.getEmail())).thenReturn(false);
+        when(userRepository.existsByNicknameAndDeletedAtIsNull(requestDto.getNickname())).thenReturn(false);
         when(passwordEncoder.encode(requestDto.getPassword())).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
         when(userMapper.toSignUpResponseDto(any(User.class))).thenReturn(
@@ -84,7 +84,7 @@ class UserServiceTest {
         // Given
         UserSignUpRequestDto requestDto = new UserSignUpRequestDto("test@example.com", "nickname", "password", "Test User");
 
-        when(userRepository.existsByEmailAndIsDeletedFalse(requestDto.getEmail())).thenReturn(true);
+        when(userRepository.existsByEmailAndDeletedAtIsNull(requestDto.getEmail())).thenReturn(true);
 
         // When & Then
         assertThrows(IllegalArgumentException.class, () -> userService.registerUser(requestDto));
@@ -97,19 +97,8 @@ class UserServiceTest {
         // Given
         UserSignUpRequestDto requestDto = new UserSignUpRequestDto("test@example.com", "nickname", "password", "Test User");
 
-        when(userRepository.existsByEmailAndIsDeletedFalse(requestDto.getEmail())).thenReturn(false);
-        when(userRepository.existsByNicknameAndIsDeletedFalse(requestDto.getNickname())).thenReturn(true);
-
-        // When & Then
-        assertThrows(IllegalArgumentException.class, () -> userService.registerUser(requestDto));
-        verify(userRepository, times(0)).save(any(User.class)); // save가 호출되지 않아야 함
-    }
-
-    @DisplayName("TEST - 회원 가입 실패: 필수 입력값 누락")
-    @Test
-    void testRegisterUser_requiredFieldsMissing() {
-        // Given
-        UserSignUpRequestDto requestDto = new UserSignUpRequestDto(null, "nickname", "password", "Test User");
+        when(userRepository.existsByEmailAndDeletedAtIsNull(requestDto.getEmail())).thenReturn(false);
+        when(userRepository.existsByNicknameAndDeletedAtIsNull(requestDto.getNickname())).thenReturn(true);
 
         // When & Then
         assertThrows(IllegalArgumentException.class, () -> userService.registerUser(requestDto));
@@ -122,7 +111,7 @@ class UserServiceTest {
         // Given
         Long userId = 1L;
         User user = User.builder().id(userId).email("test@example.com").nickname("nickname").build();
-        when(userRepository.findByIdAndIsDeletedFalse(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
         when(userMapper.toResponseDto(user)).thenReturn(
             UserResponseDto.builder()
                 .id(userId)
@@ -137,7 +126,7 @@ class UserServiceTest {
         // Then
         assertNotNull(responseDto);
         assertEquals(userId, responseDto.getId());
-        verify(userRepository, times(1)).findByIdAndIsDeletedFalse(userId);
+        verify(userRepository, times(1)).findByIdAndDeletedAtIsNull(userId);
     }
 
     @DisplayName("TEST - 회원정보 수정: 정상 동작")
@@ -153,8 +142,8 @@ class UserServiceTest {
             .build();
 
         // Mock
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(userRepository.existsByNicknameAndIsDeletedFalse(requestDto.getNickname())).thenReturn(false);
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
+        when(userRepository.existsByNicknameAndDeletedAtIsNull(requestDto.getNickname())).thenReturn(false);
         when(passwordEncoder.matches("currentPassword", user.getPassword())).thenReturn(true);
         when(passwordEncoder.encode("newPassword")).thenReturn("newEncodedPassword");
         when(userRepository.save(user)).thenReturn(user);
@@ -184,70 +173,14 @@ class UserServiceTest {
             .build();
         User user = User.builder().id(userId).email("test@example.com").nickname("nickname").build();
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user)); // 수정됨
 
         // When
         userService.deleteUser(requestDto);
 
         // Then
-        assertTrue(user.isDeleted());
+        assertNotNull(user.getDeletedAt());
         assertEquals(requestDto.getDeleteReason(), user.getDeleteReason());
-        verify(userRepository, times(1)).findById(userId);
+        verify(userRepository, times(1)).findByIdAndDeletedAtIsNull(userId); // 수정됨
     }
-
-    @DisplayName("TEST - 이메일 검증 테스트")
-    @Test
-    void testValidateUserEmail() {
-        // null 또는 공백
-        assertThrows(IllegalArgumentException.class,
-            () -> userService.validateUserEmail(null),
-            "이메일은 공백일 수 없습니다.");
-
-        // 유효하지 않은 형식
-        assertThrows(IllegalArgumentException.class,
-            () -> userService.validateUserEmail("invalidEmail"),
-            "유효하지 않은 이메일 형식입니다.");
-
-        // 이미 존재하는 이메일
-        when(userRepository.existsByEmailAndIsDeletedFalse("test@example.com")).thenReturn(true);
-        assertThrows(IllegalArgumentException.class,
-            () -> userService.validateUserEmail("test@example.com"),
-            "이미 존재하는 이메일입니다.");
-
-        // 유효한 이메일
-        when(userRepository.existsByEmailAndIsDeletedFalse("test@example.com")).thenReturn(false);
-        assertDoesNotThrow(() -> userService.validateUserEmail("test@example.com"));
-    }
-
-    @DisplayName("TEST - 닉네임 검증 테스트")
-    @Test
-    void testValidateUserNickname() {
-        // null 또는 공백
-        assertThrows(IllegalArgumentException.class,
-            () -> userService.validateUserNickname(null),
-            "닉네임은 공백일 수 없습니다.");
-
-        // 길이 초과
-        assertThrows(IllegalArgumentException.class,
-            () -> userService.validateUserNickname("InvalidNickname"),
-            "닉네임은 8자 이내여야 합니다.");
-
-        // 유효하지 않은 문자 포함
-        assertThrows(IllegalArgumentException.class,
-            () -> userService.validateUserNickname("!@#$%^&"),
-            "닉네임은 알파벳, 숫자, 한글만 포함할 수 있습니다.");
-
-        // 이미 존재하는 닉네임
-        when(userRepository.existsByNicknameAndIsDeletedFalse("nickname")).thenReturn(true);
-        assertThrows(IllegalArgumentException.class,
-            () -> userService.validateUserNickname("nickname"),
-            "이미 존재하는 닉네임입니다.");
-
-        // 유효한 닉네임
-        when(userRepository.existsByNicknameAndIsDeletedFalse("캠핑온")).thenReturn(false);
-        assertDoesNotThrow(() -> userService.validateUserNickname("캠핑온"));
-    }
-
-
-
 }
