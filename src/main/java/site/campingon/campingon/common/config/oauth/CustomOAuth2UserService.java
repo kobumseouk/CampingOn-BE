@@ -71,12 +71,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // 기존에 로그인 한 적 o -> 업데이트 할 부분이 있는지 체크
         else {
 
-            // 삭제예정인 사용자라면 상태 복구
-            if (existUser.isDeleted()) {
-                existUser.toBuilder()
-                        .isDeleted(false)
-                        .build();
-            }
 
             existUser.toBuilder()
                     .email(oAuth2ResponseDto.getEmail())
