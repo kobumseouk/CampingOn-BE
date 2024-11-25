@@ -2,8 +2,10 @@ package site.campingon.campingon.user.repository;
 
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import site.campingon.campingon.user.entity.User;
+import org.springframework.data.jpa.repository.Query;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -18,7 +20,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     User findByOauthName(String oauthName);
 
     // 이메일 또는 닉네임 중복 여부 확인
-    Optional<User> findByEmailOrNicknameAndDeletedAtIsNull(String email, String nickname);
+    @Query("SELECT u FROM User u WHERE (u.email = :email OR u.nickname = :nickname) AND u.deletedAt IS NULL")
+    Optional<User> findByEmailOrNicknameAndDeletedAtIsNull(@Param("email") String email, @Param("nickname") String nickname);
 
     // 닉네임 중복 확인
     boolean existsByNicknameAndDeletedAtIsNull(String nickname);
