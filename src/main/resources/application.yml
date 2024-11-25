@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:test;DB_CLOSE_ON_EXIT=FALSE  # Prevent H2 from closing when JVM shuts down
+    url: jdbc:h2:mem:testdb;DB_CLOSE_ON_EXIT=FALSE;MODE=MYSQL  # Prevent H2 from closing when JVM shuts down
     driver-class-name: org.h2.Driver
     username: sa
     password:
@@ -17,6 +17,18 @@ spring:
     properties:
       hibernate:
         format_sql: true  # Pretty-print SQL in logs
+        auto_quote_keyword: true
   sql:
     init:
       mode: always  # Always run SQL scripts during initialization
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope: profile, email
+
+public-data:
+  go-camping: ${GO_CAMPING_SERVICE_KEY}

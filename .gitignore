@@ -243,3 +243,6 @@ $RECYCLE.BIN/
 # Mapper Implemantation
 *MapperImpl.java
 /src/main/generated/
+
+# env
+*.env
