@@ -63,6 +63,7 @@ public class CampController {
   }
 
 /*
+  // TODO: NoSQL을 이용한 검색 기능 구현 & 엘라스틱 서치
   // 검색한 캠핑장 목록 (페이지네이션)
   @GetMapping("/search")
   @PreAuthorize("isAuthenticated()")  // 로그인 확인

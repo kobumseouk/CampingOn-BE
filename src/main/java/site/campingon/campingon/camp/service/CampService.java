@@ -85,6 +85,7 @@ public class CampService {
         .collect(Collectors.toList());
   }
 
+  // 사용자의 찜한 캠핑장 목록 조회
   public Page<CampListResponseDto> getBookmarkedCamps(Long userId, Pageable pageable) {
     Page<Camp> bookmarkedCamps = campRepository.findByBookmarks_User_IdAndBookmarks_IsMarkedTrue(userId, pageable);
 
