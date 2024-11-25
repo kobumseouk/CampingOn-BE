@@ -33,10 +33,4 @@ public class CampSiteCreateRequestDto {
 
     @NotNull(message = "사용 가능 여부는 필수입니다.")
     private boolean isAvailable;
-
-    @NotNull(message = "체크인 시간은 필수입니다.")
-    private LocalTime checkInTime;
-
-    @NotNull(message = "체크아웃 시간은 필수입니다.")
-    private LocalTime checkOutTime;
 }
