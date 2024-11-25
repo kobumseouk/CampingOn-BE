@@ -1,5 +1,6 @@
 package site.campingon.campingon.user.service;
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,11 +30,19 @@ public class UserService {
     @Transactional
     public UserSignUpResponseDto registerUser(UserSignUpRequestDto userSignUpRequestDto) {
 
-        if(userRepository.existsByEmailAndDeletedAtIsNull(userSignUpRequestDto.getEmail())) {
-            throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
-        }
-        if(userRepository.existsByNicknameAndDeletedAtIsNull(userSignUpRequestDto.getNickname())) {
-            throw new IllegalArgumentException("이미 존재하는 닉네임입니다.");
+        Optional<User> existingUser = userRepository.findByEmailOrNicknameAndDeletedAtIsNull(
+            userSignUpRequestDto.getEmail(),
+            userSignUpRequestDto.getNickname()
+        );
+
+        if (existingUser.isPresent()) {
+            User user = existingUser.get(); // NPE 방지
+            if (user.getEmail().equals(userSignUpRequestDto.getEmail())) {
+                throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
+            }
+            if (user.getNickname().equals(userSignUpRequestDto.getNickname())) {
+                throw new IllegalArgumentException("이미 존재하는 닉네임입니다.");
+            }
         }
 
         String encodedPassword = passwordEncoder.encode(userSignUpRequestDto.getPassword());

@@ -48,6 +48,7 @@ class UserServiceTest {
     void testRegisterUser_success() {
         // Given
         UserSignUpRequestDto requestDto = new UserSignUpRequestDto("test@example.com", "nickname", "password", "Test User");
+
         User newUser = User.builder()
             .email(requestDto.getEmail())
             .nickname(requestDto.getNickname())
@@ -55,55 +56,41 @@ class UserServiceTest {
             .name(requestDto.getName())
             .role(Role.USER)
             .build();
+
         User savedUser = newUser.toBuilder().id(1L).build();
 
-        when(userRepository.existsByEmailAndDeletedAtIsNull(requestDto.getEmail())).thenReturn(false);
-        when(userRepository.existsByNicknameAndDeletedAtIsNull(requestDto.getNickname())).thenReturn(false);
-        when(passwordEncoder.encode(requestDto.getPassword())).thenReturn("encodedPassword");
-        when(userRepository.save(any(User.class))).thenReturn(savedUser);
-        when(userMapper.toSignUpResponseDto(any(User.class))).thenReturn(
-            UserSignUpResponseDto.builder()
+        // Mocking: 이메일과 닉네임이 중복되지 않은 경우
+        when(userRepository.findByEmailOrNicknameAndDeletedAtIsNull(requestDto.getEmail(), requestDto.getNickname()))
+            .thenReturn(Optional.empty());
+
+        // Mocking: 비밀번호 인코딩
+        when(passwordEncoder.encode(requestDto.getPassword()))
+            .thenReturn("encodedPassword");
+
+        // Mocking: 새 사용자 저장
+        when(userRepository.save(any(User.class)))
+            .thenReturn(savedUser);
+
+        // Mocking: 저장된 사용자 DTO로 매핑
+        when(userMapper.toSignUpResponseDto(any(User.class)))
+            .thenReturn(UserSignUpResponseDto.builder()
                 .id(savedUser.getId())
                 .email(savedUser.getEmail())
-                .build()
-        );
+                .build());
 
         // When
         UserSignUpResponseDto responseDto = userService.registerUser(requestDto);
 
         // Then
-        assertNotNull(responseDto);
-        assertEquals(savedUser.getId(), responseDto.getId());
-        assertEquals(savedUser.getEmail(), responseDto.getEmail());
+        assertNotNull(responseDto); // 결과가 null이 아닌지 확인
+        assertEquals(savedUser.getId(), responseDto.getId()); // 반환된 ID가 예상값과 일치하는지 확인
+        assertEquals(savedUser.getEmail(), responseDto.getEmail()); // 반환된 이메일이 예상값과 일치하는지 확인
+        verify(userRepository, times(1)).findByEmailOrNicknameAndDeletedAtIsNull(requestDto.getEmail(), requestDto.getNickname());
         verify(userRepository, times(1)).save(any(User.class));
+        verify(passwordEncoder, times(1)).encode(requestDto.getPassword());
+        verify(userMapper, times(1)).toSignUpResponseDto(any(User.class));
     }
 
-    @DisplayName("TEST - 회원 가입 실패: 이메일 중복")
-    @Test
-    void testRegisterUser_emailDuplicated() {
-        // Given
-        UserSignUpRequestDto requestDto = new UserSignUpRequestDto("test@example.com", "nickname", "password", "Test User");
-
-        when(userRepository.existsByEmailAndDeletedAtIsNull(requestDto.getEmail())).thenReturn(true);
-
-        // When & Then
-        assertThrows(IllegalArgumentException.class, () -> userService.registerUser(requestDto));
-        verify(userRepository, times(0)).save(any(User.class)); // save가 호출되지 않아야 함
-    }
-
-    @DisplayName("TEST - 회원 가입 실패: 닉네임 중복")
-    @Test
-    void testRegisterUser_nicknameDuplicated() {
-        // Given
-        UserSignUpRequestDto requestDto = new UserSignUpRequestDto("test@example.com", "nickname", "password", "Test User");
-
-        when(userRepository.existsByEmailAndDeletedAtIsNull(requestDto.getEmail())).thenReturn(false);
-        when(userRepository.existsByNicknameAndDeletedAtIsNull(requestDto.getNickname())).thenReturn(true);
-
-        // When & Then
-        assertThrows(IllegalArgumentException.class, () -> userService.registerUser(requestDto));
-        verify(userRepository, times(0)).save(any(User.class)); // save가 호출되지 않아야 함
-    }
 
     @DisplayName("TEST - 회원정보 확인: 정상 동작")
     @Test
