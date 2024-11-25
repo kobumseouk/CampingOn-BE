@@ -1,5 +1,6 @@
 package site.campingon.campingon.bookmark.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,6 +22,7 @@ public class Bookmark {
   private Long id;
 
   @ManyToOne
+  @JsonIgnore
   @JoinColumn(name = "camp_id", nullable = false)
   private Camp camp;
 

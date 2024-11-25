@@ -100,7 +100,7 @@ public class CampController {
 
   // 사용자 찜 목록 조회
   @GetMapping("/bookmarked")
-  public ResponseEntity<Page<CampListResponseDto>> getLikedCamps(
+  public ResponseEntity<Page<CampListResponseDto>> getBookmarkedCamps(
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "3") int size,
       @AuthenticationPrincipal UserDetails userDetails

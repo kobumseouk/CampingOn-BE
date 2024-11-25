@@ -20,21 +20,19 @@ public class BookmarkService {
   private final CampRepository campRepository;
   private final UserRepository userRepository;
 
-  // 찜하기
+  // 찜 기능 (토글활용)
   public void bookmarkCamp(Long campId, Long userId) {
     // 이미 찜 관계가 있는지 확인
     Optional<Bookmark> existingBookmark = bookmarkRepository.findByCampIdAndUserId(campId, userId);
 
+    // 이미 찜 관계가 있는 상태
     if (existingBookmark.isPresent()) {
-      // 이미 찜 관계가 있고 isMarked가 false면 true로 업데이트
-      if (!existingBookmark.get().isMarked()) {
-        Bookmark bookmark = existingBookmark.get().toBuilder()
-            .isMarked(true)
-            .build();
-        bookmarkRepository.save(bookmark);
-      }
-      // isMarked가 이미 true인 경우에는 아무것도 하지 않음
-      return;
+      // isMarked 상태를 반대로 토글 - true->false, false->true로 전환
+      Bookmark bookmark = existingBookmark.get().toBuilder()
+          .isMarked(!existingBookmark.get().isMarked())
+          .build();
+      bookmarkRepository.save(bookmark);
+      return;  // 변경 후 반환
     }
 
     // 새로운 찜 관계 생성
@@ -52,16 +50,4 @@ public class BookmarkService {
     bookmarkRepository.save(bookmark);
   }
 
-  // 찜 해제
-  public void unbookmarkCamp(Long campId, Long userId) {
-    Bookmark bookmark = bookmarkRepository.findByCampIdAndUserId(campId, userId)
-        .orElseThrow(() -> new RuntimeException("찜 관계를 찾을 수 없습니다."));
-
-    // soft delete: isMarked만 false로 변경
-    Bookmark updatedBookmark = bookmark.toBuilder()
-        .isMarked(false)
-        .build();
-
-    bookmarkRepository.save(updatedBookmark);
-  }
 }

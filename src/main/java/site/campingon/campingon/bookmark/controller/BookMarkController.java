@@ -16,7 +16,7 @@ import site.campingon.campingon.user.entity.User;
 public class BookMarkController {
   private final BookmarkService bookmarkService;
 
-  // 찜하기
+  // 찜 기능 (토글활용)
   @PostMapping("/{campId}/bookmarks")
   public ResponseEntity<Void> bookmarkCamp(
       @PathVariable Long campId,
@@ -24,17 +24,6 @@ public class BookMarkController {
   ) {
     User user = (User) userDetails;
     bookmarkService.bookmarkCamp(campId, user.getId());
-    return ResponseEntity.ok().build();
-  }
-
-  // 찜 해제
-  @DeleteMapping("/{campId}/bookmarks")
-  public ResponseEntity<Void> unbookmarkCamp(
-      @PathVariable Long campId,
-      @AuthenticationPrincipal UserDetails userDetails
-  ) {
-    User user = (User) userDetails;
-    bookmarkService.unbookmarkCamp(campId, user.getId());
     return ResponseEntity.ok().build();
   }
 }
