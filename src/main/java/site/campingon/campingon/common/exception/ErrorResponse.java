@@ -10,8 +10,10 @@ import org.springframework.http.ResponseEntity;
 @Builder
 public class ErrorResponse {
 
-    private String code;
-    private String message;
+    // 프론트에서 if(!data.success)로 에러를 확인해 메시지를 반환하기 위해 추가
+    private final boolean success = false;
+    private final String code;
+    private final String message;
 
     public static ResponseEntity<ErrorResponse> toResponseEntity(ErrorCode e) {
         return ResponseEntity
