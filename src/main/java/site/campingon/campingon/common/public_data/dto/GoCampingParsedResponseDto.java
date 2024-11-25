@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Getter
 @Builder
-public class GoCampingResponseDto {
+public class GoCampingParsedResponseDto {
     private long contentId; //콘텐츠 ID
     private String facltNm; //야영장명
     private String lineIntro;   //한줄소개
