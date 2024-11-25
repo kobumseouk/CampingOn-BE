@@ -1,8 +1,8 @@
 package site.campingon.campingon.common.public_data.mapper;
 
 import org.mapstruct.Mapper;
-import site.campingon.campingon.common.public_data.dto.GoCampingRequestDto;
-import site.campingon.campingon.common.public_data.dto.GoCampingResponseDto;
+import site.campingon.campingon.common.public_data.dto.GoCampingDataDto;
+import site.campingon.campingon.common.public_data.dto.GoCampingParsedResponseDto;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ import java.util.List;
 public interface GoCampingMapper {
 
     // GoCampingRequestDto의 Item을 GoCampingResponseDto로 매핑
-    GoCampingResponseDto toGoCampingResponseDto(GoCampingRequestDto.Item item);
+    GoCampingParsedResponseDto toGoCampingResponseDto(GoCampingDataDto.Item item);
 
-    List<GoCampingResponseDto> toGoCampingResponseDtoList(List<GoCampingRequestDto.Item> items);
+    List<GoCampingParsedResponseDto> toGoCampingResponseDtoList(List<GoCampingDataDto.Item> items);
 }
