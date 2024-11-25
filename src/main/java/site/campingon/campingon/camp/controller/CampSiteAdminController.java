@@ -22,7 +22,6 @@ import java.util.List;
 public class CampSiteAdminController {
 
     private final CampSiteService campSiteService;
-    private final CampSiteMapper campSiteMapper;
 
     // 캠핑지 생성
     @PostMapping
