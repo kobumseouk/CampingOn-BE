@@ -3,7 +3,6 @@ package site.campingon.campingon.camp.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +14,7 @@ import site.campingon.campingon.camp.entity.CampSite;
 import site.campingon.campingon.camp.mapper.CampMapper;
 import site.campingon.campingon.camp.repository.CampRepository;
 import site.campingon.campingon.camp.repository.CampSiteRepository;
-import site.campingon.campingon.like.repository.LikeRepository;
+import site.campingon.campingon.bookmark.repository.BookMarkRepository;
 import site.campingon.campingon.user.repository.UserKeywordRepository;
 
 import java.util.List;
@@ -29,11 +28,11 @@ public class CampService {
   private final CampRepository campRepository;
   private final CampSiteRepository campSiteRepository;
   private final UserKeywordRepository userKeywordRepository;
-  private final LikeRepository likeRepository;
+  private final BookMarkRepository bookMarkRepository;
   private final CampMapper campMapper;
 
   // 추천 캠핑장 조회 (페이지네이션 - 횡스크롤 3개)
-  public Page<CampListResponseDto> getRecommendedCampsByKeywords(Long userId, Pageable pageable) {
+  public Page<CampListResponseDto> getMatchedCampsByKeywords(Long userId, Pageable pageable) {
     List<String> userKeywords = userKeywordRepository.findKeywordsByUserId(userId);
 
     if (userKeywords.isEmpty()) {
@@ -46,7 +45,7 @@ public class CampService {
     List<CampListResponseDto> campDtos = recommendedCamps.getContent().stream()
         .map(camp -> {
           CampListResponseDto dto = campMapper.toCampListDto(camp);
-          dto.setLike(likeRepository.existsByCampIdAndUserId(camp.getId(), userId));
+          dto.setMarked(bookMarkRepository.existsByCampIdAndUserId(camp.getId(), userId));
           return dto;
         })
         .collect(Collectors.toList());
@@ -61,7 +60,7 @@ public class CampService {
     List<CampListResponseDto> campDtos = camps.getContent().stream()
         .map(camp -> {
           CampListResponseDto dto = campMapper.toCampListDto(camp);
-          dto.setLike(likeRepository.existsByCampIdAndUserId(camp.getId(), userId));
+          dto.setMarked(bookMarkRepository.existsByCampIdAndUserId(camp.getId(), userId));
           return dto;
         })
         .collect(Collectors.toList());
