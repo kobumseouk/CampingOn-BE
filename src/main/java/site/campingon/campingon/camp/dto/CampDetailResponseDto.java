@@ -17,6 +17,8 @@ public class CampDetailResponseDto {
   private String outdoorFacility;   // 부대시설
   private String induty;  // 업종
 
+  private Double longitude;  // mayX - 경도
+  private Double latitude;  // maxY - 위도
   private String address;   // 도로명 주소
 
   private List<String> images;   // 캠핑장 이미지(썸네일 포함) <- Camp_image 엔티티

@@ -30,12 +30,18 @@ public class CampAddr {
     private String state; // 시/군/구
 
     @Column(length = 20)
-    private String zipcode;
+    private String zipcode;  // 우편번호
+
+    @Column(nullable = false)
+    private Double longitude;  // mayX - 경도
+
+    @Column(nullable = false)
+    private Double latitude;  // maxY - 위도
 
     @Column(name = "street_addr", length = 50)
-    private String streetAddr;
+    private String streetAddr;   // 기본 도로명 주소
 
     @Column(name = "detailed_addr", length = 50)
-    private String detailedAddr;
+    private String detailedAddr;   // 상세 주소 (없는 경우 많음)
 
 }
