@@ -46,11 +46,12 @@ public interface CampRepository extends JpaRepository<Camp, Long> {
   @Query("""
     SELECT DISTINCT c FROM Camp c
     LEFT JOIN c.campAddr ca
+    LEFT JOIN c.induty ci
     LEFT JOIN c.campInfo cr
     LEFT JOIN c.keywords ck
     WHERE (:city IS NULL OR ca.city = :city)
     AND (:keyword IS NULL OR (
-        LOWER(c.induty) = :keyword
+        LOWER(ci.induty) = :keyword
         OR LOWER(c.outdoorFacility) = :keyword
         OR LOWER(ca.state) = :keyword
         OR LOWER(ck.keyword) = :keyword

@@ -2,10 +2,12 @@ package site.campingon.campingon.camp.dto;
 
 import lombok.*;
 import site.campingon.campingon.camp.entity.CampInduty;
+import site.campingon.campingon.camp.entity.Induty;
 
 import java.util.List;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -16,7 +18,7 @@ public class CampDetailResponseDto {
   private String lineIntro;
   private String homepage;   // 홈페이지 사용 고려
   private String outdoorFacility;   // 부대시설
-  private List<CampInduty> induty;  // 업종
+  private String indutys;  // 업종
 
   private Double longitude;  // mayX - 경도
   private Double latitude;  // maxY - 위도
