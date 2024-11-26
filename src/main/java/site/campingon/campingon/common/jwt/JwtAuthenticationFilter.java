@@ -38,7 +38,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // access token이 있고, BEARER로 시작한다면
         if (authHeader != null && authHeader.startsWith(BEARER)) {
             String token = authHeader.substring(BEARER.length());
-            log.debug("JwtAuthentication filte - access token: {}", token);
             // 토큰 검증
             try {
                 if (jwtTokenProvider.validateToken(token)) {
