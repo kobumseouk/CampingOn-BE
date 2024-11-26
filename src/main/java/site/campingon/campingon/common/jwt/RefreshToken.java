@@ -24,7 +24,7 @@ public class RefreshToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 512)
     private String token;
 
     @Column(nullable = false, unique = true)
@@ -35,7 +35,7 @@ public class RefreshToken {
 
 
     // 토큰 업데이트
-    public void updateToken(String refreshToken,LocalDateTime expiryDate) {
+    public void update(String refreshToken,LocalDateTime expiryDate) {
         this.token = refreshToken;
         this.expiryDate = expiryDate;
     }

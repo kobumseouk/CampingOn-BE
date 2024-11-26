@@ -68,7 +68,6 @@ public class JwtTokenProvider {
             .signWith(secretKey, SignatureAlgorithm.HS256) // 서명
             .compact();
 
-        log.debug("accessToken: {}, refreshToken: {}", accessToken, refreshToken);
 
         // JWT Token 객체 반환
         return JwtToken.builder()
@@ -128,7 +127,6 @@ public class JwtTokenProvider {
     // 토큰 정보 검증
     public boolean validateToken(String token) {
         log.info("validateToken start");
-        log.info("token: {}", token);
         try {
             Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token);
             return true;
@@ -148,7 +146,6 @@ public class JwtTokenProvider {
 
     public Claims parseClaims(String accessToken) {
         try {
-            log.info("parseClaims: accessToken: {}", accessToken);
             return Jwts.parserBuilder()
                 .setSigningKey(secretKey)
                 .build()
@@ -159,12 +156,12 @@ public class JwtTokenProvider {
         }
     }
 
-    // 리프레시 토큰에서 이메일 정보 추출
-    public String getMemberEmail(String refreshToken) {
+    // 토큰에서 이메일 정보 추출
+    public String getEmailFromToken(String token) {
         Claims claims = Jwts.parserBuilder()
             .setSigningKey(secretKey)
             .build()
-            .parseClaimsJws(refreshToken)
+            .parseClaimsJws(token)
             .getBody();
         return claims.getSubject();
     }

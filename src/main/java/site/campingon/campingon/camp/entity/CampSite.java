@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import site.campingon.campingon.common.converter.IndutyConverter;
 
 @Entity
 @Getter
@@ -29,11 +30,9 @@ public class CampSite {
     @Column(nullable = false)
     private Integer price; // 가격
 
-    @Column(name = "image_url", length = 255)
-    private String imageUrl; // 캠핑지 이미지
-
     @Column(length = 100, nullable = false)
-    private String type; // 업종 구분
+    @Convert(converter = IndutyConverter.class) //converter 사용
+    private Induty type; // 업종 구분
 
     @Column(name = "indoor_facility", length = 255)
     private String indoorFacility;

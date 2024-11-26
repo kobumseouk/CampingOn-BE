@@ -70,6 +70,8 @@ public class GoCampingDataDto {
         private String sbrsCl;  //부대시설(외부시설)
         private String animalCmgCl; //애완동물출입("불가능, 가능")
         private String firstImageUrl;   //대표이미지
+        private Double mapX;
+        private Double mapY;
         private String createdtime; //등록일
         private String modifiedtime;    //수정일
     }
