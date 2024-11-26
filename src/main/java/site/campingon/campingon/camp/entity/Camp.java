@@ -3,8 +3,8 @@ package site.campingon.campingon.camp.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import site.campingon.campingon.bookmark.entity.Bookmark;
-import site.campingon.campingon.common.entity.BaseEntity;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "camp")
-public class Camp extends BaseEntity {
+public class Camp{
 
   @Id
   @Column(columnDefinition = "INT UNSIGNED")
@@ -57,4 +57,9 @@ public class Camp extends BaseEntity {
   @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private List<Bookmark> bookmarks;
 
+  @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME")
+  private LocalDateTime createdAt;
+
+  @Column(name = "modified_at", nullable = false, columnDefinition = "DATETIME")
+  private LocalDateTime modifiedAt;
 }

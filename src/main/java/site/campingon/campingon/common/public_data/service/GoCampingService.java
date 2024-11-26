@@ -19,6 +19,8 @@ import site.campingon.campingon.common.public_data.mapper.GoCampingMapper;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -43,7 +45,6 @@ public class GoCampingService {
     @Value("${public-data.go-camping}")
     private String serviceKey;
 
-    //todo 생성일, 수정일 엔티티 주입하기
     //공공데이터 가공
     public List<GoCampingParsedResponseDto> createCampByGoCampingData(GoCampingDataDto goCampingDataDto) {
         List<GoCampingDataDto.Item> items = goCampingDataDto.getResponse().getBody().getItems().getItem();
@@ -67,6 +68,15 @@ public class GoCampingService {
                     .homepage(data.getHomepage())
                     .outdoorFacility(data.getSbrsCl())
                     .thumbImage(data.getFirstImageUrl())
+                    .createdAt(
+                            LocalDateTime.parse(
+                                    data.getCreatedtime()
+                                    , DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                            )
+                    .modifiedAt(LocalDateTime.parse(
+                            data.getModifiedtime()
+                            , DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                    )
                     .build();
 
             campRepository.save(camp);
