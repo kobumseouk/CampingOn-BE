@@ -15,9 +15,9 @@
             <appender-ref ref="CONSOLE"/>
         </root>
 
-        <logger name="org.springframework" level="WARN" />
+        <logger name="org.springframework" level="INFO" />
 
-        <logger name="site.campingon.campingon.common.aop" level="DEBUG" />
+        <logger name="site.campingon.campingon" level="DEBUG" />
     </springProfile>
 
     <!-- 로컬이 아닌 서버에서는(즉 배포 서버 set1, set2) appender를 통해 파일에 저장-->
