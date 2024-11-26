@@ -1,14 +1,13 @@
 package site.campingon.campingon.user.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import org.springframework.security.core.GrantedAuthority;
 
-@Getter
-@AllArgsConstructor
-public enum Role {
+public enum Role implements GrantedAuthority {
+    ROLE_USER,
+    ROLE_ADMIN;
 
-    USER("ROLE_USER"),
-    ADMIN("ROLE_ADMIN");
-
-    private final String role;
+    @Override
+    public String getAuthority() {
+        return name();
+    }
 }

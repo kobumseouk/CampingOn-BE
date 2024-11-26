@@ -62,24 +62,24 @@ public class CampController {
     );
   }
 
-/*
-  // TODO: NoSQL을 이용한 검색 기능 구현 & 엘라스틱 서치
+  // TODO: NoSQL을 이용한 검색 기능 구현 & 엘라스틱 서치 | 인덱싱 작업
   // 검색한 캠핑장 목록 (페이지네이션)
   @GetMapping("/search")
-  @PreAuthorize("isAuthenticated()")  // 로그인 확인
   public ResponseEntity<Page<CampListResponseDto>> searchCamps(
       @RequestParam String keyword,
-      @RequestParam(required = false) String location,
+      @RequestParam(required = false) String city,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "12") int size,
-      UserDto currentUser
+      //TODO: 사용자별 검색 기록 사용 시 필요(Redis - 서버사이드 캐시)
+      @AuthenticationPrincipal UserDetails userDetails
   ) {
+    User user = (User) userDetails;
+    // searchHistoryService.saveSearchKeyword(user.getId(), keyword, city);
+
     PageRequest pageRequest = PageRequest.of(page, size);
-    Long userId = currentUser.getUserId();
-    Page<CampListResponseDto> camps = campService.searchCamps(keyword, location, pageRequest, userId);
+    Page<CampListResponseDto> camps = campService.searchCamps(user.getId(), keyword, city, pageRequest);
     return ResponseEntity.ok(camps);
   }
-*/
 
   // 캠핑장 상세 조회  -  찜 버튼 활성화 시 유저 확인 추가
   @GetMapping("/{campId}")
