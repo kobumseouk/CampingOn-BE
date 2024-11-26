@@ -32,3 +32,6 @@ spring:
 
 public-data:
   go-camping: ${GO_CAMPING_SERVICE_KEY}
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY}

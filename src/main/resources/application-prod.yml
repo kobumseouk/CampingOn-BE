@@ -5,3 +5,7 @@ spring:
         registration:
           google:
             redirect-uri: # 배포 서버 url 입력
+
+jwt:
+  access-expired: 900 # 15분
+  refresh-expired: 86400 # 1일
