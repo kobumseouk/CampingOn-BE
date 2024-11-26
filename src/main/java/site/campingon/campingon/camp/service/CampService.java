@@ -105,4 +105,34 @@ public class CampService {
 
   }
 
+
+  // 캠핑장 생성
+  @Transactional
+  public CampDetailResponseDto createCamp(Camp camp) {
+      return campMapper.toCampDetailDto(campRepository.save(camp));
+  }
+
+  // 캠핑장 수정
+  @Transactional
+  public CampDetailResponseDto updateCamp(Long campId, Camp updatedCamp) {
+      Camp existingCamp = campRepository.findById(campId)
+              .orElseThrow(() -> new RuntimeException("캠핑장을 찾을 수 없습니다."));
+      campMapper.updateCampFromDto(updatedCamp, existingCamp);
+      return campMapper.toCampDetailDto(campRepository.save(existingCamp));
+  }
+
+  // 캠핑장 삭제
+  @Transactional
+  public void deleteCamp(Long id) {
+      campRepository.deleteById(id);
+  }
+
+  // 모든 캠핑장 조회
+  public List<CampListResponseDto> getAllCamps() {
+      List<Camp> camps = campRepository.findAll();
+      return camps.stream()
+              .map(campMapper::toCampListDto)
+              .toList();
+  }
+
 }
