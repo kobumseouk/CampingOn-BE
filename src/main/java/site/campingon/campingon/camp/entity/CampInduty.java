@@ -23,7 +23,7 @@ public class CampInduty {
     @JoinColumn(name = "camp_id", nullable = false)
     private Camp camp;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     @Convert(converter = IndutyConverter.class)
     private Induty induty;
 }
