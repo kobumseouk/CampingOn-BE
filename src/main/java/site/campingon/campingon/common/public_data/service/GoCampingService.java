@@ -8,6 +8,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import site.campingon.campingon.camp.entity.*;
 import site.campingon.campingon.camp.repository.*;
+import site.campingon.campingon.common.exception.ErrorCode;
+import site.campingon.campingon.common.exception.GlobalException;
 import site.campingon.campingon.common.public_data.GoCampingPath;
 import site.campingon.campingon.common.public_data.dto.GoCampingDataDto;
 import site.campingon.campingon.common.public_data.dto.GoCampingImageDto;
@@ -26,7 +28,6 @@ import static site.campingon.campingon.common.public_data.PublicDataConstants.MO
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class GoCampingService {
 
     private final GoCampingMapper goCampingMapper;
@@ -43,7 +44,6 @@ public class GoCampingService {
     private String serviceKey;
 
     //todo 생성일, 수정일 엔티티 주입하기
-    // image URL
     //공공데이터 가공
     public List<GoCampingParsedResponseDto> createCampByGoCampingData(GoCampingDataDto goCampingDataDto) {
         List<GoCampingDataDto.Item> items = goCampingDataDto.getResponse().getBody().getItems().getItem();
@@ -129,12 +129,11 @@ public class GoCampingService {
         List<GoCampingImageParsedResponseDto> goCampingImageParsedResponseDto =
                 goCampingMapper.toGoCampingImageParsedResponseDtoList(item);
 
-        log.debug("contentId: {}",goCampingImageParsedResponseDto.getFirst().getContentId());
 
         Camp camp = campRepository.findById(
                         goCampingImageParsedResponseDto.getFirst().getContentId()
                 )
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new GlobalException(ErrorCode.CAMP_NOT_FOUND_BY_ID));
         for (GoCampingImageParsedResponseDto data : goCampingImageParsedResponseDto) {
 
 
@@ -203,7 +202,6 @@ public class GoCampingService {
         for (int i = 0; i < params.length; i += 2) {
             uriBuilder.queryParam(params[i], params[i + 1]);
         }
-        log.debug("경로: {}", uriBuilder.toUriString());
 
         return new URI(uriBuilder.build().toUriString());
     }

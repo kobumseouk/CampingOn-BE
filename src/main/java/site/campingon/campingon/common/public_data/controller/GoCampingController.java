@@ -27,8 +27,8 @@ public class GoCampingController {
     //공공데이터 기반 캠프관련 엔티티 생성
     @PostMapping("/basedList")
     public ResponseEntity<List<GoCampingParsedResponseDto>> createCampByGoCampingBasedList(
-            @RequestParam("numOfRows") Long numOfRows,
-            @RequestParam("pageNo") Long pageNo)
+            @RequestParam("numOfRows") Long numOfRows,  //몇개의 데이터 갖고올지
+            @RequestParam("pageNo") Long pageNo)    //몇번부터 시작하는지
             throws URISyntaxException {
         GoCampingDataDto goCampingDataDto = goCampingService.goCampingDataDtoByGoCampingBasedList(
                 GoCampingPath.BASED_LIST,
