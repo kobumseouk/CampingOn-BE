@@ -16,7 +16,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import static site.campingon.campingon.camp.entity.Induty.*;
 import static site.campingon.campingon.common.public_data.PublicDataConstants.*;
 import static site.campingon.campingon.common.public_data.PublicDataConstants.MOBILE_APP;
 
@@ -37,6 +39,7 @@ public class GoCampingService {
     private String serviceKey;
 
     //todo 생성일, 수정일 엔티티 주입하기
+    //공공데이터 가공
     public List<GoCampingParsedResponseDto> publicDataFilters(GoCampingDataDto request) {
         List<GoCampingDataDto.Item> items = request.getResponse().getBody().getItems().getItem();
         List<GoCampingParsedResponseDto> goCampingParsedResponseDtoList = goCampingMapper.toGoCampingResponseDtoList(items);
@@ -78,66 +81,26 @@ public class GoCampingService {
             campAddrRepository.save(campAddr);
 
             //캠핑지 DB 저장
-            createCampSite(camp, normalSiteCnt, Induty.NORMAL_SITE, null, 6, 25000);
-            createCampSite(camp, carSiteCnt, Induty.CAR_SITE, null, 6, 35000);
-            createCampSite(camp, glampSiteCnt, Induty.GLAMP_SITE, glampInnerFacility, 4, 70000);
-            createCampSite(camp, caravSiteCnt, Induty.CARAV_SITE, caravInnerFacility, 4, 80000);
-            createCampSite(camp, personalCaravanSiteCnt, Induty.PERSONAL_CARAV_SITE, null, 6, 35000);
+            createCampSite(camp, normalSiteCnt, NORMAL_SITE, null,
+                    NORMAL_SITE.getMaximum_people(), NORMAL_SITE.getPrice());
+
+            createCampSite(camp, carSiteCnt, CAR_SITE, null,
+                    CAR_SITE.getMaximum_people(), CAR_SITE.getPrice());
+
+            createCampSite(camp, glampSiteCnt, GLAMP_SITE, glampInnerFacility,
+                    GLAMP_SITE.getMaximum_people(), GLAMP_SITE.getPrice());
+
+            createCampSite(camp, caravSiteCnt, CARAV_SITE, caravInnerFacility,
+                    CAR_SITE.getMaximum_people(), CAR_SITE.getPrice());
+
+            createCampSite(camp, personalCaravanSiteCnt, PERSONAL_CARAV_SITE,
+                    null, PERSONAL_CARAV_SITE.getMaximum_people(), PERSONAL_CARAV_SITE.getPrice());
 
         }
         return goCampingParsedResponseDtoList;
     }
 
-    private void createCampInduty(Camp camp, Integer normalSiteCnt, Integer carSiteCnt, Integer glampSiteCnt, Integer caravSiteCnt, Integer personalCaravanSiteCnt) {
-
-        if (normalSiteCnt != 0) {
-            CampInduty campInduty = CampInduty.builder()
-                    .induty(Induty.NORMAL_SITE).camp(camp).build();
-            campIndutyRepository.save(campInduty);
-        }
-
-        if (carSiteCnt != 0) {
-            CampInduty campInduty = CampInduty.builder()
-                    .induty(Induty.CAR_SITE).camp(camp).build();
-            campIndutyRepository.save(campInduty);
-        }
-
-        if (glampSiteCnt != 0) {
-            CampInduty campInduty = CampInduty.builder()
-                    .induty(Induty.GLAMP_SITE).camp(camp).build();
-            campIndutyRepository.save(campInduty);
-        }
-
-        if (caravSiteCnt != 0) {
-            CampInduty campInduty = CampInduty.builder()
-                    .induty(Induty.CARAV_SITE).camp(camp).build();
-            campIndutyRepository.save(campInduty);
-        }
-
-        if (personalCaravanSiteCnt != 0) {
-            CampInduty campInduty = CampInduty.builder()
-                    .induty(Induty.PERSONAL_CARAV_SITE).camp(camp).build();
-            campIndutyRepository.save(campInduty);
-        }
-    }
-
-    //CampSite 생성 및 DB 저장
-    private void createCampSite(Camp camp, Integer normalSiteCnt,
-                                Induty induty, String innerFacility,
-                                int maximum_people, int price) {
-        for (int i = 0; i < normalSiteCnt; ++i) {
-            CampSite campSite = CampSite.builder()
-                    .camp(camp)
-                    .maximumPeople(maximum_people)
-                    .price(price)
-                    .type(induty)
-                    .indoorFacility(innerFacility)
-                    .build();
-
-            campSiteRepository.save(campSite);
-        }
-    }
-
+    //공공 API 호출하여 dto 추출
     public GoCampingDataDto goCampingDataDtoByGoCampingUrl(
             GoCampingPath goCampingPath, String... params
     ) throws URISyntaxException {
@@ -157,4 +120,46 @@ public class GoCampingService {
 
         return restTemplate.getForObject(uri, GoCampingDataDto.class);
     }
+
+    //CampSite 데이터 삽입
+    private void createCampSite(Camp camp, Integer siteCnt,
+                                Induty induty, String innerFacility,
+                                int maximum_people, int price) {
+        for (int i = 0; i < siteCnt; ++i) {
+            CampSite campSite = CampSite.builder()
+                    .camp(camp)
+                    .maximumPeople(maximum_people)
+                    .price(price)
+                    .type(induty)
+                    .indoorFacility(innerFacility)
+                    .build();
+
+            campSiteRepository.save(campSite);
+        }
+    }
+
+    //CampInduty 데이터 삽입
+    private void createCampInduty(Camp camp, Integer normalSiteCnt,
+                                  Integer carSiteCnt, Integer glampSiteCnt,
+                                  Integer caravSiteCnt, Integer personalCaravanSiteCnt) {
+
+        Map<Induty, Integer> siteCounts = Map.of(
+                Induty.NORMAL_SITE, normalSiteCnt,
+                Induty.CAR_SITE, carSiteCnt,
+                Induty.GLAMP_SITE, glampSiteCnt,
+                Induty.CARAV_SITE, caravSiteCnt,
+                Induty.PERSONAL_CARAV_SITE, personalCaravanSiteCnt
+        );
+
+        siteCounts.forEach((induty, count) -> {
+            if (count != 0) {
+                CampInduty campInduty = CampInduty.builder()
+                        .induty(induty)
+                        .camp(camp)
+                        .build();
+                campIndutyRepository.save(campInduty);
+            }
+        });
+    }
+
 }
