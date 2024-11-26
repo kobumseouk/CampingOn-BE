@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import site.campingon.campingon.camp.dto.CampDetailResponseDto;
@@ -63,19 +62,22 @@ public class CampController {
     );
   }
 
-  // TODO: NoSQL을 이용한 검색 기능 구현 & 엘라스틱 서치
+  // TODO: NoSQL을 이용한 검색 기능 구현 & 엘라스틱 서치 | 인덱싱 작업
   // 검색한 캠핑장 목록 (페이지네이션)
   @GetMapping("/search")
   public ResponseEntity<Page<CampListResponseDto>> searchCamps(
       @RequestParam String keyword,
-      @RequestParam(required = false) String location,
+      @RequestParam(required = false) String city,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "12") int size,
-      @AuthenticationPrincipal UserDetails userDetails   // 사용자별 검색 기록 사용 시
+      //TODO: 사용자별 검색 기록 사용 시 필요(Redis - 서버사이드 캐시)
+      @AuthenticationPrincipal UserDetails userDetails
   ) {
     User user = (User) userDetails;
+    // searchHistoryService.saveSearchKeyword(user.getId(), keyword, city);
+
     PageRequest pageRequest = PageRequest.of(page, size);
-    Page<CampListResponseDto> camps = campService.searchCamps(keyword, location, pageRequest, user.getId());
+    Page<CampListResponseDto> camps = campService.searchCamps(user.getId(), keyword, city, pageRequest);
     return ResponseEntity.ok(camps);
   }
 
