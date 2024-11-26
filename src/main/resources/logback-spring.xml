@@ -7,10 +7,14 @@
     <springProfile name="local">
         <include resource="console-appender.xml"/>
         <!-- 로컬 서버에서는 appender를 통해 콘솔에 출력-->
-        <root level="DEBUG">
+        <root level="INFO">
             <!-- ref="appender name(CONSOLE) 지정" -->
             <appender-ref ref="CONSOLE"/>
         </root>
+
+        <logger name="org.springframework" level="WARN" />
+
+        <logger name="site.campingon.campingon.common.aop" level="DEBUG" />
     </springProfile>
 
     <!-- 로컬이 아닌 서버에서는(즉 배포 서버 set1, set2) appender를 통해 파일에 저장-->
