@@ -5,9 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import site.campingon.campingon.camp.entity.Camp;
-import site.campingon.campingon.camp.entity.CampAddr;
-import site.campingon.campingon.camp.entity.CampSite;
+import site.campingon.campingon.camp.entity.*;
 import site.campingon.campingon.camp.repository.*;
 import site.campingon.campingon.common.public_data.GoCampingPath;
 import site.campingon.campingon.common.public_data.dto.GoCampingDataDto;
@@ -16,6 +14,7 @@ import site.campingon.campingon.common.public_data.mapper.GoCampingMapper;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static site.campingon.campingon.common.public_data.PublicDataConstants.*;
@@ -32,6 +31,7 @@ public class GoCampingService {
     private final CampKeywordRepository campKeywordRepository;
     private final CampRepository campRepository;
     private final CampSiteRepository campSiteRepository;
+    private final CampIndutyRepository campIndutyRepository;
 
     @Value("${public-data.go-camping}")
     private String serviceKey;
@@ -42,6 +42,14 @@ public class GoCampingService {
         List<GoCampingParsedResponseDto> goCampingParsedResponseDtoList = goCampingMapper.toGoCampingResponseDtoList(items);
 
         for (GoCampingParsedResponseDto data : goCampingParsedResponseDtoList) {
+            Integer normalSiteCnt = data.getGnrlSiteCo();//주요시설 일반야영장
+            Integer carSiteCnt = data.getAutoSiteCo();//주요시설 자동차야영장
+            Integer glampSiteCnt = data.getGlampSiteCo();//주요시설 글램핑
+            Integer caravSiteCnt = data.getCaravSiteCo();//주요시설 카라반
+            Integer personalCaravanSiteCnt = data.getIndvdlCaravSiteCo();//주요시설 개인 카라반
+            String glampInnerFacility = data.getGlampInnerFclty();//글램핑 - 내부시설
+            String caravInnerFacility = data.getCaravInnerFclty();//카라반 - 내부시설
+
             Camp camp = Camp.builder()
 //                    .id(data.getContentId())  //엔티티 autoIncrement 전략
                     .campName(data.getFacltNm())
@@ -55,6 +63,8 @@ public class GoCampingService {
 
             campRepository.save(camp);
 
+            createCampInduty(camp,normalSiteCnt, carSiteCnt, glampSiteCnt, caravSiteCnt, personalCaravanSiteCnt);
+
             CampAddr campAddr = CampAddr.builder()
                     .camp(camp)
                     .city(data.getDoNm())
@@ -62,36 +72,64 @@ public class GoCampingService {
                     .zipcode(data.getZipcode())
                     .streetAddr(data.getAddr1())
                     .detailedAddr(data.getAddr2())
+                    .longitude(data.getMapX())  //x좌표
+                    .latitude(data.getMapY())   //y좌표
                     .build();
-
             campAddrRepository.save(campAddr);
 
-            Integer normalSiteCnt = data.getGnrlSiteCo();//주요시설 일반야영장
-            Integer carSiteCnt = data.getAutoSiteCo();//주요시설 자동차야영장
-            Integer glampSiteCnt = data.getGlampSiteCo();//주요시설 글램핑
-            Integer caravSiteCnt = data.getCaravSiteCo();//주요시설 카라반
-            Integer personalCaravanSiteCnt = data.getIndvdlCaravSiteCo();//주요시설 개인 카라반
-            String glampInnerFacility = data.getGlampInnerFclty();//글램핑 - 내부시설
-            String caravInnerFacility = data.getCaravInnerFclty();//카라반 - 내부시설
-
             //캠핑지 DB 저장
-            createCampSite(camp, normalSiteCnt, "일반야영장", "일반야영", null);
-            createCampSite(camp, carSiteCnt, "자동차야영장", "자동차야영", null);
-            createCampSite(camp, glampSiteCnt, "글램핑장", "글램핑", glampInnerFacility);
-            createCampSite(camp, caravSiteCnt, "카라반", "카라반", caravInnerFacility);
-            createCampSite(camp, personalCaravanSiteCnt, "개인카라반", "카라반", null);
+            createCampSite(camp, normalSiteCnt, Induty.NORMAL_SITE, null, 6, 25000);
+            createCampSite(camp, carSiteCnt, Induty.CAR_SITE, null, 6, 35000);
+            createCampSite(camp, glampSiteCnt, Induty.GLAMP_SITE, glampInnerFacility, 4, 70000);
+            createCampSite(camp, caravSiteCnt, Induty.CARAV_SITE, caravInnerFacility, 4, 80000);
+            createCampSite(camp, personalCaravanSiteCnt, Induty.PERSONAL_CARAV_SITE, null, 6, 35000);
 
         }
         return goCampingParsedResponseDtoList;
     }
 
+    private void createCampInduty(Camp camp, Integer normalSiteCnt, Integer carSiteCnt, Integer glampSiteCnt, Integer caravSiteCnt, Integer personalCaravanSiteCnt) {
+
+        if (normalSiteCnt != 0) {
+            CampInduty campInduty = CampInduty.builder()
+                    .induty(Induty.NORMAL_SITE).camp(camp).build();
+            campIndutyRepository.save(campInduty);
+        }
+
+        if (carSiteCnt != 0) {
+            CampInduty campInduty = CampInduty.builder()
+                    .induty(Induty.CAR_SITE).camp(camp).build();
+            campIndutyRepository.save(campInduty);
+        }
+
+        if (glampSiteCnt != 0) {
+            CampInduty campInduty = CampInduty.builder()
+                    .induty(Induty.GLAMP_SITE).camp(camp).build();
+            campIndutyRepository.save(campInduty);
+        }
+
+        if (caravSiteCnt != 0) {
+            CampInduty campInduty = CampInduty.builder()
+                    .induty(Induty.CARAV_SITE).camp(camp).build();
+            campIndutyRepository.save(campInduty);
+        }
+
+        if (personalCaravanSiteCnt != 0) {
+            CampInduty campInduty = CampInduty.builder()
+                    .induty(Induty.PERSONAL_CARAV_SITE).camp(camp).build();
+            campIndutyRepository.save(campInduty);
+        }
+    }
+
     //CampSite 생성 및 DB 저장
-    private void createCampSite(Camp camp, Integer normalSiteCnt, String roomName, String induty, String innerFacility) {
+    private void createCampSite(Camp camp, Integer normalSiteCnt,
+                                Induty induty, String innerFacility,
+                                int maximum_people, int price) {
         for (int i = 0; i < normalSiteCnt; ++i) {
             CampSite campSite = CampSite.builder()
                     .camp(camp)
-                    .maximumPeople(4)   //todo 임시설정
-                    .price(1000)    //todo 임시설정
+                    .maximumPeople(maximum_people)
+                    .price(price)
                     .type(induty)
                     .indoorFacility(innerFacility)
                     .build();
