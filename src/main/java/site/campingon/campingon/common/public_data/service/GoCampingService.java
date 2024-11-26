@@ -1,6 +1,7 @@
 package site.campingon.campingon.common.public_data.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -9,12 +10,13 @@ import site.campingon.campingon.camp.entity.*;
 import site.campingon.campingon.camp.repository.*;
 import site.campingon.campingon.common.public_data.GoCampingPath;
 import site.campingon.campingon.common.public_data.dto.GoCampingDataDto;
+import site.campingon.campingon.common.public_data.dto.GoCampingImageDto;
+import site.campingon.campingon.common.public_data.dto.GoCampingImageParsedResponseDto;
 import site.campingon.campingon.common.public_data.dto.GoCampingParsedResponseDto;
 import site.campingon.campingon.common.public_data.mapper.GoCampingMapper;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +26,7 @@ import static site.campingon.campingon.common.public_data.PublicDataConstants.MO
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GoCampingService {
 
     private final GoCampingMapper goCampingMapper;
@@ -34,15 +37,17 @@ public class GoCampingService {
     private final CampRepository campRepository;
     private final CampSiteRepository campSiteRepository;
     private final CampIndutyRepository campIndutyRepository;
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @Value("${public-data.go-camping}")
     private String serviceKey;
 
     //todo 생성일, 수정일 엔티티 주입하기
+    // image URL
     //공공데이터 가공
-    public List<GoCampingParsedResponseDto> publicDataFilters(GoCampingDataDto request) {
-        List<GoCampingDataDto.Item> items = request.getResponse().getBody().getItems().getItem();
-        List<GoCampingParsedResponseDto> goCampingParsedResponseDtoList = goCampingMapper.toGoCampingResponseDtoList(items);
+    public List<GoCampingParsedResponseDto> createCampByGoCampingData(GoCampingDataDto goCampingDataDto) {
+        List<GoCampingDataDto.Item> items = goCampingDataDto.getResponse().getBody().getItems().getItem();
+        List<GoCampingParsedResponseDto> goCampingParsedResponseDtoList = goCampingMapper.toGoCampingParsedResponseDtoList(items);
 
         for (GoCampingParsedResponseDto data : goCampingParsedResponseDtoList) {
             Integer normalSiteCnt = data.getGnrlSiteCo();//주요시설 일반야영장
@@ -54,7 +59,7 @@ public class GoCampingService {
             String caravInnerFacility = data.getCaravInnerFclty();//카라반 - 내부시설
 
             Camp camp = Camp.builder()
-//                    .id(data.getContentId())  //엔티티 autoIncrement 전략
+                    .id(data.getContentId())  //엔티티 autoIncrement 전략
                     .campName(data.getFacltNm())
                     .lineIntro(data.getLineIntro())
                     .intro(data.getIntro())
@@ -66,7 +71,7 @@ public class GoCampingService {
 
             campRepository.save(camp);
 
-            createCampInduty(camp,normalSiteCnt, carSiteCnt, glampSiteCnt, caravSiteCnt, personalCaravanSiteCnt);
+            createCampInduty(camp, normalSiteCnt, carSiteCnt, glampSiteCnt, caravSiteCnt, personalCaravanSiteCnt);
 
             CampAddr campAddr = CampAddr.builder()
                     .camp(camp)
@@ -101,24 +106,48 @@ public class GoCampingService {
     }
 
     //공공 API 호출하여 dto 추출
-    public GoCampingDataDto goCampingDataDtoByGoCampingUrl(
+    public GoCampingDataDto goCampingDataDtoByGoCampingBasedList(
             GoCampingPath goCampingPath, String... params
     ) throws URISyntaxException {
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(
-                        GO_CAMPING_END_POINT + goCampingPath.getPath())
-                .queryParam("_type", CONTENT_TYPE)
-                .queryParam("MobileOS", MOBILE_OS)
-                .queryParam("MobileApp", MOBILE_APP)
-                .queryParam("serviceKey", serviceKey);
-
-        for (int i = 0; i < params.length; i += 2) {
-            uriBuilder.queryParam(params[i], params[i + 1]);
-        }
-
-        RestTemplate restTemplate = new RestTemplate();
-        URI uri = new URI(uriBuilder.build().toUriString());
+        URI uri = publicDataFilters(goCampingPath, params);
 
         return restTemplate.getForObject(uri, GoCampingDataDto.class);
+    }
+
+    public GoCampingImageDto goCampingImageDtoByGoCampingImage(
+            GoCampingPath goCampingPath, String... params)
+            throws URISyntaxException {
+        URI uri = publicDataFilters(goCampingPath, params);
+
+        return restTemplate.getForObject(uri, GoCampingImageDto.class);
+    }
+
+    public List<GoCampingImageParsedResponseDto> createCampImageByGoCampingImageData(
+            GoCampingImageDto goCampingImageDto) {
+        List<GoCampingImageDto.Item> item =
+                goCampingImageDto.getResponse().getBody().getItems().getItem();
+        List<GoCampingImageParsedResponseDto> goCampingImageParsedResponseDto =
+                goCampingMapper.toGoCampingImageParsedResponseDtoList(item);
+
+        log.debug("contentId: {}",goCampingImageParsedResponseDto.getFirst().getContentId());
+
+        Camp camp = campRepository.findById(
+                        goCampingImageParsedResponseDto.getFirst().getContentId()
+                )
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        for (GoCampingImageParsedResponseDto data : goCampingImageParsedResponseDto) {
+
+
+            CampImage campImage = CampImage.builder()
+                    .id(data.getSerialnum())
+                    .camp(camp)
+                    .imageUrl(data.getImageUrl())
+                    .build();
+
+            campImageRepository.save(campImage);
+        }
+
+        return goCampingImageParsedResponseDto;
     }
 
     //CampSite 데이터 삽입
@@ -144,11 +173,11 @@ public class GoCampingService {
                                   Integer caravSiteCnt, Integer personalCaravanSiteCnt) {
 
         Map<Induty, Integer> siteCounts = Map.of(
-                Induty.NORMAL_SITE, normalSiteCnt,
-                Induty.CAR_SITE, carSiteCnt,
-                Induty.GLAMP_SITE, glampSiteCnt,
-                Induty.CARAV_SITE, caravSiteCnt,
-                Induty.PERSONAL_CARAV_SITE, personalCaravanSiteCnt
+                NORMAL_SITE, normalSiteCnt,
+                CAR_SITE, carSiteCnt,
+                GLAMP_SITE, glampSiteCnt,
+                CARAV_SITE, caravSiteCnt,
+                PERSONAL_CARAV_SITE, personalCaravanSiteCnt
         );
 
         siteCounts.forEach((induty, count) -> {
@@ -162,4 +191,20 @@ public class GoCampingService {
         });
     }
 
+    private URI publicDataFilters(GoCampingPath goCampingPath, String... params)
+            throws URISyntaxException {
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(
+                        GO_CAMPING_END_POINT + goCampingPath.getPath())
+                .queryParam("_type", CONTENT_TYPE)
+                .queryParam("MobileOS", MOBILE_OS)
+                .queryParam("MobileApp", MOBILE_APP)
+                .queryParam("serviceKey", serviceKey);
+
+        for (int i = 0; i < params.length; i += 2) {
+            uriBuilder.queryParam(params[i], params[i + 1]);
+        }
+        log.debug("경로: {}", uriBuilder.toUriString());
+
+        return new URI(uriBuilder.build().toUriString());
+    }
 }

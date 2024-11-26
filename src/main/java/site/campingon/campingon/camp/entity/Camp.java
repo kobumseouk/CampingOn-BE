@@ -16,7 +16,6 @@ import java.util.List;
 public class Camp extends BaseEntity {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(columnDefinition = "INT UNSIGNED")
   private Long id;
 
