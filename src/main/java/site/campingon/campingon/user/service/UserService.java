@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.campingon.campingon.common.exception.ErrorCode;
+import site.campingon.campingon.common.exception.GlobalException;
 import site.campingon.campingon.user.dto.UserDeactivateRequestDto;
 import site.campingon.campingon.user.dto.UserResponseDto;
 import site.campingon.campingon.user.dto.UserSignUpRequestDto;
@@ -52,7 +54,7 @@ public class UserService {
             .nickname(userSignUpRequestDto.getNickname())
             .password(encodedPassword)
             .name(userSignUpRequestDto.getName())
-            .role(Role.USER)
+            .role(Role.ROLE_USER)
             .build();
 
         User user = userRepository.save(newUser);
@@ -68,6 +70,14 @@ public class UserService {
             .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         return userMapper.toResponseDto(user);
+    }
+
+    // 이메일로 회원 검색
+    @Transactional(readOnly = true)
+    public User findUserByEmail(String email) {
+        return userRepository.findByEmailAndDeletedAtIsNull(email)
+            .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND_BY_EMAIL));
+
     }
 
 
