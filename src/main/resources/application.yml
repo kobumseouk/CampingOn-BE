@@ -30,7 +30,7 @@ spring:
             client-secret: ${GOOGLE_CLIENT_SECRET}
             scope: profile, email
   profiles:
-    active: local #logback-spring springProfile 설정
+    active: dev #logback-spring springProfile 설정
 
 public-data:
   go-camping: ${GO_CAMPING_SERVICE_KEY}
