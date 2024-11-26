@@ -84,7 +84,7 @@ public class CampService {
         .map(campMapper::toCampSiteListDto)
         .collect(Collectors.toList());
   }
-
+  
   // 사용자의 찜한 캠핑장 목록 조회
   public Page<CampListResponseDto> getBookmarkedCamps(Long userId, Pageable pageable) {
     Page<Camp> bookmarkedCamps = campRepository.findByBookmarks_User_IdAndBookmarks_IsMarkedTrue(userId, pageable);
@@ -99,4 +99,34 @@ public class CampService {
 
     return new PageImpl<>(campDtos, pageable, bookmarkedCamps.getTotalElements());
   }
+  
+  // 캠핑장 생성
+  @Transactional
+  public CampDetailResponseDto createCamp(Camp camp) {
+      return campMapper.toCampDetailDto(campRepository.save(camp));
+  }
+
+  // 캠핑장 수정
+  @Transactional
+  public CampDetailResponseDto updateCamp(Long campId, Camp updatedCamp) {
+      Camp existingCamp = campRepository.findById(campId)
+              .orElseThrow(() -> new RuntimeException("캠핑장을 찾을 수 없습니다."));
+      campMapper.updateCampFromDto(updatedCamp, existingCamp);
+      return campMapper.toCampDetailDto(campRepository.save(existingCamp));
+  }
+
+  // 캠핑장 삭제
+  @Transactional
+  public void deleteCamp(Long id) {
+      campRepository.deleteById(id);
+  }
+
+  // 모든 캠핑장 조회
+  public List<CampListResponseDto> getAllCamps() {
+      List<Camp> camps = campRepository.findAll();
+      return camps.stream()
+              .map(campMapper::toCampListDto)
+              .toList();
+  }
+  
 }
