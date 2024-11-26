@@ -17,7 +17,7 @@ public class BookMarkController {
   private final BookmarkService bookmarkService;
 
   // 찜 기능 (토글활용)
-  @PostMapping("/{campId}/bookmarks")
+  @PatchMapping("/{campId}/bookmarks")
   public ResponseEntity<Void> bookmarkCamp(
       @PathVariable Long campId,
       @AuthenticationPrincipal UserDetails userDetails

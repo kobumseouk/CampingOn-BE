@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import site.campingon.campingon.camp.dto.CampDetailResponseDto;
@@ -62,24 +63,21 @@ public class CampController {
     );
   }
 
-/*
   // TODO: NoSQL을 이용한 검색 기능 구현 & 엘라스틱 서치
   // 검색한 캠핑장 목록 (페이지네이션)
   @GetMapping("/search")
-  @PreAuthorize("isAuthenticated()")  // 로그인 확인
   public ResponseEntity<Page<CampListResponseDto>> searchCamps(
       @RequestParam String keyword,
       @RequestParam(required = false) String location,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "12") int size,
-      UserDto currentUser
+      @AuthenticationPrincipal UserDetails userDetails   // 사용자별 검색 기록 사용 시
   ) {
+    User user = (User) userDetails;
     PageRequest pageRequest = PageRequest.of(page, size);
-    Long userId = currentUser.getUserId();
-    Page<CampListResponseDto> camps = campService.searchCamps(keyword, location, pageRequest, userId);
+    Page<CampListResponseDto> camps = campService.searchCamps(keyword, location, pageRequest, user.getId());
     return ResponseEntity.ok(camps);
   }
-*/
 
   // 캠핑장 상세 조회  -  찜 버튼 활성화 시 유저 확인 추가
   @GetMapping("/{campId}")

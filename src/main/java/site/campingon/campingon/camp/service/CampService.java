@@ -3,6 +3,7 @@ package site.campingon.campingon.camp.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -99,4 +100,9 @@ public class CampService {
 
     return new PageImpl<>(campDtos, pageable, bookmarkedCamps.getTotalElements());
   }
+
+  public Page<CampListResponseDto> searchCamps(String keyword, String location, PageRequest pageRequest, Long id) {
+
+  }
+
 }
