@@ -22,6 +22,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +32,7 @@ import static site.campingon.campingon.common.public_data.PublicDataConstants.MO
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GoCampingService {
 
     private final GoCampingMapper goCampingMapper;
@@ -42,11 +44,12 @@ public class GoCampingService {
     private final CampSiteRepository campSiteRepository;
     private final CampIndutyRepository campIndutyRepository;
     private final RestTemplate restTemplate = new RestTemplate();
+    private static final String IMAGE_PAGE_NO = "1";    //이미지 몇번부터 값 꺼내올지
 
     @Value("${public-data.go-camping}")
     private String serviceKey;
 
-    //공공데이터 가공
+    //Camp 관련 엔티티 생성 및 DB 저장 메서드
     public List<GoCampingParsedResponseDto> createCampByGoCampingData(GoCampingDataDto goCampingDataDto) {
         List<GoCampingDataDto.Item> items = goCampingDataDto.getResponse().getBody().getItems().getItem();
         List<GoCampingParsedResponseDto> goCampingParsedResponseDtoList = goCampingMapper.toGoCampingParsedResponseDtoList(items);
@@ -122,48 +125,65 @@ public class GoCampingService {
         return goCampingParsedResponseDtoList;
     }
 
-    //공공 API 호출하여 dto 추출
-    public GoCampingDataDto goCampingDataDtoByGoCampingBasedList(
-            GoCampingPath goCampingPath, String... params
+    //공공데이터 전체 API 조회하고 dto 변환
+    public GoCampingDataDto getAndConvertToGoCampingDataDto(
+            String... params
     ) throws URISyntaxException {
-        URI uri = publicDataFilters(goCampingPath, params);
+        URI uri = publicDataFilters(GoCampingPath.BASED_LIST, params);
 
-        return restTemplate.getForObject(uri, GoCampingDataDto.class);
+        return restTemplate.getForObject(uri, GoCampingDataDto.class);  //API 호출
     }
 
-    public GoCampingImageDto goCampingImageDtoByGoCampingImage(
-            GoCampingPath goCampingPath, String... params)
+    //공공데이터 이미지 API 조회하고 dto 변환
+    public List<GoCampingImageDto> getAndConvertToGoCampingDataDto(
+            Long imageCnt)
             throws URISyntaxException {
-        URI uri = publicDataFilters(goCampingPath, params);
+        List<GoCampingImageDto> goCampingDataDtoList = new ArrayList<>();
 
-        return restTemplate.getForObject(uri, GoCampingImageDto.class);
+        List<Long> campIdList = campRepository.findAll().stream()
+                .map(Camp::getId)
+                .toList();
+
+        for (Long campId : campIdList) {
+            URI uri = publicDataFilters(GoCampingPath.IMAGE_LIST,
+                    "numOfRows", imageCnt.toString(),
+                    "pageNo", IMAGE_PAGE_NO,  //몇번부터 시작할지
+                    "contentId", campId.toString());
+
+            goCampingDataDtoList.add(
+                    restTemplate.getForObject(uri, GoCampingImageDto.class)); //API 호출
+        }
+        return goCampingDataDtoList;
     }
 
-    public List<GoCampingImageParsedResponseDto> createCampImageByGoCampingImageData(
-            GoCampingImageDto goCampingImageDto) {
-        List<GoCampingImageDto.Item> item =
-                goCampingImageDto.getResponse().getBody().getItems().getItem();
-        List<GoCampingImageParsedResponseDto> goCampingImageParsedResponseDto =
-                goCampingMapper.toGoCampingImageParsedResponseDtoList(item);
+    //CampImage 를 생성 및 DB 저장 메서드
+    public List<List<GoCampingImageParsedResponseDto>> createCampImageByGoCampingImageData(
+            List<GoCampingImageDto> goCampingImageDto) {
+        List<List<GoCampingImageParsedResponseDto>> goCampingImageParsedResponseDtoList = new ArrayList<>();
 
+        for (GoCampingImageDto goCampingDataDto : goCampingImageDto) {
+            List<GoCampingImageDto.Item> item
+                    = goCampingDataDto.getResponse().getBody().getItems().getItem();
 
-        Camp camp = campRepository.findById(
-                        goCampingImageParsedResponseDto.getFirst().getContentId()
-                )
-                .orElseThrow(() -> new GlobalException(ErrorCode.CAMP_NOT_FOUND_BY_ID));
-        for (GoCampingImageParsedResponseDto data : goCampingImageParsedResponseDto) {
+            List<GoCampingImageParsedResponseDto> goCampingImageParsedResponseDto =
+                    goCampingMapper.toGoCampingImageParsedResponseDtoList(item);
 
+            Camp camp = campRepository.findById(
+                            goCampingImageParsedResponseDto.getFirst().getContentId()
+                    )
+                    .orElseThrow(() -> new GlobalException(ErrorCode.CAMP_NOT_FOUND_BY_ID));
+            for (GoCampingImageParsedResponseDto data : goCampingImageParsedResponseDto) {
+                CampImage campImage = CampImage.builder()
+                        .id(data.getSerialnum())
+                        .camp(camp)
+                        .imageUrl(data.getImageUrl())
+                        .build();
 
-            CampImage campImage = CampImage.builder()
-                    .id(data.getSerialnum())
-                    .camp(camp)
-                    .imageUrl(data.getImageUrl())
-                    .build();
-
-            campImageRepository.save(campImage);
+                campImageRepository.save(campImage);
+            }
+            goCampingImageParsedResponseDtoList.add(goCampingImageParsedResponseDto);
         }
-
-        return goCampingImageParsedResponseDto;
+        return goCampingImageParsedResponseDtoList;
     }
 
     //CampSite 데이터 삽입
@@ -207,6 +227,7 @@ public class GoCampingService {
         });
     }
 
+    //공공데이터 URI 작업 메서드
     private URI publicDataFilters(GoCampingPath goCampingPath, String... params)
             throws URISyntaxException {
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(
