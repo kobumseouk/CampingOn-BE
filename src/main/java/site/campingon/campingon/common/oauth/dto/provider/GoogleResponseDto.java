@@ -1,4 +1,4 @@
-package site.campingon.campingon.common.config.oauth.dto.provider;
+package site.campingon.campingon.common.oauth.dto.provider;
 
 import lombok.RequiredArgsConstructor;
 

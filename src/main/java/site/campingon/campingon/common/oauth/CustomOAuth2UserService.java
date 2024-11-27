@@ -1,4 +1,4 @@
-package site.campingon.campingon.common.config.oauth;
+package site.campingon.campingon.common.oauth;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,12 +7,14 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-import site.campingon.campingon.common.config.oauth.dto.provider.GoogleResponseDto;
-import site.campingon.campingon.common.config.oauth.dto.provider.OAuth2ResponseDto;
-import site.campingon.campingon.common.config.oauth.dto.OAuth2UserDto;
+import site.campingon.campingon.common.oauth.dto.provider.GoogleResponseDto;
+import site.campingon.campingon.common.oauth.dto.provider.OAuth2ResponseDto;
+import site.campingon.campingon.common.oauth.dto.OAuth2UserDto;
 import site.campingon.campingon.user.entity.Role;
 import site.campingon.campingon.user.entity.User;
 import site.campingon.campingon.user.repository.UserRepository;
+
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -26,7 +28,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
-        log.info("\n\n\n[oAuth2User확인]\n" + oAuth2User + "\n\n\n");
+        log.debug("[oAuth2User 확인]: {}", oAuth2User);
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
         OAuth2ResponseDto oAuth2ResponseDto = null;
@@ -49,10 +51,15 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         // 한번도 로그인 한 적 x -> 새 데이터 삽입
         if(existUser == null) {
+
+            // 임의의 9자리 UUID 생성
+            String nickname = UUID.randomUUID().toString().replace("-", "").substring(0, 9);
+
             User newUser = User.builder()
                     .email(oAuth2ResponseDto.getEmail())
                     .oauthName(oauthName)
-                    .nickname(oAuth2ResponseDto.getName())
+                    .nickname(nickname)
+                    .name(oAuth2ResponseDto.getName())
                     .role(Role.ROLE_USER)
                     .build();
 
@@ -61,28 +68,22 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             OAuth2UserDto OAuthUserDto = OAuth2UserDto.builder()
                     .oauthName(oauthName)
                     .email(oAuth2ResponseDto.getEmail())
-                    .nickname(oAuth2ResponseDto.getName())
+                    .nickname(nickname)
+                    .name(oAuth2ResponseDto.getName())
                     .role(String.valueOf(Role.ROLE_USER))
                     .build();
 
             return new CustomOAuth2User(OAuthUserDto);
         }
 
-        // 기존에 로그인 한 적 o -> 업데이트 할 부분이 있는지 체크
+        // 기존에 로그인 한 적 o -> 바로 로그인 처리
         else {
-
-
-            existUser.toBuilder()
-                    .email(oAuth2ResponseDto.getEmail())
-                    .nickname(oAuth2ResponseDto.getName())
-                    .build();
-
-            userRepository.save(existUser);
 
             OAuth2UserDto OAuthUserDto = OAuth2UserDto.builder()
                     .oauthName(existUser.getOauthName())
                     .email(existUser.getEmail())
                     .nickname(existUser.getNickname())
+                    .name(existUser.getName())
                     .role(String.valueOf(existUser.getRole()))
                     .build();
 

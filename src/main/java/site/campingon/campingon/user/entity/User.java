@@ -2,10 +2,8 @@ package site.campingon.campingon.user.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+
+import lombok.*;
 import site.campingon.campingon.common.entity.BaseEntity;
 
 
@@ -13,6 +11,7 @@ import site.campingon.campingon.common.entity.BaseEntity;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@ToString
 @Builder(toBuilder = true)
 @Table(uniqueConstraints = {
     @UniqueConstraint(name = "up_email_deleted_at", columnNames = {"email", "deleted_at"})
