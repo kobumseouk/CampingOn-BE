@@ -20,6 +20,7 @@ public interface CampMapper {
 
   // Camp -> CampDetailResponseDto 매핑
   @Mapping(target = "name", source = "campName")
+  @Mapping(target = "images", source = "images", qualifiedByName = "imagesToUrlList")
   CampDetailResponseDto toCampDetailDto(Camp camp);
 
   CampSiteListResponseDto toCampSiteListDto(CampSite campSite);
@@ -29,6 +30,14 @@ public interface CampMapper {
     return keywords.stream()
             .map(CampKeyword::getKeyword)
             .toList();
+  }
+
+  @Named("imagesToUrlList")
+  default List<String> imagesToUrlList(List<CampImage> images) {
+    if (images == null) return null;
+    return images.stream()
+        .map(CampImage::getImageUrl)
+        .toList();
   }
 
   // 업데이트 로직을 위한 메서드
