@@ -30,7 +30,7 @@ public class CampSite {
     @Column(nullable = false)
     private Integer price; // 가격
 
-    @Column(length = 100, nullable = false)
+    @Column(length = 50, nullable = false)
     @Convert(converter = IndutyConverter.class) //converter 사용
     private Induty type; // 업종 구분
 

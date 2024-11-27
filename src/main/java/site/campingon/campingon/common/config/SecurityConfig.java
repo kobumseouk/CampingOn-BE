@@ -14,10 +14,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
-import site.campingon.campingon.common.config.oauth.CustomOAuth2UserService;
+import site.campingon.campingon.common.oauth.CustomOAuth2FailureHandler;
+import site.campingon.campingon.common.oauth.CustomOAuth2UserService;
 import site.campingon.campingon.common.jwt.CustomUserDetailsService;
 import site.campingon.campingon.common.jwt.JwtAuthenticationFilter;
 import site.campingon.campingon.common.jwt.JwtTokenProvider;
+import site.campingon.campingon.common.oauth.CustomOAuthSuccessHandler;
 
 @Configuration
 @EnableWebSecurity
@@ -26,6 +28,8 @@ import site.campingon.campingon.common.jwt.JwtTokenProvider;
 public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomOAuthSuccessHandler customOAuthSuccessHandler;
+    private final CustomOAuth2FailureHandler customOAuthFailureHandler;
     private final JwtTokenProvider jwtTokenProvider;
     private final ObjectMapper objectMapper;
     private final CustomUserDetailsService customUserDetailsService;
@@ -45,7 +49,13 @@ public class SecurityConfig {
         http
                 .oauth2Login((oauth2) -> oauth2
                         .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
-                                .userService(customOAuth2UserService)));
+                                .userService(customOAuth2UserService))
+//                        .defaultSuccessUrl("/oauth/success") // 로그인 성공시 이동할 URL
+                        .successHandler(customOAuthSuccessHandler)
+//                        .failureUrl("/oauth/fail") // 로그인 실패시 이동할 URL
+                        .failureHandler(customOAuthFailureHandler))
+                .logout(logout -> logout.logoutSuccessUrl("/oauth/logout") // 로그아웃 성공시 해당 url로 이동
+                );
 
         // 경로별 인가 작업
         http

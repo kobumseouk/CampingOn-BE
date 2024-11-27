@@ -18,6 +18,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
+import site.campingon.campingon.common.oauth.CustomOAuth2User;
 import site.campingon.campingon.user.entity.Role;
 
 @Slf4j
@@ -27,10 +28,10 @@ public class JwtTokenProvider {
     private final Key secretKey;
 
     @Value("${jwt.access-expired}")
-    private Long accessTokenExpired;
+    public Long accessTokenExpired;
 
     @Value("${jwt.refresh-expired}")
-    private Long refreshTokenExpired;
+    public Long refreshTokenExpired;
 
     public JwtTokenProvider(@Value("${jwt.secret-key}") String secretKey) {
         byte[] keyBytes = secretKey.getBytes();
@@ -88,6 +89,45 @@ public class JwtTokenProvider {
             .setExpiration(refreshTokenExpiration) // 만료 시간 설정
             .signWith(secretKey, SignatureAlgorithm.HS256) // 서명 알고리즘과 키 설정
             .compact();
+    }
+
+    // OAuth2 사용자 토큰 생성 메서드
+    public JwtToken generateOAuth2Token(Authentication authentication) {
+
+        long now = (new Date()).getTime();
+        Date accessTokenExpiration = new Date(now + accessTokenExpired * 1000);
+        Date refreshTokenExpiration = new Date(now + refreshTokenExpired * 1000);
+
+        CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
+
+        // OAuth2 사용자 권한 정보를 문자열로 변환
+        String authorities = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+
+        // Access Token 생성
+        String accessToken = Jwts.builder()
+                .setSubject(oAuth2User.getEmail())
+                .claim("nickname", oAuth2User.getNickname())
+                .claim("role", Role.ROLE_USER)
+                .claim("oauthName", oAuth2User.getOauthName())
+                .setExpiration(accessTokenExpiration)
+                .signWith(secretKey, SignatureAlgorithm.HS256)
+                .compact();
+
+        // Refresh Token 생성 (주로 만료 시간만 포함)
+        String refreshToken = Jwts.builder()
+                .setSubject(oAuth2User.getEmail())
+                .setExpiration(refreshTokenExpiration)
+                .signWith(secretKey, SignatureAlgorithm.HS256)
+                .compact();
+
+        // JWT Token 객체 반환
+        return JwtToken.builder()
+                .grantType("Bearer")
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
 
 

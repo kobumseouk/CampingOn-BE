@@ -1,14 +1,16 @@
-package site.campingon.campingon.common.config.oauth;
+package site.campingon.campingon.common.oauth;
 
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import site.campingon.campingon.common.config.oauth.dto.OAuth2UserDto;
+import site.campingon.campingon.common.oauth.dto.OAuth2UserDto;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
+@ToString
 @RequiredArgsConstructor
 public class CustomOAuth2User implements OAuth2User {
 
@@ -37,6 +39,11 @@ public class CustomOAuth2User implements OAuth2User {
 
     @Override
     public String getName() {
+
+        return OAuthUserDto.getNickname();
+    }
+
+    public String getNickname() {
 
         return OAuthUserDto.getNickname();
     }
