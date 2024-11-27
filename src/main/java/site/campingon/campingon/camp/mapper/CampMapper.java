@@ -20,9 +20,6 @@ public interface CampMapper {
 
   // Camp -> CampDetailResponseDto 매핑
   @Mapping(target = "name", source = "campName")
-  @Mapping(target = "address", source = "campAddr.streetAddr")
-  @Mapping(target = "recommendCnt", source = "campInfo.recommendCnt")
-  @Mapping(target = "bookmarkCnt", source = "campInfo.bookmarkCnt")
   CampDetailResponseDto toCampDetailDto(Camp camp);
 
   CampSiteListResponseDto toCampSiteListDto(CampSite campSite);

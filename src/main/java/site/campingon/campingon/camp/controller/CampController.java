@@ -12,6 +12,7 @@ import site.campingon.campingon.camp.dto.CampDetailResponseDto;
 import site.campingon.campingon.camp.dto.CampListResponseDto;
 import site.campingon.campingon.camp.dto.CampSiteListResponseDto;
 import site.campingon.campingon.camp.service.CampService;
+import site.campingon.campingon.common.jwt.CustomUserDetails;
 import site.campingon.campingon.user.entity.User;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -36,13 +37,10 @@ public class CampController {
   public ResponseEntity<Page<CampListResponseDto>> getMatchedCamps(
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "3") int size,
-      @AuthenticationPrincipal UserDetails userDetails   // 추후 UserDto로 커스텀
+      @AuthenticationPrincipal CustomUserDetails userDetails
   ) {
-    User user = (User) userDetails;
-    PageRequest pageRequest = PageRequest.of(page, size);
-
     return ResponseEntity.ok(campService.getMatchedCampsByKeywords(
-        user.getId(), pageRequest)
+        userDetails.getId(), PageRequest.of(page, size))
     );
   }
 
@@ -50,15 +48,13 @@ public class CampController {
   @GetMapping("/popular")
   public ResponseEntity<Page<CampListResponseDto>> getPopularCamps(
       @RequestParam(defaultValue = "0") int page,
-      @AuthenticationPrincipal UserDetails userDetails
+      @AuthenticationPrincipal CustomUserDetails userDetails
   ) {
-    User user = (User) userDetails;
-    boolean hasKeywords = userKeywordRepository.existsByUserId(user.getId());
+    boolean hasKeywords = userKeywordRepository.existsByUserId(userDetails.getId());
     int pageSize = hasKeywords ? KEYWORD_MATCHED_PAGE_SIZE : DEFAULT_PAGE_SIZE;
 
-    PageRequest pageRequest = PageRequest.of(page, pageSize);
     return ResponseEntity.ok(
-        campService.getPopularCamps(user.getId(), pageRequest)
+        campService.getPopularCamps(userDetails.getId(), PageRequest.of(page, pageSize))
     );
   }
 
@@ -71,14 +67,12 @@ public class CampController {
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "12") int size,
       //TODO: 사용자별 검색 기록 사용 시 필요(Redis - 서버사이드 캐시)
-      @AuthenticationPrincipal UserDetails userDetails
+      @AuthenticationPrincipal CustomUserDetails userDetails
   ) {
-    User user = (User) userDetails;
-    // searchHistoryService.saveSearchKeyword(user.getId(), keyword, city);
-
-    PageRequest pageRequest = PageRequest.of(page, size);
-    Page<CampListResponseDto> camps = campService.searchCamps(user.getId(), keyword, city, pageRequest);
-    return ResponseEntity.ok(camps);
+    // searchHistoryService.saveSearchKeyword(userDetails.getId(), keyword, city);
+    return ResponseEntity.ok(campService.searchCamps(
+        userDetails.getId(), keyword, city, PageRequest.of(page, size)
+    ));
   }
 
   // 캠핑장 상세 조회  -  찜 버튼 활성화 시 유저 확인 추가
@@ -103,12 +97,11 @@ public class CampController {
   public ResponseEntity<Page<CampListResponseDto>> getBookmarkedCamps(
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "3") int size,
-      @AuthenticationPrincipal UserDetails userDetails
+      @AuthenticationPrincipal CustomUserDetails userDetails
   ) {
-    User user = (User) userDetails;
-    PageRequest pageRequest = PageRequest.of(page, size);
-
-    return ResponseEntity.ok(campService.getBookmarkedCamps(user.getId(), pageRequest));
+    return ResponseEntity.ok(campService.getBookmarkedCamps(
+        userDetails.getId(), PageRequest.of(page, size))
+    );
   }
 
 }
