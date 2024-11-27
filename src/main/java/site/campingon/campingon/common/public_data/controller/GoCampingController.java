@@ -3,7 +3,6 @@ package site.campingon.campingon.common.public_data.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-import site.campingon.campingon.common.public_data.GoCampingPath;
 import site.campingon.campingon.common.public_data.dto.GoCampingDataDto;
 import site.campingon.campingon.common.public_data.dto.GoCampingImageDto;
 import site.campingon.campingon.common.public_data.dto.GoCampingImageParsedResponseDto;
@@ -24,24 +23,27 @@ public class GoCampingController {
 
     private final GoCampingService goCampingService;
 
-    //공공데이터 기반 캠프관련 엔티티 생성
+    //공공데이터 기반 캠프관련 엔티티 생성 및 DB 저장
     @PostMapping("/basedList")
     public ResponseEntity<List<GoCampingParsedResponseDto>> createCampByGoCampingBasedList(
             @RequestParam("numOfRows") Long numOfRows,  //몇개의 데이터 갖고올지
             @RequestParam("pageNo") Long pageNo)    //몇번부터 시작하는지
             throws URISyntaxException {
-        GoCampingDataDto goCampingDataDto = goCampingService.goCampingDataDtoByGoCampingBasedList(
-                GoCampingPath.BASED_LIST,
+        //공공데이터를 조회하고 반환
+        GoCampingDataDto goCampingDataDto = goCampingService.getAndConvertToGoCampingDataDto(
                 "numOfRows", numOfRows.toString(),
                 "pageNo", pageNo.toString());
 
+        //Camp 관련 엔티티를 생성하고 DB에 저장한다.
         List<GoCampingParsedResponseDto> goCampingParsedResponseDtos
                 = goCampingService.createCampByGoCampingData(goCampingDataDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(goCampingParsedResponseDtos);
     }
 
-    //CampImage 생성
+    /**
+     * DB에 Camp Id를 가져와서 Id가 가지고있는 이미지를 호출 및 저장
+     * */
     @PostMapping("/imageList")
     public ResponseEntity<List<List<GoCampingImageParsedResponseDto>>> createCampImageByGoCampingImageList(
             @RequestParam("imageCnt") Long imageCnt)    //몇개의 이미지개수를 갖고올지
@@ -49,6 +51,7 @@ public class GoCampingController {
         //공공데이터를 조회하고 dto로 변환
         List<GoCampingImageDto> goCampingImageDto = goCampingService.getAndConvertToGoCampingDataDto(imageCnt);
 
+        //CampImage 를 생성하고 DB에 저장한다.
         List<List<GoCampingImageParsedResponseDto>> goCampingParsedResponseDtos
                 = goCampingService.createCampImageByGoCampingImageData(goCampingImageDto);
 

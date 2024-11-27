@@ -43,11 +43,12 @@ public class GoCampingService {
     private final CampSiteRepository campSiteRepository;
     private final CampIndutyRepository campIndutyRepository;
     private final RestTemplate restTemplate = new RestTemplate();
+    private static final String IMAGE_PAGE_NO = "1";    //이미지 몇번부터 값 꺼내올지
 
     @Value("${public-data.go-camping}")
     private String serviceKey;
 
-    //공공데이터 가공
+    //Camp 관련 엔티티 생성 및 DB 저장 메서드
     public List<GoCampingParsedResponseDto> createCampByGoCampingData(GoCampingDataDto goCampingDataDto) {
         List<GoCampingDataDto.Item> items = goCampingDataDto.getResponse().getBody().getItems().getItem();
         List<GoCampingParsedResponseDto> goCampingParsedResponseDtoList = goCampingMapper.toGoCampingParsedResponseDtoList(items);
@@ -124,15 +125,16 @@ public class GoCampingService {
         return goCampingParsedResponseDtoList;
     }
 
-    //공공 API 호출하여 dto 추출
-    public GoCampingDataDto goCampingDataDtoByGoCampingBasedList(
-            GoCampingPath goCampingPath, String... params
+    //공공데이터 전체 API 조회하고 dto 변환
+    public GoCampingDataDto getAndConvertToGoCampingDataDto(
+            String... params
     ) throws URISyntaxException {
-        URI uri = publicDataFilters(goCampingPath, params);
+        URI uri = publicDataFilters(GoCampingPath.BASED_LIST, params);
 
-        return restTemplate.getForObject(uri, GoCampingDataDto.class);
+        return restTemplate.getForObject(uri, GoCampingDataDto.class);  //API 호출
     }
 
+    //공공데이터 이미지 API 조회하고 dto 변환
     public List<GoCampingImageDto> getAndConvertToGoCampingDataDto(
             Long imageCnt)
             throws URISyntaxException {
@@ -145,15 +147,16 @@ public class GoCampingService {
         for (Long campId : campIdList) {
             URI uri = publicDataFilters(GoCampingPath.IMAGE_LIST,
                     "numOfRows", imageCnt.toString(),
-                    "pageNo", "1",
+                    "pageNo", IMAGE_PAGE_NO,  //몇번부터 시작할지
                     "contentId", campId.toString());
 
             goCampingDataDtoList.add(
-                    restTemplate.getForObject(uri, GoCampingImageDto.class));
+                    restTemplate.getForObject(uri, GoCampingImageDto.class)); //API 호출
         }
         return goCampingDataDtoList;
     }
 
+    //CampImage 를 생성 및 DB 저장 메서드
     public List<List<GoCampingImageParsedResponseDto>> createCampImageByGoCampingImageData(
             List<GoCampingImageDto> goCampingImageDto) {
         List<List<GoCampingImageParsedResponseDto>> goCampingImageParsedResponseDtoList = new ArrayList<>();
@@ -224,6 +227,7 @@ public class GoCampingService {
         });
     }
 
+    //공공데이터 URI 작업 메서드
     private URI publicDataFilters(GoCampingPath goCampingPath, String... params)
             throws URISyntaxException {
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(
