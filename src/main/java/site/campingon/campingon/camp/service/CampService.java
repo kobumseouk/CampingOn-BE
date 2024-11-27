@@ -83,15 +83,6 @@ public class CampService {
     return dto;
   }
 
-  // 캠핑장의 캠핑지 목록 조회
-  public List<CampSiteListResponseDto> getCampSites(Long campId) {
-    List<CampSite> campSites = campSiteRepository.findByCampId(campId);
-
-    return campSites.stream()
-        .map(campMapper::toCampSiteListDto)
-        .collect(Collectors.toList());
-  }
-
   // 사용자의 찜한 캠핑장 목록 조회
   public Page<CampListResponseDto> getBookmarkedCamps(Long userId, Pageable pageable) {
     Page<Camp> bookmarkedCamps = campRepository.findByBookmarks_User_IdAndBookmarks_IsMarkedTrue(userId, pageable);

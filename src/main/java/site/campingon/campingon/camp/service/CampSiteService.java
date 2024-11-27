@@ -14,6 +14,7 @@ import site.campingon.campingon.camp.repository.CampRepository;
 import site.campingon.campingon.camp.repository.CampSiteRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -62,6 +63,14 @@ public class CampSiteService {
                 .toList();
     }
 
+    // 캠핑장의 캠핑지 전체 목록 조회
+    public List<CampSiteListResponseDto> getCampInSites(Long campId) {
+        List<CampSite> campSites = campSiteRepository.findByCampId(campId);
+
+        return campSites.stream()
+            .map(campSiteMapper::toCampSiteListDto)
+            .collect(Collectors.toList());
+    }
 
     // 특정 캠핑지 조회
     public CampSiteResponseDto getCampSite(Long campId, Long siteId) {
