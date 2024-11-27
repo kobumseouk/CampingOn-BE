@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
 
+    @Transactional
     public void saveOrUpdateRefreshToken(String email, String refreshToken, long refreshTokenExpired) {
         refreshTokenRepository.findByEmail(email)
             .ifPresentOrElse(
