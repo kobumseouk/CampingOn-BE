@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,7 +35,7 @@ public class UserController {
     public ResponseEntity<UserSignUpResponseDto> registerUser(@RequestBody @Valid UserSignUpRequestDto userSignUpRequestDto) {
         UserSignUpResponseDto userSignUpResponseDto = userService.registerUser(userSignUpRequestDto);
         log.info("회원가입 성공: email={}", userSignUpRequestDto.getEmail());
-        return ResponseEntity.ok(userSignUpResponseDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userSignUpResponseDto);
     }
 
     // 회원 정보 조회 api
