@@ -1,35 +1,29 @@
 package site.campingon.campingon.common.oauth.dto.provider;
 
-import lombok.RequiredArgsConstructor;
+import lombok.Getter;
 
+import java.util.HashMap;
 import java.util.Map;
 
-@RequiredArgsConstructor
+@Getter
 public class GoogleResponseDto implements OAuth2ResponseDto {
+    private final String provider = "google";
+    private final String providerId;
+    private final String email;
+    private final String name;
+    private final String accessToken;
+    private final Map<String, Object> attributes;
 
-    private final Map<String, Object> attribute;
-
-    @Override
-    public String getProvider() {
-
-        return "google";
-    }
-
-    @Override
-    public String getProviderId() {
-
-        return attribute.get("sub").toString();
-    }
-
-    @Override
-    public String getEmail() {
-
-        return attribute.get("email").toString();
-    }
-
-    @Override
-    public String getName() {
-
-        return attribute.get("name").toString();
+    public GoogleResponseDto(Map<String, Object> attributes, String accessToken) {
+        
+        // attributes를 새로 만들어서 토큰 추가
+        Map<String, Object> newAttributes = new HashMap<>(attributes);
+        newAttributes.put("accessToken", accessToken);
+        this.attributes = newAttributes;
+        
+        this.providerId = String.valueOf(attributes.get("sub"));
+        this.email = String.valueOf(attributes.get("email"));
+        this.name = String.valueOf(attributes.get("name"));
+        this.accessToken = accessToken;
     }
 }

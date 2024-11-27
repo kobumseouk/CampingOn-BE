@@ -15,11 +15,12 @@ import java.util.Map;
 public class CustomOAuth2User implements OAuth2User {
 
     private final OAuth2UserDto OAuthUserDto;
+    private final Map<String, Object> attributes;
 
     @Override
     public Map<String, Object> getAttributes() {
 
-        return null;
+        return attributes;
     }
 
     @Override
