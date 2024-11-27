@@ -43,18 +43,13 @@ public class GoCampingController {
 
     //CampImage 생성
     @PostMapping("/imageList")
-    public ResponseEntity<List<GoCampingImageParsedResponseDto>> createCampImageByGoCampingImageList(
-            @RequestParam("numOfRows") Long numOfRows,
-            @RequestParam("pageNo") Long pageNo,
-            @RequestParam("contentId") Long contentId)
+    public ResponseEntity<List<List<GoCampingImageParsedResponseDto>>> createCampImageByGoCampingImageList(
+            @RequestParam("imageCnt") Long imageCnt)    //몇개의 이미지개수를 갖고올지
             throws URISyntaxException {
-        GoCampingImageDto goCampingImageDto = goCampingService.goCampingImageDtoByGoCampingImage(
-                GoCampingPath.IMAGE_LIST,
-                "numOfRows", numOfRows.toString(),
-                "pageNo", pageNo.toString(),
-                "contentId", contentId.toString());
+        //공공데이터를 조회하고 dto로 변환
+        List<GoCampingImageDto> goCampingImageDto = goCampingService.getAndConvertToGoCampingDataDto(imageCnt);
 
-        List<GoCampingImageParsedResponseDto> goCampingParsedResponseDtos
+        List<List<GoCampingImageParsedResponseDto>> goCampingParsedResponseDtos
                 = goCampingService.createCampImageByGoCampingImageData(goCampingImageDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(goCampingParsedResponseDtos);

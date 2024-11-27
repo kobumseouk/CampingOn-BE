@@ -21,6 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +31,7 @@ import static site.campingon.campingon.common.public_data.PublicDataConstants.MO
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GoCampingService {
 
     private final GoCampingMapper goCampingMapper;
@@ -131,39 +133,54 @@ public class GoCampingService {
         return restTemplate.getForObject(uri, GoCampingDataDto.class);
     }
 
-    public GoCampingImageDto goCampingImageDtoByGoCampingImage(
-            GoCampingPath goCampingPath, String... params)
+    public List<GoCampingImageDto> getAndConvertToGoCampingDataDto(
+            Long imageCnt)
             throws URISyntaxException {
-        URI uri = publicDataFilters(goCampingPath, params);
+        List<GoCampingImageDto> goCampingDataDtoList = new ArrayList<>();
 
-        return restTemplate.getForObject(uri, GoCampingImageDto.class);
+        List<Long> campIdList = campRepository.findAll().stream()
+                .map(Camp::getId)
+                .toList();
+
+        for (Long campId : campIdList) {
+            URI uri = publicDataFilters(GoCampingPath.IMAGE_LIST,
+                    "numOfRows", imageCnt.toString(),
+                    "pageNo", "1",
+                    "contentId", campId.toString());
+
+            goCampingDataDtoList.add(
+                    restTemplate.getForObject(uri, GoCampingImageDto.class));
+        }
+        return goCampingDataDtoList;
     }
 
-    public List<GoCampingImageParsedResponseDto> createCampImageByGoCampingImageData(
-            GoCampingImageDto goCampingImageDto) {
-        List<GoCampingImageDto.Item> item =
-                goCampingImageDto.getResponse().getBody().getItems().getItem();
-        List<GoCampingImageParsedResponseDto> goCampingImageParsedResponseDto =
-                goCampingMapper.toGoCampingImageParsedResponseDtoList(item);
+    public List<List<GoCampingImageParsedResponseDto>> createCampImageByGoCampingImageData(
+            List<GoCampingImageDto> goCampingImageDto) {
+        List<List<GoCampingImageParsedResponseDto>> goCampingImageParsedResponseDtoList = new ArrayList<>();
 
+        for (GoCampingImageDto goCampingDataDto : goCampingImageDto) {
+            List<GoCampingImageDto.Item> item
+                    = goCampingDataDto.getResponse().getBody().getItems().getItem();
 
-        Camp camp = campRepository.findById(
-                        goCampingImageParsedResponseDto.getFirst().getContentId()
-                )
-                .orElseThrow(() -> new GlobalException(ErrorCode.CAMP_NOT_FOUND_BY_ID));
-        for (GoCampingImageParsedResponseDto data : goCampingImageParsedResponseDto) {
+            List<GoCampingImageParsedResponseDto> goCampingImageParsedResponseDto =
+                    goCampingMapper.toGoCampingImageParsedResponseDtoList(item);
 
+            Camp camp = campRepository.findById(
+                            goCampingImageParsedResponseDto.getFirst().getContentId()
+                    )
+                    .orElseThrow(() -> new GlobalException(ErrorCode.CAMP_NOT_FOUND_BY_ID));
+            for (GoCampingImageParsedResponseDto data : goCampingImageParsedResponseDto) {
+                CampImage campImage = CampImage.builder()
+                        .id(data.getSerialnum())
+                        .camp(camp)
+                        .imageUrl(data.getImageUrl())
+                        .build();
 
-            CampImage campImage = CampImage.builder()
-                    .id(data.getSerialnum())
-                    .camp(camp)
-                    .imageUrl(data.getImageUrl())
-                    .build();
-
-            campImageRepository.save(campImage);
+                campImageRepository.save(campImage);
+            }
+            goCampingImageParsedResponseDtoList.add(goCampingImageParsedResponseDto);
         }
-
-        return goCampingImageParsedResponseDto;
+        return goCampingImageParsedResponseDtoList;
     }
 
     //CampSite 데이터 삽입
