@@ -47,6 +47,7 @@ public class UserAuthService {
     }
 
     // 토큰 재발급
+    @Transactional
     public JwtToken refresh(String refreshToken) {
         log.info("Refresh Token을 사용한 Access Token 재발급");
         if (!jwtTokenProvider.validateToken(refreshToken)) {

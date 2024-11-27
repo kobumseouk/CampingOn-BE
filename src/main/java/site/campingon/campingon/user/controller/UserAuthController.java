@@ -1,22 +1,17 @@
 package site.campingon.campingon.user.controller;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import site.campingon.campingon.common.exception.ErrorCode;
 import site.campingon.campingon.common.exception.GlobalException;
-import site.campingon.campingon.common.util.CookieUtil;
-import org.springframework.web.bind.annotation.GetMapping;
+import site.campingon.campingon.common.jwt.JwtTokenProvider;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.WebUtils;
 import site.campingon.campingon.common.jwt.JwtToken;
 import site.campingon.campingon.user.dto.UserSignInRequestDto;
 import site.campingon.campingon.user.service.UserAuthService;
@@ -27,59 +22,44 @@ import site.campingon.campingon.user.service.UserAuthService;
 @RequestMapping("/api")
 public class UserAuthController {
 
-    @Value("${jwt.refresh-expired}")
-    private Long refreshTokenExpired;
-
-    @Value("${jwt.access-expired}")
-    private Long accessExpired;
 
     private final UserAuthService userAuthService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     // 로그인 처리
     @PostMapping("/login")
-    public ResponseEntity<JwtToken> login(@RequestBody UserSignInRequestDto userSignInRequestDto,
-        HttpServletResponse response) throws IOException {
+    public ResponseEntity<JwtToken> login(@RequestBody UserSignInRequestDto userSignInRequestDto) {
 
         JwtToken jwtToken = userAuthService.login(userSignInRequestDto);
-
-        // access token 쿠키 설정
-        CookieUtil.setCookie(response, "accessToken", jwtToken.getAccessToken(), accessExpired);
-        // refresh token 쿠키 설정
-        CookieUtil.setCookie(response, "refreshToken", jwtToken.getRefreshToken(), refreshTokenExpired);
-
-        return ResponseEntity.ok(jwtToken); // 응답 본문에도 포함
+        return ResponseEntity.ok(jwtToken);
     }
 
 
     // 토큰 재발급
-    @GetMapping("/token/refresh")
-    public ResponseEntity<Object> refreshAccessToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        Cookie refreshTokenCookie = WebUtils.getCookie(request, "refreshToken");
+    @PostMapping("/token/refresh")
+    public ResponseEntity<Object> refreshAccessToken(@RequestBody Map<String, String> request) {
+        String refreshToken = request.get("refreshToken");
+        // 정상적인 refresh Token일 경우에
+        if (refreshToken != null && jwtTokenProvider.validateToken(refreshToken)) {
+            JwtToken jwtToken = userAuthService.refresh(refreshToken);
 
-        if (refreshTokenCookie == null) {
-            throw new GlobalException(ErrorCode.NO_TOKEN);
+            return ResponseEntity.ok(jwtToken);
         }
-
-        JwtToken jwtToken = userAuthService.refresh(refreshTokenCookie.getValue());
-
-        CookieUtil.setCookie(response, "accessToken", jwtToken.getAccessToken(), accessExpired);
-        CookieUtil.setCookie(response, "refreshToken", jwtToken.getRefreshToken(), refreshTokenExpired);
-
-        // JWT 토큰 정보 반환
-        return ResponseEntity.ok(jwtToken);
+        throw new GlobalException(ErrorCode.INVALID_TOKEN);
     }
 
     // 로그아웃 API
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
-        // 쿠키 삭제
-        CookieUtil.deleteCookie(response, "accessToken");
-        CookieUtil.deleteCookie(response, "refreshToken");
+    public ResponseEntity<Void> logout(HttpServletRequest request) {
+        // 헤더에서 Access Token 추출
+        String accessToken = request.getHeader("Authorization");
+        if (accessToken != null && accessToken.startsWith("Bearer ")) {
+            accessToken = accessToken.substring(7); // "Bearer " 제거
+        } else {
+            throw new GlobalException(ErrorCode.NO_TOKEN);
+        }
 
-        // refresh token을 db에서 삭제
-        String accessToken = CookieUtil.getCookieValue(request, "accessToken")
-            .orElseThrow(() -> new GlobalException(ErrorCode.NO_TOKEN));
-        userAuthService.logout(accessToken);
+        userAuthService.logout(accessToken); // 서버에서 Refresh Token 삭제 처리
         return ResponseEntity.noContent().build(); // 204 No Content 응답
     }
 
