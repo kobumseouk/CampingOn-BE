@@ -14,12 +14,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
-import site.campingon.campingon.common.oauth.CustomOAuth2FailureHandler;
-import site.campingon.campingon.common.oauth.CustomOAuth2UserService;
+import site.campingon.campingon.common.oauth.handler.CustomOAuth2FailureHandler;
+import site.campingon.campingon.common.oauth.service.CustomOAuth2UserService;
 import site.campingon.campingon.common.jwt.CustomUserDetailsService;
 import site.campingon.campingon.common.jwt.JwtAuthenticationFilter;
 import site.campingon.campingon.common.jwt.JwtTokenProvider;
-import site.campingon.campingon.common.oauth.CustomOAuthSuccessHandler;
+import site.campingon.campingon.common.oauth.handler.CustomOAuthSuccessHandler;
 
 @Configuration
 @EnableWebSecurity

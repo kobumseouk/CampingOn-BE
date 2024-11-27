@@ -1,4 +1,4 @@
-package site.campingon.campingon.common.oauth;
+package site.campingon.campingon.common.oauth.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import site.campingon.campingon.common.exception.ErrorCode;
 import site.campingon.campingon.common.exception.OAuthException;
+import site.campingon.campingon.common.oauth.CustomOAuth2User;
 import site.campingon.campingon.common.oauth.dto.provider.GoogleResponseDto;
 import site.campingon.campingon.common.oauth.dto.provider.OAuth2ResponseDto;
 import site.campingon.campingon.common.oauth.dto.OAuth2UserDto;

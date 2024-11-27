@@ -1,4 +1,4 @@
-package site.campingon.campingon.common.oauth;
+package site.campingon.campingon.common.oauth.handler;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

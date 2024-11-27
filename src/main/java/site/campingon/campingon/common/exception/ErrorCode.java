@@ -32,6 +32,7 @@ public enum ErrorCode {
     ACCESS_DENIED(HttpStatus.UNAUTHORIZED, "AUTH-05", "인증되지 않은 유저입니다."),
     INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "AUTH-006", "유효하지 않은 사용자 이름 또는 비밀번호입니다."),
     INVALID_SECRET_KEY(HttpStatus.UNAUTHORIZED, "AUTH-007", "유효하지 않은 비밀 키입니다."),
+    DELETE_USER_DENIED(HttpStatus.FORBIDDEN, "AUTH-008", "회원 탈퇴가 거부되었습니다."),
 
     DUPLICATED_EMAIL(HttpStatus.BAD_REQUEST, "ACCOUNT-001", "이미 존재하는 이메일입니다."),
     USER_NOT_FOUND_BY_EMAIL(HttpStatus.NOT_FOUND, "ACCOUNT-002", "해당 이메일의 회원을 찾을 수 없습니다.");
