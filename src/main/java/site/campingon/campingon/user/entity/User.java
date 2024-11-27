@@ -3,7 +3,10 @@ package site.campingon.campingon.user.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+import java.util.ArrayList;
+import java.util.List;
 import lombok.*;
+import site.campingon.campingon.bookmark.entity.Bookmark;
 import site.campingon.campingon.common.entity.BaseEntity;
 
 
@@ -29,7 +32,7 @@ public class User extends BaseEntity {
     @Column(length = 60)
     private String password;
 
-    @Column(nullable = true, length = 50)
+    @Column(length = 50)
     private String name;
 
     // oauth 로그인인 경우에 생성되는 값
@@ -47,6 +50,14 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Bookmark> bookmarks = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserKeyword> keywords = new ArrayList<>();
 
     // 회원 탈퇴 로직
     public void deleteUser(String deleteReason) {
