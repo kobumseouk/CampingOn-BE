@@ -20,12 +20,6 @@ public class CustomOAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
     private final JwtTokenProvider jwtTokenProvider;
 
-    @Value("${jwt.refresh-expired}")
-    private Long refreshTokenExpired;
-
-    @Value("${jwt.access-expired}")
-    private Long accessTokenExpired;
-
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
 
@@ -33,10 +27,10 @@ public class CustomOAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         JwtToken jwtToken = jwtTokenProvider.generateOAuth2Token(authentication);
 
         // Access Token을 쿠키에 추가
-        CookieUtil.setCookie(response, "accessToken", jwtToken.getAccessToken(), accessTokenExpired);
+        CookieUtil.setCookie(response, "accessToken", jwtToken.getAccessToken(), jwtTokenProvider.getAccessTokenExpired());
 
         // Refresh Token을 쿠키에 추가
-        CookieUtil.setCookie(response, "refreshToken", jwtToken.getRefreshToken(), refreshTokenExpired);
+        CookieUtil.setCookie(response, "refreshToken", jwtToken.getRefreshToken(), jwtTokenProvider.getRefreshTokenExpired());
 
         response.sendRedirect("/oauth/success");
     }
