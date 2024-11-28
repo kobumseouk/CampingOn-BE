@@ -1,10 +1,7 @@
 package site.campingon.campingon.reservation.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import site.campingon.campingon.camp.entity.CampSite;
 import site.campingon.campingon.common.entity.BaseEntity;
@@ -14,9 +11,9 @@ import java.time.LocalDateTime;
 
 @Entity
 @ToString
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder(toBuilder = true)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class Reservation extends BaseEntity {
 
     @Id
