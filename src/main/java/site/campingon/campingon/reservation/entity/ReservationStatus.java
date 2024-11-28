@@ -1,10 +1,10 @@
 package site.campingon.campingon.reservation.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 @Getter
-@RequiredArgsConstructor
+@AllArgsConstructor
 public enum ReservationStatus {
 
     RESERVED("예약완료"),

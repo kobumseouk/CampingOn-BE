@@ -42,8 +42,10 @@ public class Reservation extends BaseEntity {
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "DEFAULT 'RESERVED'")
+    @Column(nullable = false, columnDefinition = "VARCHAR(20) DEFAULT 'RESERVED'")
     private ReservationStatus status = ReservationStatus.RESERVED;
+
+    private String cancelReason;
 
     private int totalPrice;
 
