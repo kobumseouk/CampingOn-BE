@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import site.campingon.campingon.common.jwt.CustomUserPrincipal;
 import site.campingon.campingon.common.oauth.dto.OAuth2UserDto;
 
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ import java.util.Map;
 
 @ToString
 @RequiredArgsConstructor
-public class CustomOAuth2User implements OAuth2User {
+public class CustomOAuth2User implements OAuth2User, CustomUserPrincipal {
 
     private final OAuth2UserDto OAuthUserDto;
     private final Map<String, Object> attributes;
@@ -44,11 +45,18 @@ public class CustomOAuth2User implements OAuth2User {
         return OAuthUserDto.getNickname();
     }
 
+    @Override
     public String getNickname() {
 
         return OAuthUserDto.getNickname();
     }
 
+    @Override
+    public String getRole() {
+        return OAuthUserDto.getRole();
+    }
+
+    @Override
     public String getEmail() {
 
         return OAuthUserDto.getEmail();

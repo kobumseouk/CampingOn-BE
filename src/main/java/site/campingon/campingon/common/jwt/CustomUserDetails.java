@@ -2,6 +2,7 @@ package site.campingon.campingon.common.jwt;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -9,7 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import site.campingon.campingon.user.entity.Role;
 
 @Getter
-public class CustomUserDetails implements UserDetails {
+public class CustomUserDetails implements UserDetails, CustomUserPrincipal {
     private final Long id;
     private final String email;
     private final String nickname;
@@ -24,12 +25,20 @@ public class CustomUserDetails implements UserDetails {
         this.password = password;
     }
 
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority(role.name())); // 문자열 기반 권한
     }
 
+    @Override
+    public String getRole() {
+        return role.name();
+    }
+
+    @Override
+    public Map<String, Object> getAttributes() {
+        return Collections.emptyMap(); // OAuth2가 아니므로 빈 맵 반환
+    }
 
     @Override
     public String getPassword() {
