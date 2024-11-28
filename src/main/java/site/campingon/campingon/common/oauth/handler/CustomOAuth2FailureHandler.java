@@ -20,7 +20,9 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class CustomOAuth2FailureHandler extends SimpleUrlAuthenticationFailureHandler {
     @Override
-    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
+    public void onAuthenticationFailure(HttpServletRequest request,
+                                        HttpServletResponse response,
+                                        AuthenticationException exception) {
 
         // 예외 유형에 따른 적절한 ErrorCode 설정
         ErrorCode errorCode;

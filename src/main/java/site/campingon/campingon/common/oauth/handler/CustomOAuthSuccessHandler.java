@@ -25,7 +25,9 @@ public class CustomOAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     private String frontUrl;
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
+    public void onAuthenticationSuccess(HttpServletRequest request,
+                                        HttpServletResponse response,
+                                        Authentication authentication) throws IOException {
 
         // JWT 토큰 생성
         JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
