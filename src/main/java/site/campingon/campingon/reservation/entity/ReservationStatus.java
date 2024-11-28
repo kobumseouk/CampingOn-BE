@@ -9,7 +9,7 @@ public enum ReservationStatus {
 
     RESERVED("예약완료"),
     CANCELED("예약취소"),
-    PAID("결제완료");
+    COMPLETED("체크아웃완료"); // 체크아웃시간 이후로 (자동) 변경
 
     private final String status;
 }
