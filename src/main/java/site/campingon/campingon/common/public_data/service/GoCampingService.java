@@ -38,8 +38,6 @@ public class GoCampingService {
     private final GoCampingMapper goCampingMapper;
     private final CampAddrRepository campAddrRepository;
     private final CampImageRepository campImageRepository;
-    private final CampInfoRepository campInfoRepository;
-    private final CampKeywordRepository campKeywordRepository;
     private final CampRepository campRepository;
     private final CampSiteRepository campSiteRepository;
     private final CampIndutyRepository campIndutyRepository;
