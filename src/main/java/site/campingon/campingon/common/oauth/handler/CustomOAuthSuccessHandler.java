@@ -1,6 +1,5 @@
 package site.campingon.campingon.common.oauth.handler;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +9,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 import site.campingon.campingon.common.jwt.JwtToken;
 import site.campingon.campingon.common.jwt.JwtTokenProvider;
+import site.campingon.campingon.common.jwt.RefreshTokenService;
 import site.campingon.campingon.common.util.CookieUtil;
 
 import java.io.IOException;
@@ -19,19 +19,27 @@ import java.io.IOException;
 public class CustomOAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final RefreshTokenService refreshTokenService;
+
+    @Value("${app.front-url}")
+    private String frontUrl;
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
 
         // JWT 토큰 생성
-        JwtToken jwtToken = jwtTokenProvider.generateOAuth2Token(authentication);
-
-        // Access Token을 쿠키에 추가
-        CookieUtil.setCookie(response, "accessToken", jwtToken.getAccessToken(), jwtTokenProvider.getAccessTokenExpired());
+        JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
+        String refreshToken = jwtToken.getRefreshToken();
+        String email = jwtTokenProvider.getEmailFromToken(refreshToken);
 
         // Refresh Token을 쿠키에 추가
-        CookieUtil.setCookie(response, "refreshToken", jwtToken.getRefreshToken(), jwtTokenProvider.getRefreshTokenExpired());
+        CookieUtil.setCookie(response, "refreshToken", refreshToken, jwtTokenProvider.getRefreshTokenExpired());
 
-        response.sendRedirect("/oauth/success");
+        // Refresh Token을 DB에 저장
+        refreshTokenService.saveOrUpdateRefreshToken(email, refreshToken, jwtTokenProvider.getRefreshTokenExpired());
+
+
+        String redirectUrl = frontUrl + "/oauth2/redirect";
+        getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }
 }

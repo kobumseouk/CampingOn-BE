@@ -11,17 +11,18 @@ import java.security.Key;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.stream.Collectors;
-
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
-import site.campingon.campingon.common.oauth.CustomOAuth2User;
 import site.campingon.campingon.user.entity.Role;
+import site.campingon.campingon.user.entity.User;
+import site.campingon.campingon.user.repository.UserRepository;
 
 @Slf4j
 @Getter
@@ -29,6 +30,9 @@ import site.campingon.campingon.user.entity.Role;
 public class JwtTokenProvider {
 
     private final Key secretKey;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Value("${jwt.access-expired}")
     private Long accessTokenExpired;
@@ -48,26 +52,20 @@ public class JwtTokenProvider {
         Date accessTokenExpiration = new Date(now + accessTokenExpired * 1000);
         Date refreshTokenExpiration = new Date(now + refreshTokenExpired * 1000);
 
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-
-        // 사용자 권한 정보를 문자열로 변환
-        String authorities = authentication.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .collect(Collectors.joining(","));
+        CustomUserPrincipal userPrincipal = (CustomUserPrincipal) authentication.getPrincipal();
 
         // Access Token 생성
         String accessToken = Jwts.builder()
-            .setSubject(userDetails.getEmail()) // 이메일을 Subject로 설정
-            .claim("id", userDetails.getId()) // 사용자 ID
-            .claim("nickname", userDetails.getNickname()) // 닉네임
-            .claim("role", userDetails.getRole().name()) // 사용자 역할(Role)
+            .setSubject(userPrincipal.getEmail()) // 이메일을 Subject로 설정
+            .claim("nickname", userPrincipal.getNickname()) // 닉네임
+            .claim("role", userPrincipal.getRole()) // 사용자 역할(Role)
             .setExpiration(accessTokenExpiration) // 만료 시간
             .signWith(secretKey, SignatureAlgorithm.HS256) // 서명
             .compact();
 
         // Refresh Token 생성 (주로 만료 시간만 포함)
         String refreshToken = Jwts.builder()
-            .setSubject(userDetails.getEmail()) // 사용자 식별용 정보
+            .setSubject(userPrincipal.getEmail()) // 사용자 식별용 정보
             .setExpiration(refreshTokenExpiration) // 만료 시간
             .signWith(secretKey, SignatureAlgorithm.HS256) // 서명
             .compact();
@@ -93,6 +91,7 @@ public class JwtTokenProvider {
             .signWith(secretKey, SignatureAlgorithm.HS256) // 서명 알고리즘과 키 설정
             .compact();
     }
+/*
 
     // OAuth2 사용자 토큰 생성 메서드
     public JwtToken generateOAuth2Token(Authentication authentication) {
@@ -133,6 +132,7 @@ public class JwtTokenProvider {
                 .build();
     }
 
+*/
 
     // 토큰에서 유저 정보 추출
     public Authentication getAuthentication(String accessToken) {
@@ -145,7 +145,6 @@ public class JwtTokenProvider {
         }
 
         // 사용자 정보 추출
-        Long id = Long.parseLong(claims.get("id").toString()); // 토큰에서 사용자 ID 추출
         String email = claims.getSubject(); // 토큰 subject에서 email 추출
         String nickname = claims.get("nickname").toString(); // nickname 추출
         String password = claims.get("password", String.class);
@@ -154,6 +153,13 @@ public class JwtTokenProvider {
 
         // 문자열에서 Role 객체로 변환
         Role role = Role.valueOf(roleName); // Enum이라면 가능
+
+        // email로 User 조회
+        User user = userRepository.findByEmailAndDeletedAtIsNull(email)
+            .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+
+        // 사용자 ID 가져오기
+        Long id = user.getId();
 
         // CustomUserDetails 생성
         CustomUserDetails userDetails = new CustomUserDetails(id, email, nickname, role, password);
