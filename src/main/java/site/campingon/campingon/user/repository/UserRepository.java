@@ -24,5 +24,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmailOrNicknameAndDeletedAtIsNull(@Param("email") String email, @Param("nickname") String nickname);
 
     // 닉네임 중복 확인
-    boolean existsByNicknameAndDeletedAtIsNull(String nickname);
+    boolean existsByNickname(String nickname);
+
+    // 이메일 중복 확인
+    boolean existsByEmailAndDeletedAtIsNull(String email);
+
 }

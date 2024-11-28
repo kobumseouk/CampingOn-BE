@@ -11,6 +11,7 @@ import site.campingon.campingon.camp.dto.CampDetailResponseDto;
 import site.campingon.campingon.camp.dto.CampListResponseDto;
 import site.campingon.campingon.camp.dto.CampSiteListResponseDto;
 import site.campingon.campingon.camp.entity.Camp;
+import site.campingon.campingon.camp.entity.CampInduty;
 import site.campingon.campingon.camp.entity.CampSite;
 import site.campingon.campingon.camp.mapper.CampMapper;
 import site.campingon.campingon.camp.repository.CampRepository;
@@ -65,16 +66,21 @@ public class CampService {
     Camp camp = campRepository.findById(campId)
         .orElseThrow(() -> new RuntimeException("캠핑장을 찾을 수 없습니다."));
 
-    return campMapper.toCampDetailDto(camp);
-  }
+    StringBuilder indutyBuilder = new StringBuilder();
+    List<CampInduty> campInduties = camp.getInduty();
 
-  // 캠핑장의 캠핑지 목록 조회
-  public List<CampSiteListResponseDto> getCampSites(Long campId) {
-    List<CampSite> campSites = campSiteRepository.findByCampId(campId);
+    for (int i = 0; i < campInduties.size(); i++) {
+      indutyBuilder.append(campInduties.get(i).getInduty().getType());
+      if (i < campInduties.size() - 1) {
+        indutyBuilder.append(", ");
+      }
+    }
 
-    return campSites.stream()
-        .map(campMapper::toCampSiteListDto)
-        .collect(Collectors.toList());
+    // DTO 생성 및 값 설정
+    CampDetailResponseDto dto = campMapper.toCampDetailDto(camp);
+    dto.setIndutys(indutyBuilder.toString());
+
+    return dto;
   }
 
   // 사용자의 찜한 캠핑장 목록 조회

@@ -44,6 +44,9 @@ public class Camp{
   @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private List<CampKeyword> keywords;
 
+  @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private List<CampImage> images;
+
   @OneToMany(mappedBy = "camp",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
   @Column(length = 100, nullable = false)
   private List<CampInduty> induty;  // 업종

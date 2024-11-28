@@ -12,6 +12,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.stream.Collectors;
+
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,16 +24,17 @@ import site.campingon.campingon.common.oauth.CustomOAuth2User;
 import site.campingon.campingon.user.entity.Role;
 
 @Slf4j
+@Getter
 @Component
 public class JwtTokenProvider {
 
     private final Key secretKey;
 
     @Value("${jwt.access-expired}")
-    public Long accessTokenExpired;
+    private Long accessTokenExpired;
 
     @Value("${jwt.refresh-expired}")
-    public Long refreshTokenExpired;
+    private Long refreshTokenExpired;
 
     public JwtTokenProvider(@Value("${jwt.secret-key}") String secretKey) {
         byte[] keyBytes = secretKey.getBytes();

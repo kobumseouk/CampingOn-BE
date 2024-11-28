@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.geo.Point;
 
 @Entity
 @Getter
@@ -32,11 +33,14 @@ public class CampAddr {
     @Column(length = 20)
     private String zipcode;  // 우편번호
 
-    @Column(nullable = false)
+    /*@Column(nullable = false)
     private Double longitude;  // mayX - 경도
 
     @Column(nullable = false)
-    private Double latitude;  // maxY - 위도
+    private Double latitude;  // maxY - 위도*/
+
+    @Column(columnDefinition = "POINT", nullable = false)
+    private Point location;
 
     @Column(name = "street_addr", length = 50)
     private String streetAddr;   // 기본 도로명 주소

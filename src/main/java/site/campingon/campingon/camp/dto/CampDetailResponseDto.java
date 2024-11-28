@@ -1,11 +1,13 @@
 package site.campingon.campingon.camp.dto;
 
 import lombok.*;
-import site.campingon.campingon.camp.entity.CampInduty;
+import site.campingon.campingon.camp.entity.CampAddr;
+import site.campingon.campingon.camp.entity.CampInfo;
 
 import java.util.List;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -16,14 +18,11 @@ public class CampDetailResponseDto {
   private String lineIntro;
   private String homepage;   // 홈페이지 사용 고려
   private String outdoorFacility;   // 부대시설
-  private List<CampInduty> induty;  // 업종
+  private String indutys;  // 업종
 
-  private Double longitude;  // mayX - 경도
-  private Double latitude;  // maxY - 위도
-  private String address;   // 도로명 주소
+  private CampAddr campAddr;  // 경도, 위도, 도로명 주소
 
   private List<String> images;   // 캠핑장 이미지(썸네일 포함) <- Camp_image 엔티티
 
-  private int recommendCnt;  // 추천 수 <- Camp_Info 엔티티
-  private int bookmarkCnt;  // 찜 수 <- Camp_Info 엔티티
+  private CampInfo campInfo;  // 추천 수, 찜 수
 }

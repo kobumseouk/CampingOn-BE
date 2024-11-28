@@ -3,6 +3,7 @@ package site.campingon.campingon.common.public_data.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.geo.Point;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -100,8 +101,7 @@ public class GoCampingService {
                     .zipcode(data.getZipcode())
                     .streetAddr(data.getAddr1())
                     .detailedAddr(data.getAddr2())
-                    .longitude(data.getMapX())  //x좌표
-                    .latitude(data.getMapY())   //y좌표
+                    .location(new Point(data.getMapX(), data.getMapY()))
                     .build();
             campAddrRepository.save(campAddr);
 

@@ -20,12 +20,10 @@ public interface CampMapper {
 
   // Camp -> CampDetailResponseDto 매핑
   @Mapping(target = "name", source = "campName")
-  @Mapping(target = "address", source = "campAddr.streetAddr")
-  @Mapping(target = "recommendCnt", source = "campInfo.recommendCnt")
-  @Mapping(target = "bookmarkCnt", source = "campInfo.bookmarkCnt")
+  @Mapping(target = "images", source = "images", qualifiedByName = "imagesToUrlList")
   CampDetailResponseDto toCampDetailDto(Camp camp);
 
-  CampSiteListResponseDto toCampSiteListDto(CampSite campSite);
+
 
   @Named("keywordsToStringList")
   default List<String> keywordsToStringList(List<CampKeyword> keywords) {
@@ -34,14 +32,34 @@ public interface CampMapper {
             .toList();
   }
 
+  @Named("imagesToUrlList")
+  default List<String> imagesToUrlList(List<CampImage> images) {
+    if (images == null) return null;
+    return images.stream()
+        .map(CampImage::getImageUrl)
+        .toList();
+  }
+
+  @Named("urlsToImagesList")
+  default List<CampImage> urlsToImagesList(List<String> imageUrls) {
+    if (imageUrls == null) return null;
+    return imageUrls.stream()
+        .map(url -> CampImage.builder()
+            .imageUrl(url)
+            .build())
+        .toList();
+  }
+
   // 업데이트 로직을 위한 메서드
   void updateCampFromDto(Camp updatedCamp, @MappingTarget Camp existingCamp);
 
   // CampCreateRequestDto -> Camp
   @Mapping(target = "campName", source = "name")
+  @Mapping(target = "images", source = "images", qualifiedByName = "urlsToImagesList")
   Camp toCampEntity(CampCreateRequestDto createRequestDto);
 
   // CampUpdateRequestDto -> Camp
   @Mapping(target = "campName", source = "name")
+  @Mapping(target = "images", source = "images", qualifiedByName = "urlsToImagesList")
   Camp toCampEntity(CampUpdateRequestDto updateRequestDto);
 }
