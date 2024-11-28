@@ -29,11 +29,9 @@ public class Reservation extends BaseEntity {
     @JoinColumn(nullable = false)
     private CampSite campSite;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     @Column(nullable = false, columnDefinition = "DATETIME(0)")
     private LocalDateTime checkIn;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     @Column(nullable = false, columnDefinition = "DATETIME(0)")
     private LocalDateTime checkOut;
 
