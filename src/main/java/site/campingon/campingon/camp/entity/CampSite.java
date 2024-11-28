@@ -32,7 +32,7 @@ public class CampSite {
 
     @Column(length = 50, nullable = false)
     @Convert(converter = IndutyConverter.class) //converter 사용
-    private Induty type; // 업종 구분
+    private Induty siteType; // 업종 구분
 
     @Column(name = "indoor_facility", length = 255)
     private String indoorFacility;

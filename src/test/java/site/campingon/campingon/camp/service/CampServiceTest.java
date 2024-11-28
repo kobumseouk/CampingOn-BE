@@ -23,14 +23,14 @@ import site.campingon.campingon.camp.repository.CampSiteRepository;
 import site.campingon.campingon.user.repository.UserKeywordRepository;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CampServiceTest {
@@ -135,7 +135,7 @@ class CampServiceTest {
   }
 
   @Test
-  @DisplayName("키워드 매칭된 캠핑장 목록 조회 확인 테스트")
+  @DisplayName("키워드 매칭된 캠핑장 목록 조회 성공 확인 테스트")
   void getMatchedCampsByKeywords_success() {
     // given
     Long userId = 1L;
@@ -163,6 +163,27 @@ class CampServiceTest {
   }
 
   @Test
+  @DisplayName("사용자 키워드가 없을 때 빈 페이지 반환 확인 테스트")
+  void getMatchedCampsByKeywords_emptyKeywords_returnsEmptyPage() {
+    // given
+    Long userId = 1L;
+    Pageable pageable = PageRequest.of(0, 3);
+    when(userKeywordRepository.findKeywordsByUserId(userId)).thenReturn(Collections.emptyList());
+
+    // when
+    Page<CampListResponseDto> result = campService.getMatchedCampsByKeywords(userId, pageable);
+
+    // then
+    assertTrue(result.isEmpty());
+    assertEquals(0, result.getTotalElements());
+    verify(userKeywordRepository).findKeywordsByUserId(userId);
+    verify(campRepository, never()).findMatchedCampsByKeywords(any(), any());
+  }
+
+
+
+  @Test
+  @DisplayName("추천수 기반 인기있는 캠핑장 목록 조회 성공 확인 테스트")
   void getPopularCamps_success() {
     // given
     Long userId = 1L;
@@ -188,7 +209,28 @@ class CampServiceTest {
   }
 
   @Test
-  @DisplayName("캠핑장 상세 조회 확인 테스트")
+  @DisplayName("추천수가 있는 캠핑장이 없을 때 빈 목록 반환 확인 테스트")
+  void getPopularCamps_noRecommendations_returnsEmptyList() {
+    // given
+    Long userId = 1L;
+    Pageable pageable = PageRequest.of(0, 12);
+    Page<Camp> emptyPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
+
+    when(campRepository.findPopularCamps(pageable)).thenReturn(emptyPage);
+
+    // when
+    Page<CampListResponseDto> result = campService.getPopularCamps(userId, pageable);
+
+    // then
+    assertTrue(result.isEmpty());
+    assertEquals(0, result.getTotalElements());
+    verify(campRepository).findPopularCamps(pageable);
+  }
+
+
+
+  @Test
+  @DisplayName("캠핑장 상세 조회 성공 확인 테스트")
   void getCampDetail_success() {
     // given
     Long campId = 1L;
@@ -210,7 +252,23 @@ class CampServiceTest {
   }
 
   @Test
-  @DisplayName("찜한 캠핑장 목록 조회 확인 테스트")
+  @DisplayName("존재하지 않는 캠핑장 ID로 상세 조회 시 예외 발생 확인 테스트")
+  void getCampDetail_invalidId_throwsException() {
+    // given
+    Long invalidCampId = 999L;
+    when(campRepository.findById(invalidCampId)).thenReturn(Optional.empty());
+
+    // when & then
+    RuntimeException exception = assertThrows(RuntimeException.class, () ->
+        campService.getCampDetail(invalidCampId)
+    );
+    assertEquals("캠핑장을 찾을 수 없습니다.", exception.getMessage());
+    verify(campRepository).findById(invalidCampId);
+  }
+
+
+  @Test
+  @DisplayName("찜한 캠핑장 목록 조회 성공 확인 테스트")
   void getBookmarkedCamps_success() {
     // given
     Long userId = 1L;
@@ -235,7 +293,28 @@ class CampServiceTest {
   }
 
   @Test
-  @DisplayName("지역(시/도)과 검색어를 통한 캠핑장 목록 조회 확인 테스트")
+  @DisplayName("찜한 캠핑장이 없을 때 빈 목록 반환 확인 테스트")
+  void getBookmarkedCamps_noBookmarks_returnsEmptyList() {
+    // given
+    Long userId = 1L;
+    Pageable pageable = PageRequest.of(0, 3);
+    Page<Camp> emptyPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
+
+    when(campRepository.findByBookmarks_User_IdAndBookmarks_IsMarkedTrue(userId, pageable))
+        .thenReturn(emptyPage);
+
+    // when
+    Page<CampListResponseDto> result = campService.getBookmarkedCamps(userId, pageable);
+
+    // then
+    assertTrue(result.isEmpty());
+    assertEquals(0, result.getTotalElements());
+    verify(campRepository).findByBookmarks_User_IdAndBookmarks_IsMarkedTrue(userId, pageable);
+  }
+
+
+  @Test
+  @DisplayName("지역(시/도)과 검색어를 통한 캠핑장 목록 조회 성공 확인 테스트")
   void searchCamps_success() {
     // given
     Long userId = 1L;
@@ -263,9 +342,33 @@ class CampServiceTest {
     verify(bookMarkRepository).existsByCampIdAndUserId(anyLong(), anyLong());
   }
 
+  @Test
+  @DisplayName("검색 결과가 없을 때 빈 목록 반환 확인 테스트")
+  void searchCamps_noResults_returnsEmptyList() {
+    // given
+    Long userId = 1L;
+    String keyword = "nonexistent";
+    String city = "NonexistentCity";
+    PageRequest pageRequest = PageRequest.of(0, 12);
+    Page<Camp> emptyPage = new PageImpl<>(Collections.emptyList(), pageRequest, 0);
+
+    when(campRepository.findByCampNameSearch(city, pageRequest)).thenReturn(emptyPage);
+    when(campRepository.searchCampsByKeywordAndCity(keyword.toLowerCase(), city, pageRequest))
+        .thenReturn(emptyPage);
+
+    // when
+    Page<CampListResponseDto> result = campService.searchCamps(userId, keyword, city, pageRequest);
+
+    // then
+    assertTrue(result.isEmpty());
+    assertEquals(0, result.getTotalElements());
+    verify(campRepository).findByCampNameSearch(city, pageRequest);
+  }
+
 
   // 캠핑장 관리자 테스트 CRUD
   @Test
+  @DisplayName("관리자 캠핑장 생성 확인 테스트")
   void createCamp_success() {
     // given
     when(campRepository.save(any(Camp.class))).thenReturn(mockCamp);
@@ -284,6 +387,7 @@ class CampServiceTest {
   }
 
   @Test
+  @DisplayName("관리자 캠핑장 수정 확인 테스트")
   void updateCamp_success() {
     // given
     Long campId = 1L;
@@ -332,6 +436,7 @@ class CampServiceTest {
   }
 
   @Test
+  @DisplayName("관리자 캠핑장 삭제 확인 테스트")
   void deleteCamp_success() {
     // given
     Long campId = 1L;
@@ -344,6 +449,7 @@ class CampServiceTest {
   }
 
   @Test
+  @DisplayName("관리자 캠핑장 목록 조회 확인 테스트")
   void getAllCamps_success() {
     // given
     List<Camp> camps = Arrays.asList(mockCamp);
