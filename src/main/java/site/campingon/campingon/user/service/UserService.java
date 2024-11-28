@@ -1,5 +1,6 @@
 package site.campingon.campingon.user.service;
 
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.campingon.campingon.common.exception.ErrorCode;
 import site.campingon.campingon.common.exception.GlobalException;
-import site.campingon.campingon.user.dto.UserDeactivateRequestDto;
+import site.campingon.campingon.common.jwt.RefreshTokenService;
 import site.campingon.campingon.user.dto.UserResponseDto;
 import site.campingon.campingon.user.dto.UserSignUpRequestDto;
 import site.campingon.campingon.user.dto.UserSignUpResponseDto;
@@ -17,6 +18,7 @@ import site.campingon.campingon.user.dto.UserUpdateRequestDto;
 import site.campingon.campingon.user.entity.Role;
 import site.campingon.campingon.user.entity.User;
 import site.campingon.campingon.user.mapper.UserMapper;
+import site.campingon.campingon.user.repository.UserKeywordRepository;
 import site.campingon.campingon.user.repository.UserRepository;
 
 @Service
@@ -27,6 +29,9 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final UserKeywordRepository userKeywordRepository;
+    private final RefreshTokenService refreshTokenService;
+
 
     // 회원 가입
     @Transactional
@@ -95,7 +100,7 @@ public class UserService {
         }
 
         // 닉네임 변경
-        if (userRepository.existsByNicknameAndDeletedAtIsNull(userUpdateRequestDto.getNickname())) {
+        if (userRepository.existsByNickname(userUpdateRequestDto.getNickname())) {
             throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
         }
         user.updateNickname(userUpdateRequestDto.getNickname());
@@ -122,15 +127,31 @@ public class UserService {
 
     // 회원 탈퇴
     @Transactional
-    public void deleteUser(UserDeactivateRequestDto userDeactiveRequestDto) {
+    public void deleteUser(Long userId, String deleteReson) {
         // 사용자 정보 조회
-        User user = userRepository.findByIdAndDeletedAtIsNull(userDeactiveRequestDto.getId())
+        User user = userRepository.findByIdAndDeletedAtIsNull(userId)
             .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-        // 사용자 탈퇴 처리 (소프트 삭제)
-        user.deleteUser(userDeactiveRequestDto.getDeleteReason());
-        log.info("회원 탈퇴 - 이메일: {} , 탈퇴 사유: {}", userDeactiveRequestDto.getId(), userDeactiveRequestDto.getDeleteReason());
+        refreshTokenService.deleteRefreshTokenByEmail(user.getEmail());
 
+        // 사용자 탈퇴 처리 (소프트 삭제)
+        user.deleteUser(deleteReson);
+        log.info("회원 탈퇴 - 이메일: {} , 탈퇴 사유: {}", userId, deleteReson);
+
+    }
+
+    // 중복 확인(회원 가입시 이메일, 닉네임 부분)
+    public boolean checkDuplicate(String type, String value) {
+        return switch (type.toLowerCase()) {
+            case "email" -> userRepository.existsByEmailAndDeletedAtIsNull(value);
+            case "nickname" -> userRepository.existsByNickname(value);
+            default -> throw new IllegalArgumentException("Invalid type parameter");
+        };
+    }
+
+    // 키워드 조회
+    public List<String> getKeywordsByUserId(Long userId) {
+        return userKeywordRepository.findKeywordsByUserId(userId);
     }
 
 }

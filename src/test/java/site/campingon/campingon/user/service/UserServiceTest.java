@@ -14,7 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import site.campingon.campingon.user.dto.UserDeactivateRequestDto;
+import site.campingon.campingon.common.jwt.RefreshTokenService;
 import site.campingon.campingon.user.dto.UserResponseDto;
 import site.campingon.campingon.user.dto.UserSignUpRequestDto;
 import site.campingon.campingon.user.dto.UserSignUpResponseDto;
@@ -36,6 +36,9 @@ class UserServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @Mock
+    private RefreshTokenService refreshTokenService; // MockBean 사용
+
+    @Mock
     private UserMapper userMapper;
 
     @BeforeEach
@@ -54,7 +57,7 @@ class UserServiceTest {
             .nickname(requestDto.getNickname())
             .password("encodedPassword")
             .name(requestDto.getName())
-            .role(Role.USER)
+            .role(Role.ROLE_USER)
             .build();
 
         User savedUser = newUser.toBuilder().id(1L).build();
@@ -130,7 +133,7 @@ class UserServiceTest {
 
         // Mock
         when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
-        when(userRepository.existsByNicknameAndDeletedAtIsNull(requestDto.getNickname())).thenReturn(false);
+        when(userRepository.existsByNickname(requestDto.getNickname())).thenReturn(false);
         when(passwordEncoder.matches("currentPassword", user.getPassword())).thenReturn(true);
         when(passwordEncoder.encode("newPassword")).thenReturn("newEncodedPassword");
         when(userRepository.save(user)).thenReturn(user);
@@ -154,20 +157,22 @@ class UserServiceTest {
     void deleteUser_success() {
         // Given
         Long userId = 1L;
-        UserDeactivateRequestDto requestDto = UserDeactivateRequestDto.builder()
+        String deleteReason = "deleteReason";
+        User user = User.builder()
             .id(userId)
-            .deleteReason("탈퇴합니다.")
+            .email("test@example.com")
+            .nickname("nickname")
+            .deleteReason(deleteReason)
             .build();
-        User user = User.builder().id(userId).email("test@example.com").nickname("nickname").build();
 
         when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user)); // 수정됨
 
         // When
-        userService.deleteUser(requestDto);
+        userService.deleteUser(userId, deleteReason);
 
         // Then
         assertNotNull(user.getDeletedAt());
-        assertEquals(requestDto.getDeleteReason(), user.getDeleteReason());
+        assertEquals(deleteReason, user.getDeleteReason());
         verify(userRepository, times(1)).findByIdAndDeletedAtIsNull(userId); // 수정됨
     }
 }
