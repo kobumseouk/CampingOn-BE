@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import site.campingon.campingon.camp.entity.Camp;
+import site.campingon.campingon.common.entity.BaseEntity;
 import site.campingon.campingon.user.entity.User;
 
 
@@ -15,7 +16,7 @@ import site.campingon.campingon.user.entity.User;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class Bookmark {
+public class Bookmark extends BaseEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(columnDefinition = "INT UNSIGNED")

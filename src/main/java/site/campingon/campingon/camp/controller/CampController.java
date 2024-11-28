@@ -83,15 +83,6 @@ public class CampController {
     return ResponseEntity.ok(campService.getCampDetail(campId));
   }
 
-  // 캠핑지 목록 조회
-  @GetMapping("/{campId}/sites")
-  public ResponseEntity<List<CampSiteListResponseDto>> getCampSites(
-      @PathVariable("campId") Long campId
-  ) {
-    return ResponseEntity.ok(campService.getCampSites(campId));
-  }
-
-
   // 사용자 찜 목록 조회
   @GetMapping("/bookmarked")
   public ResponseEntity<Page<CampListResponseDto>> getBookmarkedCamps(
