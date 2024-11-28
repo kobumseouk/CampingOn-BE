@@ -1,10 +1,8 @@
 package site.campingon.campingon.camp.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 import site.campingon.campingon.common.converter.IndutyConverter;
 
 @Entity
@@ -32,12 +30,23 @@ public class CampSite {
 
     @Column(length = 50, nullable = false)
     @Convert(converter = IndutyConverter.class) //converter 사용
-    private Induty type; // 업종 구분
+    private Induty siteType; // 업종 구분
 
     @Column(name = "indoor_facility", length = 255)
     private String indoorFacility;
 
-    // @Builder.Default
+    @Builder.Default
     @Column(name = "is_available", nullable = false)
-    private boolean isAvailable;
+    private boolean isAvailable = false;
+//
+//    @PrePersist
+//    @PreUpdate
+//    private void setDefaultValues() {
+//        if (price == null) {
+//            this.price = siteType.getPrice();
+//        }
+//        if (maximumPeople == null) {
+//            this.maximumPeople = siteType.getMaximum_people();
+//        }
+//    }
 }

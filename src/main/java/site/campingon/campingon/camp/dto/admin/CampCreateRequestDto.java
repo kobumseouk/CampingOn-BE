@@ -5,11 +5,12 @@ import lombok.*;
 import java.util.List;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class CampCreateRequestDto {
-    private String name;           // 캠핑장 이름
+    private String campName;           // 캠핑장 이름
     private String tel;            // 전화번호
     private String lineIntro;      // 요약 소개
     private String homepage;       // 홈페이지 URL

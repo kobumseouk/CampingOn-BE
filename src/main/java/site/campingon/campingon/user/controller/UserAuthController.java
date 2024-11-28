@@ -1,18 +1,23 @@
 package site.campingon.campingon.user.controller;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Map;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.util.WebUtils;
 import site.campingon.campingon.common.exception.ErrorCode;
 import site.campingon.campingon.common.exception.GlobalException;
-import site.campingon.campingon.common.jwt.JwtTokenProvider;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import site.campingon.campingon.common.jwt.JwtToken;
+import site.campingon.campingon.common.util.CookieUtil;
 import site.campingon.campingon.user.dto.UserSignInRequestDto;
 import site.campingon.campingon.user.service.UserAuthService;
 
@@ -22,35 +27,42 @@ import site.campingon.campingon.user.service.UserAuthService;
 @RequestMapping("/api")
 public class UserAuthController {
 
+    @Value("${jwt.refresh-expired}")
+    private Long refreshTokenExpired;
 
     private final UserAuthService userAuthService;
-    private final JwtTokenProvider jwtTokenProvider;
 
     // 로그인 처리
     @PostMapping("/login")
-    public ResponseEntity<JwtToken> login(@RequestBody UserSignInRequestDto userSignInRequestDto) {
+    public ResponseEntity<JwtToken> login(@RequestBody UserSignInRequestDto userSignInRequestDto,
+        HttpServletResponse response) throws IOException {
 
         JwtToken jwtToken = userAuthService.login(userSignInRequestDto);
+        CookieUtil.setCookie(response, "refreshToken", jwtToken.getRefreshToken(),refreshTokenExpired);
+
         return ResponseEntity.ok(jwtToken);
     }
 
 
     // 토큰 재발급
-    @PostMapping("/token/refresh")
-    public ResponseEntity<Object> refreshAccessToken(@RequestBody Map<String, String> request) {
-        String refreshToken = request.get("refreshToken");
-        // 정상적인 refresh Token일 경우에
-        if (refreshToken != null && jwtTokenProvider.validateToken(refreshToken)) {
-            JwtToken jwtToken = userAuthService.refresh(refreshToken);
+    @GetMapping("/token/refresh")
+    public ResponseEntity<JwtToken> refreshAccessToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        Cookie refreshTokenCookie = WebUtils.getCookie(request, "refreshToken");
 
-            return ResponseEntity.ok(jwtToken);
+        if (refreshTokenCookie == null) {
+            throw new GlobalException(ErrorCode.NO_TOKEN);
         }
-        throw new GlobalException(ErrorCode.INVALID_TOKEN);
+
+        JwtToken jwtToken = userAuthService.refresh(refreshTokenCookie.getValue());
+        CookieUtil.setCookie(response, "refreshToken", jwtToken.getRefreshToken(), refreshTokenExpired);
+
+        // JWT 토큰 정보 반환
+        return ResponseEntity.ok(jwtToken);
     }
 
     // 로그아웃 API
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletRequest request) {
+    public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
         // 헤더에서 Access Token 추출
         String accessToken = request.getHeader("Authorization");
         if (accessToken != null && accessToken.startsWith("Bearer ")) {
@@ -59,7 +71,12 @@ public class UserAuthController {
             throw new GlobalException(ErrorCode.NO_TOKEN);
         }
 
-        userAuthService.logout(accessToken); // 서버에서 Refresh Token 삭제 처리
+        // 서버에서 리프레시 토큰 삭제
+        userAuthService.logout(accessToken);
+
+        // Refresh Token 쿠키 삭제
+        CookieUtil.deleteCookie(response, "refreshToken");
+
         return ResponseEntity.noContent().build(); // 204 No Content 응답
     }
 

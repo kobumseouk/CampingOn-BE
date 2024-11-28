@@ -11,7 +11,7 @@ import site.campingon.campingon.camp.entity.CampSite;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface CampSiteMapper {
 
-    CampSiteResponseDto toCampSiteDetailResponseDto(CampSite campSite);
+    CampSiteResponseDto toCampSiteResponseDto(CampSite campSite);
 
     CampSiteListResponseDto toCampSiteListResponseDto(CampSite campSite);
 
