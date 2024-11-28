@@ -13,8 +13,8 @@ import java.util.List;
 @Data
 public class CampSiteResponseDto {
     private Long siteId;              // 캠핑지 ID
-//    private Integer maximumPeople;        // 최대 수용 인원
-//    private Integer price;            // 가격
+    private Integer maximumPeople;        // 최대 수용 인원
+    private Integer price;            // 가격
     private String indoorFacility;    // 실내 시설 설명
     private Induty siteType;              // 업종 구분
     private boolean isAvailable;

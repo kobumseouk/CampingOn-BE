@@ -18,11 +18,11 @@ import site.campingon.campingon.camp.repository.CampRepository;
 import site.campingon.campingon.camp.repository.CampSiteRepository;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -47,6 +47,8 @@ class CampSiteServiceTest {
     private CampAddr mockCampAddr;
     private CampInfo mockCampInfo;
     private List<CampInduty> mockCampInduties;
+    private CampSite mockCampSite;
+    private CampSiteListResponseDto mockCampSiteListDto;
 
     @BeforeEach
     void setUp() {
@@ -115,6 +117,8 @@ class CampSiteServiceTest {
         // CampSiteCreateRequestDto를 생성할 때 단일 Induty를 사용하여 생성
         CampSiteCreateRequestDto createDto = CampSiteCreateRequestDto.builder()
                 .siteType(induty)
+                .price(2000)
+                .maximumPeople(4)
                 .indoorFacility("전기, 수도, 와이파이")
                 .isAvailable(true)
                 .build();
@@ -125,6 +129,8 @@ class CampSiteServiceTest {
                 .id(1L)
                 .camp(mockCamp)
                 .siteType(induty)
+                .price(2000)
+                .maximumPeople(4)
                 .indoorFacility("전기, 수도, 와이파이")
                 .isAvailable(true)
                 .build();
@@ -140,7 +146,10 @@ class CampSiteServiceTest {
                 .thenReturn(CampSiteResponseDto.builder()
                         .siteId(campSite.getId())
                         .siteType(campSite.getSiteType())
+                        .price(campSite.getPrice())
+                        .maximumPeople(campSite.getMaximumPeople())
                         .indoorFacility(campSite.getIndoorFacility())
+                        .isAvailable(campSite.isAvailable())
                         .build());
 
         // When
@@ -162,6 +171,8 @@ class CampSiteServiceTest {
 
         CampSiteUpdateRequestDto updateRequestDto = CampSiteUpdateRequestDto.builder()
                 .siteType(Induty.CAR_SITE)
+                .price(3000)
+                .maximumPeople(5)
                 .indoorFacility("수도, 와이파이")
                 .isAvailable(false)
                 .build();
@@ -170,6 +181,8 @@ class CampSiteServiceTest {
                 .id(siteId)
                 .camp(mockCamp)
                 .siteType(Induty.GLAMP_SITE)
+                .price(2000)
+                .maximumPeople(4)
                 .indoorFacility("전기, 수도, 와이파이")
                 .isAvailable(true)
                 .build();
@@ -178,6 +191,8 @@ class CampSiteServiceTest {
                 .id(siteId)
                 .camp(mockCamp)
                 .siteType(updateRequestDto.getSiteType())
+                .price(updateRequestDto.getPrice())
+                .maximumPeople(updateRequestDto.getMaximumPeople())
                 .indoorFacility(updateRequestDto.getIndoorFacility())
                 .isAvailable(updateRequestDto.isAvailable())
                 .build();
@@ -189,7 +204,10 @@ class CampSiteServiceTest {
                 .thenReturn(CampSiteResponseDto.builder()
                         .siteId(updatedCampSite.getId())
                         .siteType(updatedCampSite.getSiteType())
+                        .price(updatedCampSite.getPrice())
+                        .maximumPeople(updatedCampSite.getMaximumPeople())
                         .indoorFacility(updatedCampSite.getIndoorFacility())
+                        .isAvailable(updatedCampSite.isAvailable())
                         .build());
 
         // When
@@ -231,6 +249,8 @@ class CampSiteServiceTest {
                 .id(1L)
                 .camp(mockCamp)
                 .siteType(Induty.NORMAL_SITE)
+                .price(2000)
+                .maximumPeople(4)
                 .indoorFacility("전기, 수도")
                 .isAvailable(true)
                 .build();
@@ -239,6 +259,8 @@ class CampSiteServiceTest {
                 .id(2L)
                 .camp(mockCamp)
                 .siteType(Induty.CAR_SITE)
+                .price(5000)
+                .maximumPeople(6)
                 .indoorFacility("수도, 와이파이")
                 .isAvailable(false)
                 .build();
@@ -268,6 +290,8 @@ class CampSiteServiceTest {
                 .id(1L)
                 .camp(mockCamp)
                 .siteType(Induty.NORMAL_SITE)
+                .price(2000)
+                .maximumPeople(4)
                 .indoorFacility("전기, 수도")
                 .isAvailable(true)
                 .build();
@@ -276,6 +300,8 @@ class CampSiteServiceTest {
                 .id(2L)
                 .camp(mockCamp)
                 .siteType(Induty.CAR_SITE)
+                .price(5000)
+                .maximumPeople(6)
                 .indoorFacility("수도, 와이파이")
                 .isAvailable(false)
                 .build();
@@ -306,6 +332,8 @@ class CampSiteServiceTest {
                 .id(siteId)
                 .camp(mockCamp)
                 .siteType(Induty.NORMAL_SITE)
+                .price(2000)
+                .maximumPeople(4)
                 .indoorFacility("전기, 수도")
                 .isAvailable(true)
                 .build();
@@ -315,6 +343,9 @@ class CampSiteServiceTest {
                 .thenReturn(CampSiteResponseDto.builder()
                         .siteId(campSite.getId())
                         .siteType(campSite.getSiteType())
+                        .price(campSite.getPrice())
+                        .maximumPeople(campSite.getMaximumPeople())
+                        .indoorFacility(campSite.getIndoorFacility())
                         .build());
 
         // When
@@ -325,4 +356,49 @@ class CampSiteServiceTest {
         assertEquals(siteId, responseDto.getSiteId());
         verify(campSiteRepository, times(1)).findByIdAndCampId(siteId, campId);
     }
+
+//    @Test
+//    @DisplayName("캠핑장의 캠핑지 전체 목록 조회 성공 확인 테스트")
+//    void getCampInSites_success() {
+//        // given
+//        Long campId = 1L;
+//        List<CampSite> campSites = Arrays.asList(mockCampSite);
+//
+//        when(campSiteRepository.findByCampId(campId)).thenReturn(campSites);
+//        when(campSiteMapper.toCampSiteListDto(any(CampSite.class))).thenReturn(mockCampSiteListDto);
+//
+//        // when
+//        List<CampSiteListResponseDto> result = campSiteService.getCampInSites(campId);
+//
+//        // then
+//        assertNotNull(result);
+//        assertEquals(1, result.size());
+//        assertEquals(mockCampSiteListDto, result.get(0));
+//        assertEquals(mockCampSiteListDto.getSiteId(), result.get(0).getSiteId());
+//        assertEquals(mockCampSiteListDto.getSiteType(), result.get(0).getSiteType());
+//        assertEquals(mockCampSiteListDto.getMaximumPeople(), result.get(0).getMaximumPeople());
+//
+//        verify(campSiteRepository).findByCampId(campId);
+//        verify(campSiteMapper).toCampSiteListDto(any(CampSite.class));
+//    }
+
+    @Test
+    @DisplayName("존재하지 않는 캠핑장의 캠핑지 목록 조회 시 빈 리스트 반환 확인 테스트")
+    void getCampInSites_emptySites_returnsEmptyList() {
+        // given
+        Long nonExistentCampId = 999L;
+
+        when(campSiteRepository.findByCampId(nonExistentCampId)).thenReturn(Collections.emptyList());
+
+        // when
+        List<CampSiteListResponseDto> result = campSiteService.getCampInSites(nonExistentCampId);
+
+        // then
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        verify(campSiteRepository).findByCampId(nonExistentCampId);
+        verify(campSiteMapper, never()).toCampSiteListDto(any(CampSite.class));
+    }
+
 }

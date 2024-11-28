@@ -13,8 +13,8 @@ import java.time.LocalTime;
 @Builder
 public class CampSiteListResponseDto {
   private Long siteId;
-//  private Integer maximumPeople;
-//  private Integer price;
+  private Integer maximumPeople;
+  private Integer price;
   private Induty siteType;
   private String indoor_facility;
 

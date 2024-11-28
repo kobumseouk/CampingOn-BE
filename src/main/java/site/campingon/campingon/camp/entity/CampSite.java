@@ -22,13 +22,11 @@ public class CampSite {
     @JoinColumn(name = "camp_id", nullable = false)
     private Camp camp; // 캠핑장 (N:1 관계)
 
-//    @Column(name = "maximum_people", nullable = false)
-//    @Builder.Default
-//    private Integer maximumPeople = null; // 최대 수용 인원
-//
-//    @Column(nullable = false)
-//    @Builder.Default
-//    private Integer price = null; // 가격
+    @Column(name = "maximum_people", nullable = false)
+    private Integer maximumPeople; // 최대 수용 인원
+
+    @Column(nullable = false)
+    private Integer price; // 가격
 
     @Column(length = 50, nullable = false)
     @Convert(converter = IndutyConverter.class) //converter 사용
