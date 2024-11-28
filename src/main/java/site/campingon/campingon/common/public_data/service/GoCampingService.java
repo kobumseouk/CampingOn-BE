@@ -42,7 +42,7 @@ public class GoCampingService {
     private final CampRepository campRepository;
     private final CampSiteRepository campSiteRepository;
     private final CampIndutyRepository campIndutyRepository;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
     private static final String IMAGE_PAGE_NO = "1";    //이미지 몇번부터 값 꺼내올지
 
     @Value("${public-data.go-camping}")
@@ -135,7 +135,7 @@ public class GoCampingService {
     }
 
     //공공데이터 이미지 API 조회하고 dto 변환
-    public List<GoCampingImageDto> getAndConvertToGoCampingDataDto(
+    public List<GoCampingImageDto> getAndConvertToGoCampingImageDataDto(
             Long imageCnt)
             throws URISyntaxException {
         List<GoCampingImageDto> goCampingDataDtoList = new ArrayList<>();
@@ -228,7 +228,7 @@ public class GoCampingService {
     }
 
     //공공데이터 URI 작업 메서드
-    private URI publicDataFilters(GoCampingPath goCampingPath, String... params)
+    public URI publicDataFilters(GoCampingPath goCampingPath, String... params)
             throws URISyntaxException {
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(
                         GO_CAMPING_END_POINT + goCampingPath.getPath())
