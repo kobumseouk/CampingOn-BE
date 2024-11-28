@@ -195,7 +195,7 @@ public class GoCampingService {
                     .camp(camp)
                     .maximumPeople(maximum_people)
                     .price(price)
-                    .type(induty)
+                    .siteType(induty)
                     .indoorFacility(innerFacility)
                     .build();
 
