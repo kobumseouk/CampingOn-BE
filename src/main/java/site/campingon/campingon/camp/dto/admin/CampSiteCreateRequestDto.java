@@ -12,14 +12,14 @@ import site.campingon.campingon.camp.entity.Induty;
 @Builder
 public class CampSiteCreateRequestDto {
 
-//    @NotNull(message = "최대 수용 인원은 필수입니다.")
-//    @Min(value = 1, message = "최대 수용 인원은 최소 1명 이상이어야 합니다.")
-//    @Max(value = 10, message = "최대 수용 인원은 10명을 초과할 수 없습니다.")
-//    private Integer maximumPeople;
-//
-//    @NotNull(message = "가격은 필수입니다.")
-//    @Min(value = 0, message = "가격은 0 이상이어야 합니다.")
-//    private Integer price;
+    @NotNull(message = "최대 수용 인원은 필수입니다.")
+    @Min(value = 1, message = "최대 수용 인원은 최소 1명 이상이어야 합니다.")
+    @Max(value = 10, message = "최대 수용 인원은 10명을 초과할 수 없습니다.")
+    private Integer maximumPeople;
+
+    @NotNull(message = "가격은 필수입니다.")
+    @Min(value = 0, message = "가격은 0 이상이어야 합니다.")
+    private Integer price;
 
     @NotNull(message = "캠핑 유형은 필수입니다.")
     private Induty siteType;
