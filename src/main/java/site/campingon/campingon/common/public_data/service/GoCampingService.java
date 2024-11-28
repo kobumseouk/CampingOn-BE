@@ -193,9 +193,9 @@ public class GoCampingService {
         for (int i = 0; i < siteCnt; ++i) {
             CampSite campSite = CampSite.builder()
                     .camp(camp)
-                    .maximumPeople(maximum_people)
-                    .price(price)
-                    .type(induty)
+//                    .maximumPeople(maximum_people)
+//                    .price(price)
+                    .siteType(induty)
                     .indoorFacility(innerFacility)
                     .build();
 

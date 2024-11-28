@@ -27,10 +27,13 @@ public class CampSiteService {
 
     @Transactional
     public CampSiteResponseDto createCampSite(Long campId, CampSiteCreateRequestDto createRequestDto) {
+        if (!campRepository.existsById(campId)) {
+            throw new RuntimeException("캠핑장을 찾을 수 없습니다.");
+        }
         Camp camp = campRepository.findById(campId)
                 .orElseThrow(() -> new RuntimeException("캠핑장을 찾을 수 없습니다."));
         CampSite campSite = campSiteMapper.toCampSite(createRequestDto, camp);
-        return campSiteMapper.toCampSiteDetailResponseDto(campSiteRepository.save(campSite));
+        return campSiteMapper.toCampSiteResponseDto(campSiteRepository.save(campSite));
     }
 
     @Transactional
@@ -43,7 +46,7 @@ public class CampSiteService {
         CampSite campSite = campSiteRepository.findByIdAndCampId(siteId, campId)
                 .orElseThrow(() -> new RuntimeException("캠핑지를 찾을 수 없습니다."));
         campSiteMapper.updateCampSiteFromDto(updateRequestDto, campSite);
-        return campSiteMapper.toCampSiteDetailResponseDto(campSiteRepository.save(campSite));
+        return campSiteMapper.toCampSiteResponseDto(campSiteRepository.save(campSite));
     }
 
     @Transactional
@@ -76,6 +79,6 @@ public class CampSiteService {
     public CampSiteResponseDto getCampSite(Long campId, Long siteId) {
         CampSite campSite = campSiteRepository.findByIdAndCampId(siteId, campId)
                 .orElseThrow(() -> new RuntimeException("캠핑지를 찾을 수 없습니다."));
-        return campSiteMapper.toCampSiteDetailResponseDto(campSite);
+        return campSiteMapper.toCampSiteResponseDto(campSite);
     }
 }
