@@ -17,9 +17,7 @@ public class CampSiteResponseDto {
 //    private Integer price;            // 가격
     private String indoorFacility;    // 실내 시설 설명
     private Induty siteType;              // 업종 구분
-    @Builder.Default
-//    private boolean isAvailable = false;
-    private boolean isAvailable = false;
+    private boolean isAvailable;
 
     private LocalTime checkInTime;    // 체크인 시간
     private LocalTime checkOutTime;   // 체크아웃 시간

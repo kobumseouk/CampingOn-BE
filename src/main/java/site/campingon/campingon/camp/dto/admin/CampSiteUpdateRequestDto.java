@@ -27,6 +27,5 @@ public class CampSiteUpdateRequestDto {
     @Size(max = 255, message = "내부 시설 정보는 최대 255자까지 가능합니다.")
     private String indoorFacility;
 
-    @NotNull(message = "사용 가능 여부는 필수입니다.")
-    private Boolean isAvailable;
+    private boolean isAvailable;
 }
