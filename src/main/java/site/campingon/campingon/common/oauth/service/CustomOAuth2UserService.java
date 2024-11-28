@@ -123,7 +123,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             log.debug("Google account successfully revoked.");
 
             //DB 업데이트 - soft-delete, oauthName 삭제
-            String oauthName = ((CustomOAuth2User) oauth2User).getOauthName();
+            String oauthName = oauth2User.getOauthName();
             User user = userRepository.findByOauthName(oauthName);
 
             User updatedUser = user.toBuilder()
