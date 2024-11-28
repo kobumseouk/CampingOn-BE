@@ -127,7 +127,7 @@ public class GoCampingService {
     public GoCampingDataDto getAndConvertToGoCampingDataDto(
             String... params
     ) throws URISyntaxException {
-        URI uri = publicDataFilters(GoCampingPath.BASED_LIST, params);
+        URI uri = createUri(GoCampingPath.BASED_LIST, params);
 
         return restTemplate.getForObject(uri, GoCampingDataDto.class);  //API 호출
     }
@@ -143,7 +143,7 @@ public class GoCampingService {
                 .toList();
 
         for (Long campId : campIdList) {
-            URI uri = publicDataFilters(GoCampingPath.IMAGE_LIST,
+            URI uri = createUri(GoCampingPath.IMAGE_LIST,
                     "numOfRows", imageCnt.toString(),
                     "pageNo", IMAGE_PAGE_NO,  //몇번부터 시작할지
                     "contentId", campId.toString());
@@ -226,7 +226,7 @@ public class GoCampingService {
     }
 
     //공공데이터 URI 작업 메서드
-    public URI publicDataFilters(GoCampingPath goCampingPath, String... params)
+    public URI createUri(GoCampingPath goCampingPath, String... params)
             throws URISyntaxException {
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(
                         GO_CAMPING_END_POINT + goCampingPath.getPath())
