@@ -3,6 +3,7 @@ package site.campingon.campingon.reservation.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
+import site.campingon.campingon.camp.entity.Camp;
 import site.campingon.campingon.camp.entity.CampSite;
 import site.campingon.campingon.common.entity.BaseEntity;
 import site.campingon.campingon.user.entity.User;
@@ -21,11 +22,15 @@ public class Reservation extends BaseEntity {
     @Column(nullable = false, columnDefinition = "INT UNSIGNED")
     private Long Id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
+    private Camp camp;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private CampSite campSite;
 
