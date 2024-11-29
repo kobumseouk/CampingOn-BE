@@ -67,48 +67,49 @@ class CampSiteServiceTest {
         .build();
   }
 
-
   @Test
-  @DisplayName("캠핑장의 캠핑지 전체 목록 조회 성공 확인 테스트")
-  void getCampInSites_success() {
+  @DisplayName("예약 가능한 캠프사이트 조회 성공 확인 테스트")
+  void getAvailableCampSites_success() {
     // given
     Long campId = 1L;
-    List<CampSite> campSites = Arrays.asList(mockCampSite);
+    List<Long> reservedSiteIds = Arrays.asList(2L, 3L);
+    List<CampSite> allCampSites = Arrays.asList(
+        mockCampSite,
+        CampSite.builder().id(2L).camp(mockCamp).siteType(Induty.NORMAL_SITE).build(),
+        CampSite.builder().id(3L).camp(mockCamp).siteType(Induty.CAR_SITE).build()
+    );
 
-    when(campSiteRepository.findByCampId(campId)).thenReturn(campSites);
+    when(campSiteRepository.findByCampId(campId)).thenReturn(allCampSites);
     when(campSiteMapper.toCampSiteListDto(any(CampSite.class))).thenReturn(mockCampSiteListDto);
 
     // when
-    List<CampSiteListResponseDto> result = campSiteService.getCampInSites(campId);
+    List<CampSiteListResponseDto> result = campSiteService.getAvailableCampSites(campId, reservedSiteIds);
 
     // then
     assertNotNull(result);
     assertEquals(1, result.size());
     assertEquals(mockCampSiteListDto, result.get(0));
-    assertEquals(mockCampSiteListDto.getSiteId(), result.get(0).getSiteId());
-    assertEquals(mockCampSiteListDto.getType(), result.get(0).getType());
-    assertEquals(mockCampSiteListDto.getMaxPeople(), result.get(0).getMaxPeople());
-
     verify(campSiteRepository).findByCampId(campId);
     verify(campSiteMapper).toCampSiteListDto(any(CampSite.class));
   }
 
   @Test
-  @DisplayName("존재하지 않는 캠핑장의 캠핑지 목록 조회 시 빈 리스트 반환 확인 테스트")
-  void getCampInSites_emptySites_returnsEmptyList() {
+  @DisplayName("모든 캠프사이트가 예약 불가능할 때 빈 리스트 반환 확인 테스트")
+  void getAvailableCampSites_allReserved_returnsEmptyList() {
     // given
-    Long nonExistentCampId = 999L;
+    Long campId = 1L;
+    List<Long> reservedSiteIds = Arrays.asList(1L);
+    List<CampSite> allCampSites = Arrays.asList(mockCampSite);
 
-    when(campSiteRepository.findByCampId(nonExistentCampId)).thenReturn(Collections.emptyList());
+    when(campSiteRepository.findByCampId(campId)).thenReturn(allCampSites);
 
     // when
-    List<CampSiteListResponseDto> result = campSiteService.getCampInSites(nonExistentCampId);
+    List<CampSiteListResponseDto> result = campSiteService.getAvailableCampSites(campId, reservedSiteIds);
 
     // then
     assertNotNull(result);
     assertTrue(result.isEmpty());
-
-    verify(campSiteRepository).findByCampId(nonExistentCampId);
+    verify(campSiteRepository).findByCampId(campId);
     verify(campSiteMapper, never()).toCampSiteListDto(any(CampSite.class));
   }
 }

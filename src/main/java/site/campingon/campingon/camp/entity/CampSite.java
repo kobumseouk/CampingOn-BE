@@ -1,10 +1,7 @@
 package site.campingon.campingon.camp.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import site.campingon.campingon.common.converter.IndutyConverter;
 
 @Entity

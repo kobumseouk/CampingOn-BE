@@ -63,11 +63,17 @@ public class CampSiteService {
                 .toList();
     }
 
-    // 캠핑장의 캠핑지 전체 목록 조회
-    public List<CampSiteListResponseDto> getCampInSites(Long campId) {
-        List<CampSite> campSites = campSiteRepository.findByCampId(campId);
+    // 캠핑장의 예약 가능한 SiteType별 캠핑지 조회
+    public List<CampSiteListResponseDto> getAvailableCampSites(Long campId, List<Long> reservedSiteIds) {
+        // 해당 캠핑장의 모든 캠프사이트 조회
+        List<CampSite> allCampSites = campSiteRepository.findByCampId(campId);
 
-        return campSites.stream()
+        // 예약 불가능한 사이트들 제외하고 타입별 그룹화
+        return allCampSites.stream()
+            .filter(site -> !reservedSiteIds.contains(site.getId()))  // 이미 예약된 사이트 제외
+            .collect(Collectors.groupingBy(CampSite::getSiteType)) // 그룹화
+            .values().stream()
+            .map(sites -> sites.get(0))  // 각 타입별 첫 번째 사이트만 선택
             .map(campSiteMapper::toCampSiteListDto)
             .collect(Collectors.toList());
     }
