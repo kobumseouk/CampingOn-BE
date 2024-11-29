@@ -1,5 +1,6 @@
 package site.campingon.campingon.common.public_data.controller;
 
+import com.vividsolutions.jts.io.ParseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +29,7 @@ public class GoCampingController {
     public ResponseEntity<List<GoCampingParsedResponseDto>> createCampByGoCampingBasedList(
             @RequestParam("numOfRows") Long numOfRows,  //몇개의 데이터 갖고올지
             @RequestParam("pageNo") Long pageNo)    //몇번부터 시작하는지
-            throws URISyntaxException {
+            throws URISyntaxException, ParseException {
         //공공데이터를 조회하고 반환
         GoCampingDataDto goCampingDataDto = goCampingService.getAndConvertToGoCampingDataDto(
                 "numOfRows", numOfRows.toString(),
