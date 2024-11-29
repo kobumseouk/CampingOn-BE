@@ -107,7 +107,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     // 구글 로그인 유저 탈퇴 시
     @Transactional
-    public void deleteGoogleAccount(OAuth2User oauth2User) {
+    public void deleteGoogleAccount(CustomOAuth2User oauth2User) {
         String accessToken = (String) oauth2User.getAttributes().get("accessToken");
 
         if (accessToken == null) {

@@ -44,7 +44,7 @@ public class User extends BaseEntity {
     @Column(name="delete_reason", columnDefinition = "TEXT")
     private String deleteReason;
 
-    @Column(name = "deleted_at")
+    @Column(name = "deleted_at", columnDefinition = "DATETIME(0) DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime deletedAt;
 
     @Enumerated(EnumType.STRING)

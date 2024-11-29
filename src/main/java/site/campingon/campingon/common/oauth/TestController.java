@@ -41,9 +41,9 @@ public class TestController {
 
     @GetMapping("/oauth/logout")
     @ResponseBody
-    public RedirectView logout(@AuthenticationPrincipal OAuth2User principal) {
-        if (principal != null) {
-            customOAuth2UserService.deleteGoogleAccount(principal);
+    public RedirectView logout(@AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        if (customOAuth2User != null) {
+            customOAuth2UserService.deleteGoogleAccount(customOAuth2User);
         }
 
         return new RedirectView("/oauth/logout/success");

@@ -34,7 +34,18 @@ public class CampSite {
     @Column(name = "indoor_facility", length = 255)
     private String indoorFacility;
 
-    // @Builder.Default
+    @Builder.Default
     @Column(name = "is_available", nullable = false)
-    private boolean isAvailable;
+    private boolean isAvailable = false;
+//
+//    @PrePersist
+//    @PreUpdate
+//    private void setDefaultValues() {
+//        if (price == null) {
+//            this.price = siteType.getPrice();
+//        }
+//        if (maximumPeople == null) {
+//            this.maximumPeople = siteType.getMaximum_people();
+//        }
+//    }
 }

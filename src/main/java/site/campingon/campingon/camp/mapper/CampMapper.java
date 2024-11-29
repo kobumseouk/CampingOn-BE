@@ -54,12 +54,10 @@ public interface CampMapper {
   void updateCampFromDto(Camp updatedCamp, @MappingTarget Camp existingCamp);
 
   // CampCreateRequestDto -> Camp
-  @Mapping(target = "campName", source = "name")
   @Mapping(target = "images", source = "images", qualifiedByName = "urlsToImagesList")
   Camp toCampEntity(CampCreateRequestDto createRequestDto);
 
   // CampUpdateRequestDto -> Camp
-  @Mapping(target = "campName", source = "name")
   @Mapping(target = "images", source = "images", qualifiedByName = "urlsToImagesList")
   Camp toCampEntity(CampUpdateRequestDto updateRequestDto);
 }

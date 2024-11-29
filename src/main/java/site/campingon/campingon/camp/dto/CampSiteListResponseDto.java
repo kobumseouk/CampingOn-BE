@@ -2,20 +2,21 @@ package site.campingon.campingon.camp.dto;
 
 
 import lombok.*;
+import site.campingon.campingon.camp.entity.Induty;
 
 import java.time.LocalTime;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class CampSiteListResponseDto {
   private Long siteId;
-  private Integer maxPeople;
+  private Integer maximumPeople;
   private Integer price;
-  private String imageUrl;
+  private Induty siteType;
   private String indoor_facility;
-  private String type;
 
   @Builder.Default  // 기본값 자동 설정
   private LocalTime checkInTime = LocalTime.of(15, 0);  // 15:00
