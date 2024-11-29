@@ -37,3 +37,8 @@ public-data:
 
 jwt:
   secret-key: ${JWT_SECRET_KEY}
+
+app:
+  pagination:
+    reservation:
+      size: 10
