@@ -23,4 +23,9 @@ public class UserKeyword {
 
   @Column(nullable = false)
   private String keyword;
+
+  @Override
+  public String toString() {
+    return "{user_id: " + user.getId() + ", keyword: " +  keyword + "}";
+  }
 }
