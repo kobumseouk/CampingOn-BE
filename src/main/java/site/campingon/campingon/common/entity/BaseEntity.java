@@ -15,12 +15,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 @MappedSuperclass
 public class BaseEntity {
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME(0)")
     private LocalDateTime createdAt;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @LastModifiedDate
     @Column(name = "modified_at", nullable = false, columnDefinition = "DATETIME(0)")
     private LocalDateTime modifiedAt;
