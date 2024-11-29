@@ -4,18 +4,19 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import site.campingon.campingon.reservation.entity.ReservationStatus;
+
+import java.time.LocalDateTime;
 
 @Getter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReservationCancelRequestDto {
+public class ReservationCheckDateRequestDto {
 
-    private Long id;
+    private Long camp_id;
 
-    private ReservationStatus status;
+    private LocalDateTime checkIn;
 
-    private String cancelReason;
+    private LocalDateTime checkOut;
 
 }
