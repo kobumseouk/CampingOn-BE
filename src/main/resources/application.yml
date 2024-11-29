@@ -1,19 +1,15 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_ON_EXIT=FALSE;MODE=MYSQL  # Prevent H2 from closing when JVM shuts down
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-  h2:
-    console:
-      enabled: true  # H2 console activation
-      path: /h2-console  # Access H2 console at /h2-console
+    url: ${MYSQL_URL}  # Prevent H2 from closing when JVM shuts down
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
   jpa:
-    defer-datasource-initialization: true  # Correctly defers initialization for H2 database
+    database: mysql
     show-sql: true  # Log SQL statements
     hibernate:
-      ddl-auto: update  # Auto-update schema
-    database-platform: org.hibernate.dialect.H2Dialect  # Explicit dialect (optional for H2)
+      ddl-auto: update  # mysql 테이블 생성하고 싶으면 create 변경
+    database-platform: org.hibernate.dialect.MySQLDialect  # Explicit dialect (optional for H2)
     properties:
       hibernate:
         format_sql: true  # Pretty-print SQL in logs
