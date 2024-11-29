@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ReservationCheckDateRequestDto {
 
-    private Long camp_id;
+    private Long campId;
 
     private LocalDateTime checkIn;
 
