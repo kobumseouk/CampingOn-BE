@@ -6,7 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import site.campingon.campingon.common.jwt.CustomUserDetails;
 import site.campingon.campingon.reservation.dto.*;
 import site.campingon.campingon.reservation.service.ReservationService;
 
@@ -23,10 +25,10 @@ public class ReservationController {
 
     // 유저의 예약 목록 조회
     @GetMapping
-    public ResponseEntity<Page<ReservationResponseDto>> getReservations(@RequestParam Long userId,
+    public ResponseEntity<Page<ReservationResponseDto>> getReservations(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                                         @RequestParam int page) {
         Pageable pageable = PageRequest.of(page, pageSize);
-        return ResponseEntity.ok(reservationService.getReservations(userId, pageable));
+        return ResponseEntity.ok(reservationService.getReservations(userDetails.getId(), pageable));
     }
 
     // 새로운 예약 후 확인을 위한 조회
