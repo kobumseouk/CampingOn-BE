@@ -247,6 +247,16 @@ class CampServiceTest {
     assertEquals(mockCampDetailDto.getName(), result.getName());
     assertEquals("일반야영장, 자동차야영장", result.getIndutys());
 
+    // CampAddr 관련 검증
+    assertNotNull(result.getCampAddr());
+    assertEquals(mockCampAddr.getCity(), result.getCampAddr().getCity());
+    assertEquals(mockCampAddr.getState(), result.getCampAddr().getState());
+
+    // CampInfo 관련 검증
+    assertNotNull(result.getCampInfo());
+    assertEquals(mockCampInfo.getRecommendCnt(), result.getCampInfo().getRecommendCnt());
+    assertEquals(mockCampInfo.getBookmarkCnt(), result.getCampInfo().getBookmarkCnt());
+
     verify(campRepository).findById(campId);
     verify(campMapper).toCampDetailDto(mockCamp);
   }
