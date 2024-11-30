@@ -48,7 +48,9 @@ public class Camp{
   private List<CampImage> images;
 
   @OneToMany(mappedBy = "camp",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+/*
   @Column(length = 100, nullable = false)
+*/
   private List<CampInduty> induty;  // 업종
 
   @OneToOne(mappedBy = "camp", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
