@@ -75,7 +75,7 @@ class CampSiteServiceTest {
   }
 
   @Test
-  @DisplayName("예약 가능한 캠프사이트 조회 성공 확인 테스트")
+  @DisplayName("TEST - 예약 가능한 캠프사이트 조회 성공 확인 테스트")
   void getAvailableCampSites_success() {
     // given
     Long campId = 1L;
@@ -101,7 +101,7 @@ class CampSiteServiceTest {
   }
 
   @Test
-  @DisplayName("모든 캠프사이트가 예약 불가능할 때 빈 리스트 반환 확인 테스트")
+  @DisplayName("TEST - 모든 캠프사이트가 예약 불가능할 때 빈 리스트 반환 확인 테스트")
   void getAvailableCampSites_allReserved_returnsEmptyList() {
     // given
     Long campId = 1L;
@@ -331,5 +331,59 @@ class CampSiteServiceTest {
     assertNotNull(responseDto);
     assertEquals(siteId, responseDto.getSiteId());
     verify(campSiteRepository, times(1)).findByIdAndCampId(siteId, campId);
+  }
+
+  @Test
+  @DisplayName("TEST - 캠프사이트 예약 가능 여부 토글")
+  public void testToggleAvailability() {
+    // Given
+    Long campSiteId = 1L;
+    CampSite existingCampSite = CampSite.builder()
+            .id(campSiteId)
+            .maximumPeople(10)
+            .price(10000)
+            .siteType(Induty.CAR_SITE)
+            .indoorFacility("Indoor Facility")
+            .isAvailable(false) // 초기 상태 false
+            .build();
+
+    CampSite updatedCampSite = existingCampSite.toBuilder()
+            .isAvailable(true) // 상태를 true로 변경
+            .build();
+
+    when(campSiteRepository.findById(campSiteId)).thenReturn(Optional.of(existingCampSite));
+    when(campSiteRepository.save(any(CampSite.class))).thenReturn(updatedCampSite);
+
+    // When
+    boolean updatedStatus = campSiteService.toggleAvailability(campSiteId);
+
+    // Then
+    assertTrue(updatedStatus);
+    verify(campSiteRepository, times(1)).findById(campSiteId);
+    verify(campSiteRepository, times(1)).save(any(CampSite.class));
+  }
+
+  @Test
+  @DisplayName("TEST - 캠프사이트 예약 가능 여부 조회")
+  public void testGetAvailability() {
+    // Given
+    Long campSiteId = 1L;
+    CampSite campSite = CampSite.builder()
+            .id(campSiteId)
+            .maximumPeople(10)
+            .price(10000)
+            .siteType(Induty.CAR_SITE)
+            .indoorFacility("Indoor Facility")
+            .isAvailable(true) // 초기 상태 true
+            .build();
+
+    when(campSiteRepository.findById(campSiteId)).thenReturn(Optional.of(campSite));
+
+    // When
+    boolean isAvailable = campSiteService.getAvailability(campSiteId);
+
+    // Then
+    assertTrue(isAvailable);
+    verify(campSiteRepository, times(1)).findById(campSiteId);
   }
 }

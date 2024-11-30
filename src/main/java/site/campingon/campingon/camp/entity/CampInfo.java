@@ -20,7 +20,7 @@ public class CampInfo {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "camp_id", nullable = false)
+    @JoinColumn(name = "camp_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private Camp camp;
 
     @Column(name = "recommend_cnt")

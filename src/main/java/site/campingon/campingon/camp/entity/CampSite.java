@@ -35,17 +35,6 @@ public class CampSite {
     private String indoorFacility;
 
     @Builder.Default
-    @Column(name = "is_available", nullable = false)
+    @Column(name = "is_available", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 1")
     private boolean isAvailable = false;
-//
-//    @PrePersist
-//    @PreUpdate
-//    private void setDefaultValues() {
-//        if (price == null) {
-//            this.price = siteType.getPrice();
-//        }
-//        if (maximumPeople == null) {
-//            this.maximumPeople = siteType.getMaximum_people();
-//        }
-//    }
 }
