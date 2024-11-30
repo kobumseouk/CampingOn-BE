@@ -1,22 +1,21 @@
 spring:
   datasource:
-    url: ${MYSQL_URL}  # Prevent H2 from closing when JVM shuts down
+    url: ${MYSQL_URL}  # MySQL 데이터베이스 URL
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: ${MYSQL_USERNAME}
     password: ${MYSQL_PASSWORD}
   jpa:
-    database: mysql
-    show-sql: true  # Log SQL statements
+    show-sql: true  # SQL 로그 출력
     hibernate:
-      ddl-auto: update  # mysql 테이블 생성하고 싶으면 create 변경
-    database-platform: org.hibernate.dialect.MySQLDialect  # Explicit dialect (optional for H2)
+      ddl-auto: update
+    database-platform: org.hibernate.spatial.dialect.mysql.MySQLSpatialDialect  # 공간 데이터 처리 Dialect
     properties:
       hibernate:
-        format_sql: true  # Pretty-print SQL in logs
-        auto_quote_keyword: true
+        format_sql: true  # SQL 로그를 보기 좋게 포맷
+        auto_quote_keyword: true  # 예약어를 자동으로 따옴표 처리
   sql:
     init:
-      mode: always  # Always run SQL scripts during initialization
+      mode: always  # 애플리케이션 초기화 시 SQL 스크립트 실행
   security:
     oauth2:
       client:
@@ -26,7 +25,7 @@ spring:
             client-secret: ${GOOGLE_CLIENT_SECRET}
             scope: profile, email
   profiles:
-    active: dev, s3Bucket #logback-spring springProfile 설정, AWS S3 Bucket 설정
+    active: dev, s3Bucket  # logback-spring SpringProfile 설정 및 AWS S3 Bucket 설정
 
 public-data:
   go-camping: ${GO_CAMPING_SERVICE_KEY}

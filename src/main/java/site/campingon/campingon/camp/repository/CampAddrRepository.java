@@ -13,7 +13,7 @@ public interface CampAddrRepository extends JpaRepository<CampAddr, Long> {
 
     @Modifying
     @Query(value = "INSERT INTO camp_addr (camp_id, city, state, zipcode, street_addr, detailed_addr, location) " +
-            "VALUES (:campId, :city, :state, :zipcode, :streetAddr, :detailedAddr, ST_GeomFromText(:location))", nativeQuery = true)
+            "VALUES (:campId, :city, :state, :zipcode, :streetAddr, :detailedAddr, ST_GeomFromText(:location, 4326))", nativeQuery = true)
     void saveWithPoint(@Param("campId") Long campId,
                        @Param("city") String city,
                        @Param("state") String state,

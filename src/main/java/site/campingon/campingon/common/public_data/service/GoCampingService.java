@@ -100,7 +100,7 @@ public class GoCampingService {
 
             createCampInduty(camp, normalSiteCnt, carSiteCnt, glampSiteCnt, caravSiteCnt, personalCaravanSiteCnt);
 
-            String pointWKT = String.format("POINT(%f %f)", data.getMapX(), data.getMapY());
+            String pointWKT = String.format("POINT(%f %f)", data.getMapY(), data.getMapX());
             Point point = (Point) new WKTReader().read(pointWKT);
 
 //            CampAddr campAddr = CampAddr.builder()

@@ -1,7 +1,9 @@
 package site.campingon.campingon.camp.entity;
 
+
 import org.locationtech.jts.geom.Point;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Type;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -39,7 +41,7 @@ public class CampAddr {
     @Column(nullable = false)
     private Double latitude;  // maxY - 위도*/
 
-    @Column(name = "location", updatable = false, nullable = false)
+    @Column(columnDefinition = "POINT SRID 4326", nullable = false) // MySQL POINT 유형 및 SRID 지정
     private Point location;
 
     @Column(name = "street_addr", length = 50)
