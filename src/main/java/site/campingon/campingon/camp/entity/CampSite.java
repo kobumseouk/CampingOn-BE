@@ -1,7 +1,6 @@
 package site.campingon.campingon.camp.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import site.campingon.campingon.common.converter.IndutyConverter;
 
