@@ -19,11 +19,11 @@ public class CampAddr {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(columnDefinition = "INT UNSIGNED")
+    @Column(columnDefinition = "BIGINT UNSIGNED")
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "camp_id", nullable = false)
+    @JoinColumn(name = "camp_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private Camp camp;
 
     @Column(length = 50)

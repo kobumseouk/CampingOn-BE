@@ -35,8 +35,9 @@ public class CampSite {
     private String indoorFacility;
 
     @Builder.Default
-    @Column(name = "is_available", nullable = false)
+    @Column(name = "is_available", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 1")
     private boolean isAvailable = false;
+
 
     public void updateCampSite(Camp camp, int maximumPeople, int price, Induty induty, String innerFacility) {
         this.camp = camp;
@@ -56,4 +57,5 @@ public class CampSite {
 //            this.maximumPeople = siteType.getMaximum_people();
 //        }
 //    }
+
 }
