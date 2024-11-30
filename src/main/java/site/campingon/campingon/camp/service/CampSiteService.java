@@ -87,4 +87,26 @@ public class CampSiteService {
                 .orElseThrow(() -> new RuntimeException("캠핑지를 찾을 수 없습니다."));
         return campSiteMapper.toCampSiteResponseDto(campSite);
     }
+
+    // isAvailable 상태를 토글하고 변경된 상태 반환
+    @Transactional
+    public boolean toggleAvailability(Long campSiteId) {
+        CampSite campSite = campSiteRepository.findById(campSiteId)
+                .orElseThrow(() -> new RuntimeException("캠프 사이트를 찾을 수 없습니다."));
+
+        boolean newAvailability = !campSite.isAvailable(); // 현재 상태를 반대로 변경
+        CampSite updatedCampSite = campSite.toBuilder()
+                .isAvailable(newAvailability) // 변경된 상태로 업데이트
+                .build();
+
+        campSiteRepository.save(updatedCampSite); // 저장
+        return newAvailability; // 변경된 상태 반환
+    }
+
+    // isAvailable 상태 조회
+    public boolean getAvailability(Long campSiteId) {
+        CampSite campSite = campSiteRepository.findById(campSiteId)
+                .orElseThrow(() -> new RuntimeException("캠프 사이트를 찾을 수 없습니다."));
+        return campSite.isAvailable();
+    }
 }

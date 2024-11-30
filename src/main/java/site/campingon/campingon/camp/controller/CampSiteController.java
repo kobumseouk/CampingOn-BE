@@ -25,4 +25,22 @@ public class CampSiteController {
   ) {
     return ResponseEntity.ok(campSiteService.getAvailableCampSites(campId, reservedSiteIds));
   }
+
+  // 특정 캠핑지의 isAvailable 상태를 토글
+  @PutMapping("/{campSiteId}/toggle-availability")
+  public ResponseEntity<Boolean> toggleAvailability(
+          @PathVariable Long campSiteId
+  ) {
+    boolean newAvailability = campSiteService.toggleAvailability(campSiteId);
+    return ResponseEntity.ok(newAvailability); // 변경된 isAvailable 상태 반환
+  }
+
+  // 특정 캠핑지의 isAvailable 상태 조회
+  @GetMapping("/{campSiteId}/availability")
+  public ResponseEntity<Boolean> getAvailability(
+          @PathVariable Long campSiteId
+  ) {
+    boolean isAvailable = campSiteService.getAvailability(campSiteId);
+    return ResponseEntity.ok(isAvailable); // 현재 isAvailable 상태 반환
+  }
 }
