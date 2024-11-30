@@ -45,10 +45,10 @@ public class UserService {
         if (existingUser.isPresent()) {
             User user = existingUser.get(); // NPE 방지
             if (user.getEmail().equals(userSignUpRequestDto.getEmail())) {
-                throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
+                throw new GlobalException(ErrorCode.DUPLICATED_EMAIL);
             }
             if (user.getNickname().equals(userSignUpRequestDto.getNickname())) {
-                throw new IllegalArgumentException("이미 존재하는 닉네임입니다.");
+                throw new GlobalException(ErrorCode.DUPLICATED_NICKNAME);
             }
         }
 
@@ -72,7 +72,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public UserResponseDto getMyInfo(Long userId) {
         User user = userRepository.findByIdAndDeletedAtIsNull(userId)
-            .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+            .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND_BY_ID));
 
         return userMapper.toResponseDto(user);
     }
@@ -91,7 +91,7 @@ public class UserService {
     public UserResponseDto updateUser(Long userId, UserUpdateRequestDto userUpdateRequestDto) {
         // 사용자 정보 조회
         User user = userRepository.findByIdAndDeletedAtIsNull(userId)
-            .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+            .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND_BY_ID));
 
         // 현재 비밀번호 확인
         if (!passwordEncoder.matches(userUpdateRequestDto.getCurrentPassword(),
@@ -101,7 +101,7 @@ public class UserService {
 
         // 닉네임 변경
         if (userRepository.existsByNickname(userUpdateRequestDto.getNickname())) {
-            throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
+            throw new GlobalException(ErrorCode.DUPLICATED_NICKNAME);
         }
         user.updateNickname(userUpdateRequestDto.getNickname());
 
@@ -130,7 +130,7 @@ public class UserService {
     public void deleteUser(Long userId, String deleteReson) {
         // 사용자 정보 조회
         User user = userRepository.findByIdAndDeletedAtIsNull(userId)
-            .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+            .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND_BY_ID));
 
         refreshTokenService.deleteRefreshTokenByEmail(user.getEmail());
 
@@ -145,7 +145,7 @@ public class UserService {
         return switch (type.toLowerCase()) {
             case "email" -> userRepository.existsByEmailAndDeletedAtIsNull(value);
             case "nickname" -> userRepository.existsByNickname(value);
-            default -> throw new IllegalArgumentException("Invalid type parameter");
+            default -> throw new IllegalArgumentException("잘못된 타입 입력값입니다.");
         };
     }
 
