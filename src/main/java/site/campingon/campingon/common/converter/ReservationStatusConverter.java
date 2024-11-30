@@ -11,14 +11,14 @@ import java.util.Arrays;
 @Converter(autoApply = true)
 public class ReservationStatusConverter implements AttributeConverter<ReservationStatus, String> {
 
-    // 한글명으로 저장 시 (ENUM → String)
+    // DB에 저장할 때 (Enum -> String) 영문으로 저장
     @Override
     public String convertToDatabaseColumn(ReservationStatus reservationStatus) {
 
-        return reservationStatus.getStatus();
+        return reservationStatus.name();
     }
 
-    // DB 에서 조회 시 (String -> ENUM)
+    // DB에 꺼내서 조회할 때 (String -> Enum)
     @Override
     public ReservationStatus convertToEntityAttribute(String dbData) {
 

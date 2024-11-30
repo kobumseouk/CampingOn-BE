@@ -1,10 +1,14 @@
 package site.campingon.campingon.common.public_data.service;
 
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKTReader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.geo.Point;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import site.campingon.campingon.camp.entity.*;
@@ -42,13 +46,15 @@ public class GoCampingService {
     private final CampSiteRepository campSiteRepository;
     private final CampIndutyRepository campIndutyRepository;
     private final RestTemplate restTemplate;
+    private final GeometryFactory geometryFactory = new GeometryFactory();
     private static final String IMAGE_PAGE_NO = "1";    //이미지 몇번부터 값 꺼내올지
 
     @Value("${public-data.go-camping}")
     private String serviceKey;
 
     //Camp 관련 엔티티 생성 및 DB 저장 메서드
-    public List<GoCampingParsedResponseDto> createCampByGoCampingData(GoCampingDataDto goCampingDataDto) {
+    @Transactional
+    public List<GoCampingParsedResponseDto> createCampByGoCampingData(GoCampingDataDto goCampingDataDto) throws ParseException {
         List<GoCampingDataDto.Item> items = goCampingDataDto.getResponse().getBody().getItems().getItem();
         List<GoCampingParsedResponseDto> goCampingParsedResponseDtoList = goCampingMapper.toGoCampingParsedResponseDtoList(items);
 
@@ -68,8 +74,10 @@ public class GoCampingService {
                 continue;
             }
 
+            //todo 중복된 아이디를 여러개 넣었을때 발생하는 문제점 더티체킹해서 괜찮음..???
+
             Camp camp = Camp.builder()
-                    .id(data.getContentId())  //엔티티 autoIncrement 전략
+                    .id(data.getContentId())
                     .campName(data.getFacltNm())
                     .lineIntro(data.getLineIntro())
                     .intro(data.getIntro())
@@ -92,16 +100,29 @@ public class GoCampingService {
 
             createCampInduty(camp, normalSiteCnt, carSiteCnt, glampSiteCnt, caravSiteCnt, personalCaravanSiteCnt);
 
-            CampAddr campAddr = CampAddr.builder()
-                    .camp(camp)
-                    .city(data.getDoNm())
-                    .state(data.getSigunguNm())
-                    .zipcode(data.getZipcode())
-                    .streetAddr(data.getAddr1())
-                    .detailedAddr(data.getAddr2())
-                    .location(new Point(data.getMapX(), data.getMapY()))
-                    .build();
-            campAddrRepository.save(campAddr);
+            String pointWKT = String.format("POINT(%f %f)", data.getMapX(), data.getMapY());
+            Point point = (Point) new WKTReader().read(pointWKT);
+
+//            CampAddr campAddr = CampAddr.builder()
+//                    .camp(camp)
+//                    .city(data.getDoNm())
+//                    .state(data.getSigunguNm())
+//                    .zipcode(data.getZipcode())
+//                    .streetAddr(data.getAddr1())
+//                    .detailedAddr(data.getAddr2())
+//                    .location(point)
+//                    .build();
+//            campAddrRepository.save(campAddr);
+
+            campAddrRepository.saveWithPoint(
+                    camp.getId(),
+                    data.getDoNm(),
+                    data.getSigunguNm(),
+                    data.getZipcode(),
+                    data.getAddr1(),
+                    data.getAddr2(),
+                    pointWKT
+            );
 
             //캠핑지 DB 저장
             createCampSite(camp, normalSiteCnt, NORMAL_SITE, null,
@@ -155,6 +176,7 @@ public class GoCampingService {
     }
 
     //CampImage 를 생성 및 DB 저장 메서드
+    @Transactional
     public List<List<GoCampingImageParsedResponseDto>> createCampImageByGoCampingImageData(
             List<GoCampingImageDto> goCampingImageDto) {
         List<List<GoCampingImageParsedResponseDto>> goCampingImageParsedResponseDtoList = new ArrayList<>();
@@ -184,10 +206,11 @@ public class GoCampingService {
         return goCampingImageParsedResponseDtoList;
     }
 
-    //CampSite 데이터 삽입
-    private void createCampSite(Camp camp, Integer siteCnt,
-                                Induty induty, String innerFacility,
-                                int maximum_people, int price) {
+    //CampSite 데이터 삽입 및 업데이트
+    @Transactional
+    public void createCampSite(Camp camp, Integer siteCnt,
+                               Induty induty, String innerFacility,
+                               int maximum_people, int price) {
         for (int i = 0; i < siteCnt; ++i) {
             CampSite campSite = CampSite.builder()
                     .camp(camp)
@@ -201,10 +224,11 @@ public class GoCampingService {
         }
     }
 
-    //CampInduty 데이터 삽입
-    private void createCampInduty(Camp camp, Integer normalSiteCnt,
-                                  Integer carSiteCnt, Integer glampSiteCnt,
-                                  Integer caravSiteCnt, Integer personalCaravanSiteCnt) {
+    //CampInduty 데이터 삽입 및 업데이트
+    @Transactional
+    public void createCampInduty(Camp camp, Integer normalSiteCnt,
+                                 Integer carSiteCnt, Integer glampSiteCnt,
+                                 Integer caravSiteCnt, Integer personalCaravanSiteCnt) {
 
         Map<Induty, Integer> siteCounts = Map.of(
                 NORMAL_SITE, normalSiteCnt,
