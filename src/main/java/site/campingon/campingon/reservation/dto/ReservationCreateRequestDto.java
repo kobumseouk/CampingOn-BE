@@ -13,6 +13,8 @@ public class ReservationCreateRequestDto {
 
     private Long userId;
 
+    private Long campId;
+
     private Long campSiteId;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")

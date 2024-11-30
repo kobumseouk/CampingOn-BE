@@ -27,4 +27,8 @@ public class ReservationResponseDto {
 
     private int totalPrice;
 
+    private CampResponseDto campResponseDto;
+
+    private CampAddrResponseDto campAddrResponseDto;
+
 }
