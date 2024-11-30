@@ -29,6 +29,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static site.campingon.campingon.camp.entity.Induty.*;
 import static site.campingon.campingon.common.public_data.PublicDataConstants.*;
@@ -46,7 +47,6 @@ public class GoCampingService {
     private final CampSiteRepository campSiteRepository;
     private final CampIndutyRepository campIndutyRepository;
     private final RestTemplate restTemplate;
-    private final GeometryFactory geometryFactory = new GeometryFactory();
     private static final String IMAGE_PAGE_NO = "1";    //이미지 몇번부터 값 꺼내올지
 
     @Value("${public-data.go-camping}")
@@ -68,13 +68,11 @@ public class GoCampingService {
             String caravInnerFacility = data.getCaravInnerFclty();//카라반 - 내부시설
 
             //데이터에 주요시설이 단, 한개도 없는 경우 DB 생성하지않는다.
-            if (normalSiteCnt + caravSiteCnt
+            if (normalSiteCnt + carSiteCnt
                     + glampSiteCnt + caravSiteCnt
                     + personalCaravanSiteCnt == 0) {
                 continue;
             }
-
-            //todo 중복된 아이디를 여러개 넣었을때 발생하는 문제점 더티체킹해서 괜찮음..???
 
             Camp camp = Camp.builder()
                     .id(data.getContentId())
@@ -98,50 +96,101 @@ public class GoCampingService {
 
             campRepository.save(camp);
 
-            createCampInduty(camp, normalSiteCnt, carSiteCnt, glampSiteCnt, caravSiteCnt, personalCaravanSiteCnt);
+            createOrUpdateCampInduty(camp, normalSiteCnt, carSiteCnt, glampSiteCnt, caravSiteCnt, personalCaravanSiteCnt);
 
             String pointWKT = String.format("POINT(%f %f)", data.getMapY(), data.getMapX());
-            Point point = (Point) new WKTReader().read(pointWKT);
 
-//            CampAddr campAddr = CampAddr.builder()
-//                    .camp(camp)
-//                    .city(data.getDoNm())
-//                    .state(data.getSigunguNm())
-//                    .zipcode(data.getZipcode())
-//                    .streetAddr(data.getAddr1())
-//                    .detailedAddr(data.getAddr2())
-//                    .location(point)
-//                    .build();
-//            campAddrRepository.save(campAddr);
+            if (campAddrRepository.findByCampId(data.getContentId()).isPresent()) {
+                //update
+                campAddrRepository.updateWithPoint(
+                        camp.getId(),
+                        data.getDoNm(),
+                        data.getSigunguNm(),
+                        data.getZipcode(),
+                        data.getAddr1(),
+                        data.getAddr2(),
+                        pointWKT
+                );
 
-            campAddrRepository.saveWithPoint(
-                    camp.getId(),
-                    data.getDoNm(),
-                    data.getSigunguNm(),
-                    data.getZipcode(),
-                    data.getAddr1(),
-                    data.getAddr2(),
-                    pointWKT
-            );
+                updateCampSite(camp, normalSiteCnt, NORMAL_SITE, null,
+                        NORMAL_SITE.getMaximum_people(), NORMAL_SITE.getPrice());
 
-            //캠핑지 DB 저장
-            createCampSite(camp, normalSiteCnt, NORMAL_SITE, null,
-                    NORMAL_SITE.getMaximum_people(), NORMAL_SITE.getPrice());
+                updateCampSite(camp, carSiteCnt, CAR_SITE, null,
+                        CAR_SITE.getMaximum_people(), CAR_SITE.getPrice());
 
-            createCampSite(camp, carSiteCnt, CAR_SITE, null,
-                    CAR_SITE.getMaximum_people(), CAR_SITE.getPrice());
+                updateCampSite(camp, glampSiteCnt, GLAMP_SITE, glampInnerFacility,
+                        GLAMP_SITE.getMaximum_people(), GLAMP_SITE.getPrice());
 
-            createCampSite(camp, glampSiteCnt, GLAMP_SITE, glampInnerFacility,
-                    GLAMP_SITE.getMaximum_people(), GLAMP_SITE.getPrice());
+                updateCampSite(camp, caravSiteCnt, CARAV_SITE, caravInnerFacility,
+                        CAR_SITE.getMaximum_people(), CAR_SITE.getPrice());
 
-            createCampSite(camp, caravSiteCnt, CARAV_SITE, caravInnerFacility,
-                    CAR_SITE.getMaximum_people(), CAR_SITE.getPrice());
+                updateCampSite(camp, personalCaravanSiteCnt, PERSONAL_CARAV_SITE,
+                        null, PERSONAL_CARAV_SITE.getMaximum_people(), PERSONAL_CARAV_SITE.getPrice());
+            } else {
+                //create
+                campAddrRepository.saveWithPoint(
+                        camp.getId(),
+                        data.getDoNm(),
+                        data.getSigunguNm(),
+                        data.getZipcode(),
+                        data.getAddr1(),
+                        data.getAddr2(),
+                        pointWKT
+                );
 
-            createCampSite(camp, personalCaravanSiteCnt, PERSONAL_CARAV_SITE,
-                    null, PERSONAL_CARAV_SITE.getMaximum_people(), PERSONAL_CARAV_SITE.getPrice());
+                //캠핑지 DB 저장
+                createCampSite(camp, normalSiteCnt, NORMAL_SITE, null,
+                        NORMAL_SITE.getMaximum_people(), NORMAL_SITE.getPrice());
+
+                createCampSite(camp, carSiteCnt, CAR_SITE, null,
+                        CAR_SITE.getMaximum_people(), CAR_SITE.getPrice());
+
+                createCampSite(camp, glampSiteCnt, GLAMP_SITE, glampInnerFacility,
+                        GLAMP_SITE.getMaximum_people(), GLAMP_SITE.getPrice());
+
+                createCampSite(camp, caravSiteCnt, CARAV_SITE, caravInnerFacility,
+                        CAR_SITE.getMaximum_people(), CAR_SITE.getPrice());
+
+                createCampSite(camp, personalCaravanSiteCnt, PERSONAL_CARAV_SITE,
+                        null, PERSONAL_CARAV_SITE.getMaximum_people(), PERSONAL_CARAV_SITE.getPrice());
+            }
+
 
         }
         return goCampingParsedResponseDtoList;
+    }
+
+    @Transactional
+    public void updateCampSite(Camp camp, Integer siteCnt,
+                               Induty induty, String innerFacility,
+                               int maximumPeople, int price) {
+        // 특정 Camp와 Induty에 대한 모든 CampSite 조회
+        List<CampSite> existingCampSites = campSiteRepository.findAllByCampAndSiteType(camp, induty);
+
+        int existingCount = existingCampSites.size();
+
+        if (existingCount < siteCnt) {
+            //기존 보다 campSite 수가 많다면 부족한 campSite 추가
+            for (int i = 0; i < siteCnt - existingCount; i++) {
+                CampSite newCampSite = CampSite.builder()
+                        .camp(camp)
+                        .maximumPeople(maximumPeople)
+                        .price(price)
+                        .siteType(induty)
+                        .indoorFacility(innerFacility)
+                        .build();
+                campSiteRepository.save(newCampSite);
+            }
+        } else if (existingCount > siteCnt) {
+            // 초과됐다면 CampSite 삭제
+            List<CampSite> toRemove = existingCampSites.subList(0, existingCount - siteCnt); //초과된 개수만큼 삭제
+            campSiteRepository.deleteAll(toRemove);
+        }
+
+        // 나머지 CampSite 정보 업데이트
+        for (CampSite campSite : existingCampSites) {
+            campSite.updateCampSite(camp, maximumPeople, price, induty, innerFacility);
+        }
     }
 
     //공공데이터 전체 API 조회하고 dto 변환
@@ -206,7 +255,7 @@ public class GoCampingService {
         return goCampingImageParsedResponseDtoList;
     }
 
-    //CampSite 데이터 삽입 및 업데이트
+    //CampSite 데이터 삽입
     @Transactional
     public void createCampSite(Camp camp, Integer siteCnt,
                                Induty induty, String innerFacility,
@@ -224,9 +273,10 @@ public class GoCampingService {
         }
     }
 
-    //CampInduty 데이터 삽입 및 업데이트
+    //CampInduty 데이터 삽입
+    //todo 업데이트 처리하기
     @Transactional
-    public void createCampInduty(Camp camp, Integer normalSiteCnt,
+    public void createOrUpdateCampInduty(Camp camp, Integer normalSiteCnt,
                                  Integer carSiteCnt, Integer glampSiteCnt,
                                  Integer caravSiteCnt, Integer personalCaravanSiteCnt) {
 

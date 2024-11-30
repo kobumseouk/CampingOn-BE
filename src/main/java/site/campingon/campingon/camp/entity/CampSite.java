@@ -37,6 +37,14 @@ public class CampSite {
     @Builder.Default
     @Column(name = "is_available", nullable = false)
     private boolean isAvailable = false;
+
+    public void updateCampSite(Camp camp, int maximumPeople, int price, Induty induty, String innerFacility) {
+        this.camp = camp;
+        this.maximumPeople = maximumPeople;
+        this.price = price;
+        this.siteType = induty;
+        this.indoorFacility = innerFacility;
+    }
 //
 //    @PrePersist
 //    @PreUpdate
