@@ -41,25 +41,22 @@ public class Camp{
   @Column(name = "thumb_image", length = 255)
   private String thumbImage;  // 썸네일 이미지
 
-  @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<CampKeyword> keywords;
 
-  @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<CampImage> images;
 
   @OneToMany(mappedBy = "camp",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-/*
-  @Column(length = 100, nullable = false)
-*/
   private List<CampInduty> induty;  // 업종
 
-  @OneToOne(mappedBy = "camp", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @OneToOne(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
   private CampAddr campAddr;
 
-  @OneToOne(mappedBy = "camp", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @OneToOne(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
   private CampInfo campInfo;
 
-  @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Bookmark> bookmarks;
 
   @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME")

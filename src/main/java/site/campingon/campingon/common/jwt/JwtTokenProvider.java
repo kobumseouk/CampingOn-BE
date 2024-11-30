@@ -20,6 +20,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
+import site.campingon.campingon.common.exception.ErrorCode;
+import site.campingon.campingon.common.exception.GlobalException;
 import site.campingon.campingon.user.entity.Role;
 import site.campingon.campingon.user.entity.User;
 import site.campingon.campingon.user.repository.UserRepository;
@@ -141,7 +143,7 @@ public class JwtTokenProvider {
 
         // 권한 정보 확인
         if (claims.get("role") == null) {
-            throw new RuntimeException("권한 정보가 없는 토큰입니다.");
+            throw new GlobalException(ErrorCode.ROLE_NOT_FOUND);
         }
 
         // 사용자 정보 추출
