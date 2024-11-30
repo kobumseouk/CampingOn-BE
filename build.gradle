@@ -61,7 +61,13 @@ dependencies {
     implementation 'software.amazon.awssdk:s3'
     implementation 'software.amazon.awssdk:sts'
 
+    //공간데이터 저장 hibernate-spatial
+    implementation group: 'org.hibernate', name: 'hibernate-spatial', version: '5.1.0.Final'
+
+    //dev-tools
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    //db
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'com.mysql:mysql-connector-j'
 
