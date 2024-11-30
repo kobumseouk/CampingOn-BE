@@ -63,6 +63,7 @@ dependencies {
 
     //공간데이터 저장 hibernate-spatial
     implementation group: 'org.hibernate', name: 'hibernate-spatial', version: '5.1.0.Final'
+    implementation 'org.locationtech.jts:jts-core:1.20.0'
 
     //dev-tools
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -73,6 +74,7 @@ dependencies {
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
 }
 
 test {
