@@ -4,7 +4,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import site.campingon.campingon.camp.entity.Camp;
 import site.campingon.campingon.camp.entity.CampSite;
+import site.campingon.campingon.camp.entity.Induty;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,4 +37,5 @@ public interface CampSiteRepository extends JpaRepository<CampSite, Long> {
             SELECT cs FROM CampSite cs
             WHERE cs.camp.id = :campId""")
   List<CampSite> findAllByCampId(@Param("campId") Long campId);
+  List<CampSite> findAllByCampAndSiteType(Camp camp, Induty induty);
 }

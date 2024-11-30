@@ -1,10 +1,13 @@
 package site.campingon.campingon.common.public_data.schedule;
 
+import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.io.ParseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import site.campingon.campingon.common.public_data.dto.GoCampingDataDto;
+import site.campingon.campingon.common.public_data.dto.GoCampingImageDto;
+import site.campingon.campingon.common.public_data.dto.GoCampingImageParsedResponseDto;
 import site.campingon.campingon.common.public_data.dto.GoCampingParsedResponseDto;
 import site.campingon.campingon.common.public_data.service.GoCampingService;
 
@@ -13,6 +16,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Component
+@Slf4j
 public class GoCampingScheduler {
     private final GoCampingService goCampingService;
 
@@ -34,16 +38,26 @@ public class GoCampingScheduler {
                     goCampingService.createCampByGoCampingData(goCampingDataDto);
 
             // 성공 로그
-            System.out.println("캠프 데이터 생성 성공: " + goCampingParsedResponseDtos.size() + "개");
+            log.info("캠프 데이터 생성 성공: " + goCampingParsedResponseDtos.size() + "개");
 
-            //todo 이미지 데이터 서비스로직 추가
+            // 이미지 데이터 서비스로직 추가
 
+            Long imageCnt = 10L;
+
+            //공공데이터를 조회하고 dto로 변환
+            List<GoCampingImageDto> goCampingImageDto = goCampingService.getAndConvertToGoCampingImageDataDto(imageCnt);
+
+            //CampImage 를 생성하고 DB에 저장한다.
+            List<List<GoCampingImageParsedResponseDto>> goCampingImageParsedResponseDtos
+                    = goCampingService.createCampImageByGoCampingImageData(goCampingImageDto);
+
+            log.info("캠프 이미지 데이터 생성 성공: " + goCampingImageParsedResponseDtos.size() + "개");
 
         } catch (URISyntaxException e) {
             // 예외 처리
-            System.err.println("캠프 데이터 생성 실패: " + e.getMessage());
+            log.error("캠프 데이터 생성 실패: " + e.getMessage());
         } catch (ParseException e) {
-            System.err.println("캠프 데이터 생성 실패: " + e.getMessage());
+            log.error("캠프 데이터 생성 실패: " + e.getMessage());
         }
     }
 }

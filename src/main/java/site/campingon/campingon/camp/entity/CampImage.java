@@ -15,7 +15,6 @@ import lombok.NoArgsConstructor;
 public class CampImage {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(columnDefinition = "INT UNSIGNED")
     private Long id;
 

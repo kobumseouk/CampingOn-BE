@@ -1,16 +1,11 @@
 package site.campingon.campingon.common.public_data.service;
 
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.io.ParseException;
-import org.locationtech.jts.io.WKTReader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 import site.campingon.campingon.camp.entity.*;
 import site.campingon.campingon.camp.repository.*;
 import site.campingon.campingon.common.exception.ErrorCode;
@@ -28,11 +23,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static site.campingon.campingon.camp.entity.Induty.*;
-import static site.campingon.campingon.common.public_data.PublicDataConstants.*;
-import static site.campingon.campingon.common.public_data.PublicDataConstants.MOBILE_APP;
 
 @Service
 @RequiredArgsConstructor
@@ -43,14 +35,9 @@ public class GoCampingService {
     private final CampAddrRepository campAddrRepository;
     private final CampImageRepository campImageRepository;
     private final CampRepository campRepository;
-    private final CampSiteRepository campSiteRepository;
-    private final CampIndutyRepository campIndutyRepository;
     private final RestTemplate restTemplate;
-    private final GeometryFactory geometryFactory = new GeometryFactory();
+    private final GoCampingCampSiteService goCampingProviderService;
     private static final String IMAGE_PAGE_NO = "1";    //이미지 몇번부터 값 꺼내올지
-
-    @Value("${public-data.go-camping}")
-    private String serviceKey;
 
     //Camp 관련 엔티티 생성 및 DB 저장 메서드
     @Transactional
@@ -68,13 +55,11 @@ public class GoCampingService {
             String caravInnerFacility = data.getCaravInnerFclty();//카라반 - 내부시설
 
             //데이터에 주요시설이 단, 한개도 없는 경우 DB 생성하지않는다.
-            if (normalSiteCnt + caravSiteCnt
+            if (normalSiteCnt + carSiteCnt
                     + glampSiteCnt + caravSiteCnt
                     + personalCaravanSiteCnt == 0) {
                 continue;
             }
-
-            //todo 중복된 아이디를 여러개 넣었을때 발생하는 문제점 더티체킹해서 괜찮음..???
 
             Camp camp = Camp.builder()
                     .id(data.getContentId())
@@ -98,47 +83,65 @@ public class GoCampingService {
 
             campRepository.save(camp);
 
-            createCampInduty(camp, normalSiteCnt, carSiteCnt, glampSiteCnt, caravSiteCnt, personalCaravanSiteCnt);
+            goCampingProviderService.createOrUpdateCampInduty(camp, normalSiteCnt, carSiteCnt, glampSiteCnt, caravSiteCnt, personalCaravanSiteCnt);
 
             String pointWKT = String.format("POINT(%f %f)", data.getMapY(), data.getMapX());
-            Point point = (Point) new WKTReader().read(pointWKT);
 
-//            CampAddr campAddr = CampAddr.builder()
-//                    .camp(camp)
-//                    .city(data.getDoNm())
-//                    .state(data.getSigunguNm())
-//                    .zipcode(data.getZipcode())
-//                    .streetAddr(data.getAddr1())
-//                    .detailedAddr(data.getAddr2())
-//                    .location(point)
-//                    .build();
-//            campAddrRepository.save(campAddr);
+            if (campAddrRepository.findByCampId(data.getContentId()).isPresent()) {
+                //update
+                campAddrRepository.updateWithPoint(
+                        camp.getId(),
+                        data.getDoNm(),
+                        data.getSigunguNm(),
+                        data.getZipcode(),
+                        data.getAddr1(),
+                        data.getAddr2(),
+                        pointWKT
+                );
 
-            campAddrRepository.saveWithPoint(
-                    camp.getId(),
-                    data.getDoNm(),
-                    data.getSigunguNm(),
-                    data.getZipcode(),
-                    data.getAddr1(),
-                    data.getAddr2(),
-                    pointWKT
-            );
+                goCampingProviderService.updateCampSite(camp, normalSiteCnt, NORMAL_SITE, null,
+                        NORMAL_SITE.getMaximum_people(), NORMAL_SITE.getPrice());
 
-            //캠핑지 DB 저장
-            createCampSite(camp, normalSiteCnt, NORMAL_SITE, null,
-                    NORMAL_SITE.getMaximum_people(), NORMAL_SITE.getPrice());
+                goCampingProviderService.updateCampSite(camp, carSiteCnt, CAR_SITE, null,
+                        CAR_SITE.getMaximum_people(), CAR_SITE.getPrice());
 
-            createCampSite(camp, carSiteCnt, CAR_SITE, null,
-                    CAR_SITE.getMaximum_people(), CAR_SITE.getPrice());
+                goCampingProviderService.updateCampSite(camp, glampSiteCnt, GLAMP_SITE, glampInnerFacility,
+                        GLAMP_SITE.getMaximum_people(), GLAMP_SITE.getPrice());
 
-            createCampSite(camp, glampSiteCnt, GLAMP_SITE, glampInnerFacility,
-                    GLAMP_SITE.getMaximum_people(), GLAMP_SITE.getPrice());
+                goCampingProviderService.updateCampSite(camp, caravSiteCnt, CARAV_SITE, caravInnerFacility,
+                        CAR_SITE.getMaximum_people(), CAR_SITE.getPrice());
 
-            createCampSite(camp, caravSiteCnt, CARAV_SITE, caravInnerFacility,
-                    CAR_SITE.getMaximum_people(), CAR_SITE.getPrice());
+                goCampingProviderService.updateCampSite(camp, personalCaravanSiteCnt, PERSONAL_CARAV_SITE,
+                        null, PERSONAL_CARAV_SITE.getMaximum_people(), PERSONAL_CARAV_SITE.getPrice());
+            } else {
+                //create
+                campAddrRepository.saveWithPoint(
+                        camp.getId(),
+                        data.getDoNm(),
+                        data.getSigunguNm(),
+                        data.getZipcode(),
+                        data.getAddr1(),
+                        data.getAddr2(),
+                        pointWKT
+                );
 
-            createCampSite(camp, personalCaravanSiteCnt, PERSONAL_CARAV_SITE,
-                    null, PERSONAL_CARAV_SITE.getMaximum_people(), PERSONAL_CARAV_SITE.getPrice());
+                //캠핑지 DB 저장
+                goCampingProviderService.createCampSite(camp, normalSiteCnt, NORMAL_SITE, null,
+                        NORMAL_SITE.getMaximum_people(), NORMAL_SITE.getPrice());
+
+                goCampingProviderService.createCampSite(camp, carSiteCnt, CAR_SITE, null,
+                        CAR_SITE.getMaximum_people(), CAR_SITE.getPrice());
+
+                goCampingProviderService.createCampSite(camp, glampSiteCnt, GLAMP_SITE, glampInnerFacility,
+                        GLAMP_SITE.getMaximum_people(), GLAMP_SITE.getPrice());
+
+                goCampingProviderService.createCampSite(camp, caravSiteCnt, CARAV_SITE, caravInnerFacility,
+                        CAR_SITE.getMaximum_people(), CAR_SITE.getPrice());
+
+                goCampingProviderService.createCampSite(camp, personalCaravanSiteCnt, PERSONAL_CARAV_SITE,
+                        null, PERSONAL_CARAV_SITE.getMaximum_people(), PERSONAL_CARAV_SITE.getPrice());
+            }
+
 
         }
         return goCampingParsedResponseDtoList;
@@ -148,7 +151,7 @@ public class GoCampingService {
     public GoCampingDataDto getAndConvertToGoCampingDataDto(
             String... params
     ) throws URISyntaxException {
-        URI uri = createUri(GoCampingPath.BASED_LIST, params);
+        URI uri = goCampingProviderService.createUri(GoCampingPath.BASED_LIST, params);
 
         return restTemplate.getForObject(uri, GoCampingDataDto.class);  //API 호출
     }
@@ -164,7 +167,7 @@ public class GoCampingService {
                 .toList();
 
         for (Long campId : campIdList) {
-            URI uri = createUri(GoCampingPath.IMAGE_LIST,
+            URI uri = goCampingProviderService.createUri(GoCampingPath.IMAGE_LIST,
                     "numOfRows", imageCnt.toString(),
                     "pageNo", IMAGE_PAGE_NO,  //몇번부터 시작할지
                     "contentId", campId.toString());
@@ -204,65 +207,5 @@ public class GoCampingService {
             goCampingImageParsedResponseDtoList.add(goCampingImageParsedResponseDto);
         }
         return goCampingImageParsedResponseDtoList;
-    }
-
-    //CampSite 데이터 삽입 및 업데이트
-    @Transactional
-    public void createCampSite(Camp camp, Integer siteCnt,
-                               Induty induty, String innerFacility,
-                               int maximum_people, int price) {
-        for (int i = 0; i < siteCnt; ++i) {
-            CampSite campSite = CampSite.builder()
-                    .camp(camp)
-                    .maximumPeople(maximum_people)
-                    .price(price)
-                    .siteType(induty)
-                    .indoorFacility(innerFacility)
-                    .build();
-
-            campSiteRepository.save(campSite);
-        }
-    }
-
-    //CampInduty 데이터 삽입 및 업데이트
-    @Transactional
-    public void createCampInduty(Camp camp, Integer normalSiteCnt,
-                                 Integer carSiteCnt, Integer glampSiteCnt,
-                                 Integer caravSiteCnt, Integer personalCaravanSiteCnt) {
-
-        Map<Induty, Integer> siteCounts = Map.of(
-                NORMAL_SITE, normalSiteCnt,
-                CAR_SITE, carSiteCnt,
-                GLAMP_SITE, glampSiteCnt,
-                CARAV_SITE, caravSiteCnt,
-                PERSONAL_CARAV_SITE, personalCaravanSiteCnt
-        );
-
-        siteCounts.forEach((induty, count) -> {
-            if (count != 0) {
-                CampInduty campInduty = CampInduty.builder()
-                        .induty(induty)
-                        .camp(camp)
-                        .build();
-                campIndutyRepository.save(campInduty);
-            }
-        });
-    }
-
-    //공공데이터 URI 작업 메서드
-    public URI createUri(GoCampingPath goCampingPath, String... params)
-            throws URISyntaxException {
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(
-                        GO_CAMPING_END_POINT + goCampingPath.getPath())
-                .queryParam("_type", CONTENT_TYPE)
-                .queryParam("MobileOS", MOBILE_OS)
-                .queryParam("MobileApp", MOBILE_APP)
-                .queryParam("serviceKey", serviceKey);
-
-        for (int i = 0; i < params.length; i += 2) {
-            uriBuilder.queryParam(params[i], params[i + 1]);
-        }
-
-        return new URI(uriBuilder.build().toUriString());
     }
 }
