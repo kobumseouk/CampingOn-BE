@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import site.campingon.campingon.camp.entity.CampSite;
 import site.campingon.campingon.reservation.dto.*;
 import site.campingon.campingon.reservation.repository.ReservationRepository;
@@ -22,7 +23,8 @@ public class ReservationServiceImpl implements ReservationService {
     private final ReservationValidate reservationValidate;
     private final ReservationRepository reservationRepository;
 
-    @Override
+    // 유저의 모든 예약리스트를 조회
+    @Transactional(readOnly = true)
     public Page<ReservationResponseDto> getReservations(Long userId, Pageable pageable) {
 
         Page<Reservation> reservations = reservationRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
@@ -30,7 +32,8 @@ public class ReservationServiceImpl implements ReservationService {
         return reservations.map(reservationMapper::toResponse);
     }
 
-    @Override
+    // 예약완료 직후 확인을 위해 예약 정보 조회
+    @Transactional(readOnly = true)
     public ReservationResponseDto getReservation(Long reservationId) {
 
         Reservation reservation = reservationValidate.validateReservationById(reservationId);
@@ -40,7 +43,8 @@ public class ReservationServiceImpl implements ReservationService {
 
 
 
-    @Override
+    // 캠프사이트 선택 후 예약 요청
+    @Transactional
     public void createReservation(ReservationCreateRequestDto requestDto) {
 
         User user = reservationValidate.validateUserById(requestDto.getUserId());
@@ -60,7 +64,8 @@ public class ReservationServiceImpl implements ReservationService {
         reservationRepository.save(reservation);
     }
 
-    @Override
+    // 예약완료 이후 예약취소 요청
+    @Transactional
     public void cancelReservation(Long reservationId, ReservationCancelRequestDto requestDto) {
         Reservation reservation = reservationValidate.validateReservationById(requestDto.getId());
 
@@ -76,7 +81,8 @@ public class ReservationServiceImpl implements ReservationService {
 
 
 
-    @Override
+    // 예약가능한 캠프사이트 조회를 위해 특정 날짜에 예약이 됐는지 조회
+    @Transactional(readOnly = true)
     public ReservedCampSiteIdListResponseDto getReservedCampSiteIds(ReservationCheckDateRequestDto requestDto) {
 
         List<Long> reservedIds = reservationRepository.findReservedCampSiteIds(
