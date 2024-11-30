@@ -96,7 +96,7 @@ public class UserService {
         // 현재 비밀번호 확인
         if (!passwordEncoder.matches(userUpdateRequestDto.getCurrentPassword(),
             user.getPassword())) {
-            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+            throw new GlobalException(ErrorCode.PASSWORD_MISMATCH);
         }
 
         // 닉네임 변경
@@ -110,11 +110,11 @@ public class UserService {
 
             // 현재 비밀번호와 새 비밀번호 비교
             if (userUpdateRequestDto.getNewPassword().equals(userUpdateRequestDto.getCurrentPassword())) {
-                throw new IllegalArgumentException("새 비밀번호는 현재 비밀번호와 다르게 설정해야 합니다.");
+                throw new GlobalException(ErrorCode.PASSWORD_SAME_AS_OLD);
             }
 
             if (!passwordEncoder.matches(userUpdateRequestDto.getCurrentPassword(), user.getPassword())) {
-                throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+                throw new GlobalException(ErrorCode.PASSWORD_MISMATCH);
             }
             user.updatePassword(passwordEncoder.encode(userUpdateRequestDto.getNewPassword()));
         }
