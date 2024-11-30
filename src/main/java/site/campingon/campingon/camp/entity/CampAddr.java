@@ -1,6 +1,6 @@
 package site.campingon.campingon.camp.entity;
 
-import com.vividsolutions.jts.geom.Point;   //jts 사용..!!
+import org.locationtech.jts.geom.Point;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,7 +39,7 @@ public class CampAddr {
     @Column(nullable = false)
     private Double latitude;  // maxY - 위도*/
 
-    @Column(columnDefinition = "GEOMETRY", nullable = false)
+    @Column(name = "location", updatable = false, nullable = false)
     private Point location;
 
     @Column(name = "street_addr", length = 50)
