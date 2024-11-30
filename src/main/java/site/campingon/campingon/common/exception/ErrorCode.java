@@ -39,6 +39,7 @@ public enum ErrorCode {
     USER_NOT_FOUND_BY_ID(HttpStatus.NOT_FOUND, "ACCOUNT-003", "해당 아이디의 회원을 찾을 수 없습니다."),
 
     CAMP_NOT_FOUND_BY_ID(HttpStatus.NOT_FOUND, "CAMP-001", "캠핑장의 ID를 찾을 수 없습니다."),
+    CAMP_NOT_FOUND(HttpStatus.NOT_FOUND, "CAMP-002", "캠핑장을 찾을 수 없습니다."),
 
     CAMP_INDUTY_NOT_FOUND(HttpStatus.NOT_FOUND, "INDUTY-001", "존재하지 않는 업종입니다."),
 

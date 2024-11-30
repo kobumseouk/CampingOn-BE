@@ -17,6 +17,8 @@ import site.campingon.campingon.camp.mapper.CampMapper;
 import site.campingon.campingon.camp.repository.CampRepository;
 import site.campingon.campingon.camp.repository.CampSiteRepository;
 import site.campingon.campingon.bookmark.repository.BookmarkRepository;
+import site.campingon.campingon.common.exception.ErrorCode;
+import site.campingon.campingon.common.exception.GlobalException;
 import site.campingon.campingon.user.repository.UserKeywordRepository;
 
 import java.util.Arrays;
@@ -29,7 +31,6 @@ import java.util.stream.Collectors;
 public class CampService {
 
   private final CampRepository campRepository;
-  private final CampSiteRepository campSiteRepository;
   private final UserKeywordRepository userKeywordRepository;
   private final BookmarkRepository bookMarkRepository;
   private final CampMapper campMapper;
@@ -64,22 +65,14 @@ public class CampService {
   // 캠핑장 상세 조회
   public CampDetailResponseDto getCampDetail(Long campId) {
     Camp camp = campRepository.findById(campId)
-        .orElseThrow(() -> new RuntimeException("캠핑장을 찾을 수 없습니다."));
+        .orElseThrow(() -> new GlobalException(ErrorCode.CAMP_NOT_FOUND_BY_ID));
 
-    StringBuilder indutyBuilder = new StringBuilder();
-    List<CampInduty> campInduties = camp.getInduty();
+    String indutyString = camp.getInduty().stream()
+        .map(induty -> induty.getInduty().getType())
+        .collect(Collectors.joining(", "));
 
-    for (int i = 0; i < campInduties.size(); i++) {
-      indutyBuilder.append(campInduties.get(i).getInduty().getType());
-      if (i < campInduties.size() - 1) {
-        indutyBuilder.append(", ");
-      }
-    }
-
-    // DTO 생성 및 값 설정
     CampDetailResponseDto dto = campMapper.toCampDetailDto(camp);
-    dto.setIndutys(indutyBuilder.toString());
-
+    dto.setIndutys(indutyString);
     return dto;
   }
 
@@ -144,16 +137,20 @@ public class CampService {
   // 캠핑장 수정
   @Transactional
   public CampDetailResponseDto updateCamp(Long campId, Camp updatedCamp) {
-      Camp existingCamp = campRepository.findById(campId)
-              .orElseThrow(() -> new RuntimeException("캠핑장을 찾을 수 없습니다."));
-      campMapper.updateCampFromDto(updatedCamp, existingCamp);
-      return campMapper.toCampDetailDto(campRepository.save(existingCamp));
+    Camp existingCamp = campRepository.findById(campId)
+        .orElseThrow(() -> new GlobalException(ErrorCode.CAMP_NOT_FOUND_BY_ID));
+
+    campMapper.updateCampFromDto(updatedCamp, existingCamp);
+    return campMapper.toCampDetailDto(campRepository.save(existingCamp));
   }
 
   // 캠핑장 삭제
   @Transactional
   public void deleteCamp(Long id) {
-      campRepository.deleteById(id);
+    if (!campRepository.existsById(id)) {
+      throw new GlobalException(ErrorCode.CAMP_NOT_FOUND_BY_ID);
+    }
+    campRepository.deleteById(id);
   }
 
   // 모든 캠핑장 조회

@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.io.WKTReader;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -11,7 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.geo.Point;
+import org.locationtech.jts.geom.Point;
 import site.campingon.campingon.bookmark.repository.BookmarkRepository;
 import site.campingon.campingon.camp.dto.CampDetailResponseDto;
 import site.campingon.campingon.camp.dto.CampListResponseDto;
@@ -68,12 +70,23 @@ class CampServiceTest {
 
   @BeforeEach
   void setUp() {
+    GeometryFactory geometryFactory = new GeometryFactory();
+
+    // WKT(Well-Known Text) 형식으로 포인트 생성
+    Point point = null;
+    try {
+      String pointWKT = "POINT(127.0 37.0)";
+      point = (Point) new WKTReader(geometryFactory).read(pointWKT);
+    } catch (org.locationtech.jts.io.ParseException e) {
+      throw new RuntimeException("Point 생성 중 오류 발생", e);
+    }
+
     mockCampAddr = CampAddr.builder()
         .id(1L)
         .city("TestCity")
         .state("TestState")
         .zipcode("12345")
-        .location(new Point(127.0, 37.0))
+        .location(point)  // 생성된 JTS Point 객체 설정
         .streetAddr("Test Street")
         .build();
 
@@ -246,6 +259,16 @@ class CampServiceTest {
     assertEquals(mockCampDetailDto.getId(), result.getId());
     assertEquals(mockCampDetailDto.getName(), result.getName());
     assertEquals("일반야영장, 자동차야영장", result.getIndutys());
+
+    // CampAddr 관련 검증
+    assertNotNull(result.getCampAddr());
+    assertEquals(mockCampAddr.getCity(), result.getCampAddr().getCity());
+    assertEquals(mockCampAddr.getState(), result.getCampAddr().getState());
+
+    // CampInfo 관련 검증
+    assertNotNull(result.getCampInfo());
+    assertEquals(mockCampInfo.getRecommendCnt(), result.getCampInfo().getRecommendCnt());
+    assertEquals(mockCampInfo.getBookmarkCnt(), result.getCampInfo().getBookmarkCnt());
 
     verify(campRepository).findById(campId);
     verify(campMapper).toCampDetailDto(mockCamp);
