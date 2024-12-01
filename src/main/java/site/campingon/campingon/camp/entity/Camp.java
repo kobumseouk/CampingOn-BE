@@ -5,6 +5,7 @@ import lombok.*;
 import site.campingon.campingon.bookmark.entity.Bookmark;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -47,7 +48,7 @@ public class Camp{
   @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<CampImage> images;
 
-  @OneToMany(mappedBy = "camp",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "camp",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private List<CampInduty> induty;  // 업종
 
   @OneToOne(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -56,8 +57,9 @@ public class Camp{
   @OneToOne(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
   private CampInfo campInfo;
 
-  @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<Bookmark> bookmarks;
+  @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL)
+  @Builder.Default
+  private List<Bookmark> bookmarks = new ArrayList<>();
 
   @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME")
   private LocalDateTime createdAt;

@@ -104,7 +104,7 @@ public class CampSiteService {
     // isAvailable 상태 조회
     public boolean getAvailability(Long campSiteId) {
         CampSite campSite = campSiteRepository.findById(campSiteId)
-                .orElseThrow(() -> new RuntimeException("캠프 사이트를 찾을 수 없습니다."));
+                .orElseThrow(() -> new GlobalException(ErrorCode.CAMPSITE_NOT_FOUND_BY_ID));
         return campSite.isAvailable();
     }
 }
