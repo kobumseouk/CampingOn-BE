@@ -147,9 +147,6 @@ public class CampService {
   // 캠핑장 삭제
   @Transactional
   public void deleteCamp(Long id) {
-    if (!campRepository.existsById(id)) {
-      throw new GlobalException(ErrorCode.CAMP_NOT_FOUND_BY_ID);
-    }
     campRepository.deleteById(id);
   }
 

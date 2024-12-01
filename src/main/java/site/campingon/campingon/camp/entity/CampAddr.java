@@ -19,7 +19,7 @@ public class CampAddr {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(columnDefinition = "BIGINT UNSIGNED")
+    @Column(columnDefinition = "INT UNSIGNED")
     private Long id;
 
     @OneToOne
