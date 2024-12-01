@@ -20,8 +20,8 @@ public class CampSiteController {
   // 캠핑지 목록 조회
   @GetMapping("/{campId}/available-sites")
   public ResponseEntity<List<CampSiteListResponseDto>> getAvailableCampSites(
-      @PathVariable Long campId,
-      @RequestParam List<Long> reservedSiteIds
+          @PathVariable("campId") Long campId,
+          @RequestParam List<Long> reservedSiteIds
   ) {
     return ResponseEntity.ok(campSiteService.getAvailableCampSites(campId, reservedSiteIds));
   }
@@ -29,7 +29,7 @@ public class CampSiteController {
   // 특정 캠핑지의 isAvailable 상태를 토글
   @PutMapping("/{campSiteId}/toggle-availability")
   public ResponseEntity<Boolean> toggleAvailability(
-          @PathVariable Long campSiteId
+          @PathVariable("campSiteId") Long campSiteId
   ) {
     boolean newAvailability = campSiteService.toggleAvailability(campSiteId);
     return ResponseEntity.ok(newAvailability); // 변경된 isAvailable 상태 반환
@@ -38,7 +38,7 @@ public class CampSiteController {
   // 특정 캠핑지의 isAvailable 상태 조회
   @GetMapping("/{campSiteId}/availability")
   public ResponseEntity<Boolean> getAvailability(
-          @PathVariable Long campSiteId
+          @PathVariable("campSiteId") Long campSiteId
   ) {
     boolean isAvailable = campSiteService.getAvailability(campSiteId);
     return ResponseEntity.ok(isAvailable); // 현재 isAvailable 상태 반환

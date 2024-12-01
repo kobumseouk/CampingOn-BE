@@ -12,9 +12,13 @@ import site.campingon.campingon.camp.entity.CampSite;
 import site.campingon.campingon.camp.mapper.CampSiteMapper;
 import site.campingon.campingon.camp.repository.CampRepository;
 import site.campingon.campingon.camp.repository.CampSiteRepository;
+import site.campingon.campingon.common.exception.GlobalException;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static site.campingon.campingon.common.exception.ErrorCode.CAMPSITE_NOT_FOUND_BY_ID;
+import static site.campingon.campingon.common.exception.ErrorCode.CAMP_NOT_FOUND_BY_ID;
 
 @Service
 @RequiredArgsConstructor
@@ -28,10 +32,10 @@ public class CampSiteService {
     @Transactional
     public CampSiteResponseDto createCampSite(Long campId, CampSiteCreateRequestDto createRequestDto) {
         if (!campRepository.existsById(campId)) {
-            throw new RuntimeException("캠핑장을 찾을 수 없습니다.");
+            throw new GlobalException(CAMP_NOT_FOUND_BY_ID);
         }
         Camp camp = campRepository.findById(campId)
-                .orElseThrow(() -> new RuntimeException("캠핑장을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GlobalException(CAMP_NOT_FOUND_BY_ID));
         CampSite campSite = campSiteMapper.toCampSite(createRequestDto, camp);
         return campSiteMapper.toCampSiteResponseDto(campSiteRepository.save(campSite));
     }
@@ -40,11 +44,11 @@ public class CampSiteService {
     public CampSiteResponseDto updateCampSite(Long campId, Long siteId, CampSiteUpdateRequestDto updateRequestDto) {
         // 캠핑장 존재 여부 확인 (Optional: 캠핑장 검증 필요 시)
         if (!campRepository.existsById(campId)) {
-            throw new RuntimeException("캠핑장을 찾을 수 없습니다.");
+            throw new GlobalException(CAMP_NOT_FOUND_BY_ID);
         }
         // 캠핑지 조회
         CampSite campSite = campSiteRepository.findByIdAndCampId(siteId, campId)
-                .orElseThrow(() -> new RuntimeException("캠핑지를 찾을 수 없습니다."));
+                .orElseThrow(() -> new GlobalException(CAMPSITE_NOT_FOUND_BY_ID));
         campSiteMapper.updateCampSiteFromDto(updateRequestDto, campSite);
         return campSiteMapper.toCampSiteResponseDto(campSiteRepository.save(campSite));
     }
@@ -53,7 +57,7 @@ public class CampSiteService {
     public void deleteCampSite(Long campId, Long siteId) {
         // 해당 캠핑지 존재 여부 확인 (Optional: 검증)
         if (!campSiteRepository.existsById(siteId)) {
-            throw new RuntimeException("캠핑지를 찾을 수 없습니다.");
+            throw new GlobalException(CAMPSITE_NOT_FOUND_BY_ID);
         }
         campSiteRepository.deleteByIdAndCampId(siteId, campId);
     }
@@ -73,18 +77,18 @@ public class CampSiteService {
 
         // 예약 불가능한 사이트들 제외하고 타입별 그룹화
         return allCampSites.stream()
-            .filter(site -> !reservedSiteIds.contains(site.getId()))  // 이미 예약된 사이트 제외
-            .collect(Collectors.groupingBy(CampSite::getSiteType)) // 그룹화
-            .values().stream()
-            .map(sites -> sites.get(0))  // 각 타입별 첫 번째 사이트만 선택
-            .map(campSiteMapper::toCampSiteListDto)
-            .collect(Collectors.toList());
+                .filter(site -> !reservedSiteIds.contains(site.getId()))  // 이미 예약된 사이트 제외
+                .collect(Collectors.groupingBy(CampSite::getSiteType)) // 그룹화
+                .values().stream()
+                .map(sites -> sites.get(0))  // 각 타입별 첫 번째 사이트만 선택
+                .map(campSiteMapper::toCampSiteListDto)
+                .collect(Collectors.toList());
     }
 
     // 특정 캠핑지 조회
     public CampSiteResponseDto getCampSite(Long campId, Long siteId) {
         CampSite campSite = campSiteRepository.findByIdAndCampId(siteId, campId)
-                .orElseThrow(() -> new RuntimeException("캠핑지를 찾을 수 없습니다."));
+                .orElseThrow(() -> new GlobalException(CAMPSITE_NOT_FOUND_BY_ID));
         return campSiteMapper.toCampSiteResponseDto(campSite);
     }
 
@@ -92,7 +96,7 @@ public class CampSiteService {
     @Transactional
     public boolean toggleAvailability(Long campSiteId) {
         CampSite campSite = campSiteRepository.findById(campSiteId)
-                .orElseThrow(() -> new RuntimeException("캠프 사이트를 찾을 수 없습니다."));
+                .orElseThrow(() -> new GlobalException(CAMPSITE_NOT_FOUND_BY_ID));
 
         boolean newAvailability = !campSite.isAvailable(); // 현재 상태를 반대로 변경
         CampSite updatedCampSite = campSite.toBuilder()
@@ -106,7 +110,7 @@ public class CampSiteService {
     // isAvailable 상태 조회
     public boolean getAvailability(Long campSiteId) {
         CampSite campSite = campSiteRepository.findById(campSiteId)
-                .orElseThrow(() -> new RuntimeException("캠프 사이트를 찾을 수 없습니다."));
+                .orElseThrow(() -> new GlobalException(CAMPSITE_NOT_FOUND_BY_ID));
         return campSite.isAvailable();
     }
 }
