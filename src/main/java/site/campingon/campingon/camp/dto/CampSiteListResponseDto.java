@@ -2,19 +2,20 @@ package site.campingon.campingon.camp.dto;
 
 
 import lombok.*;
+import site.campingon.campingon.camp.entity.Induty;
 
 import java.time.LocalTime;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class CampSiteListResponseDto {
   private Long siteId;
-  private String roomName;
-  private Integer maxPeople;
+  private Integer maximumPeople;
   private Integer price;
-  private String imageUrl;
+  private Induty siteType;
   private String indoor_facility;
 
   @Builder.Default  // 기본값 자동 설정

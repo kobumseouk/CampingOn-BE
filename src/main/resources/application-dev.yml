@@ -5,3 +5,10 @@ spring:
         registration:
           google:
             redirect-uri: http://localhost:8080/login/oauth2/code/google
+
+app:
+  front-url: http://localhost:3000
+
+jwt:
+  access-expired: 300 # 5분
+  refresh-expired: 7200 # 2시간

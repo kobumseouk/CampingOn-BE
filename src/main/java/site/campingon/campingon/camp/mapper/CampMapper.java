@@ -2,6 +2,8 @@ package site.campingon.campingon.camp.mapper;
 
 import org.mapstruct.*;
 import site.campingon.campingon.camp.dto.*;
+import site.campingon.campingon.camp.dto.admin.CampUpdateRequestDto;
+import site.campingon.campingon.camp.dto.admin.CampCreateRequestDto;
 import site.campingon.campingon.camp.entity.*;
 
 import java.util.List;
@@ -13,28 +15,49 @@ public interface CampMapper {
   // Camp -> CampListResponseDto로 매핑
   @Mapping(target = "name", source = "campName")
   @Mapping(target = "keywords", source = "keywords", qualifiedByName = "keywordsToStringList")
-  @Mapping(target = "address", source = "campAddr", qualifiedByName = "addressToString")
+  @Mapping(target = "address", source = "campAddr.streetAddr")
   CampListResponseDto toCampListDto(Camp camp);
 
   // Camp -> CampDetailResponseDto 매핑
   @Mapping(target = "name", source = "campName")
-  @Mapping(target = "address", source = "campAddr", qualifiedByName = "addressToString")
-  @Mapping(target = "recommendCnt", source = "campInfo.recommendCnt")
-  @Mapping(target = "likeCnt", source = "campInfo.likeCnt")
+  @Mapping(target = "images", source = "images", qualifiedByName = "imagesToUrlList")
   CampDetailResponseDto toCampDetailDto(Camp camp);
 
-  CampSiteListResponseDto toCampSiteListDto(CampSite campSite);
 
-  @Named("addressToString")
-  default String addressToString(CampAddr address) {
-    return address != null ? address.getFullAddress() : null;
-  }
 
   @Named("keywordsToStringList")
   default List<String> keywordsToStringList(List<CampKeyword> keywords) {
     return keywords.stream()
-        .map(CampKeyword::getKeyword)
+            .map(CampKeyword::getKeyword)
+            .toList();
+  }
+
+  @Named("imagesToUrlList")
+  default List<String> imagesToUrlList(List<CampImage> images) {
+    if (images == null) return null;
+    return images.stream()
+        .map(CampImage::getImageUrl)
         .toList();
   }
 
+  @Named("urlsToImagesList")
+  default List<CampImage> urlsToImagesList(List<String> imageUrls) {
+    if (imageUrls == null) return null;
+    return imageUrls.stream()
+        .map(url -> CampImage.builder()
+            .imageUrl(url)
+            .build())
+        .toList();
+  }
+
+  // 업데이트 로직을 위한 메서드
+  void updateCampFromDto(Camp updatedCamp, @MappingTarget Camp existingCamp);
+
+  // CampCreateRequestDto -> Camp
+  @Mapping(target = "images", source = "images", qualifiedByName = "urlsToImagesList")
+  Camp toCampEntity(CampCreateRequestDto createRequestDto);
+
+  // CampUpdateRequestDto -> Camp
+  @Mapping(target = "images", source = "images", qualifiedByName = "urlsToImagesList")
+  Camp toCampEntity(CampUpdateRequestDto updateRequestDto);
 }

@@ -15,12 +15,11 @@ import lombok.NoArgsConstructor;
 public class CampImage {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(columnDefinition = "INT UNSIGNED")
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "camp_id", nullable = false)
+    @JoinColumn(name = "camp_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private Camp camp;
 
     @Column(name = "image_url", length = 255, nullable = false)

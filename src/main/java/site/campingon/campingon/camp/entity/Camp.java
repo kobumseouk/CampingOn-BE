@@ -2,8 +2,9 @@ package site.campingon.campingon.camp.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import site.campingon.campingon.common.entity.BaseEntity;
+import site.campingon.campingon.bookmark.entity.Bookmark;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -12,10 +13,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "camp")
-public class Camp extends BaseEntity {
+public class Camp{
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(columnDefinition = "INT UNSIGNED")
   private Long id;
 
@@ -36,19 +36,32 @@ public class Camp extends BaseEntity {
   private String homepage;
 
   @Column(name = "outdoor_facility", length = 255)
-  private String outdoorFacility; // 부대 시설
+  private String outdoorFacility;  // 부대 시설
 
   @Column(name = "thumb_image", length = 255)
-  private String thumbImage; // 썸네일 이미지
+  private String thumbImage;  // 썸네일 이미지
 
-
-  @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<CampKeyword> keywords;
 
-  @OneToOne(mappedBy = "camp", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<CampImage> images;
+
+  @OneToMany(mappedBy = "camp",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+  private List<CampInduty> induty;  // 업종
+
+  @OneToOne(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
   private CampAddr campAddr;
 
-  @OneToOne(mappedBy = "camp", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @OneToOne(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
   private CampInfo campInfo;
 
+  @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Bookmark> bookmarks;
+
+  @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "DATETIME")
+  private LocalDateTime createdAt;
+
+  @Column(name = "modified_at", nullable = false, columnDefinition = "DATETIME")
+  private LocalDateTime modifiedAt;
 }

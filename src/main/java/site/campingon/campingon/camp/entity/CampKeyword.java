@@ -20,7 +20,7 @@ public class CampKeyword {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "camp_id", nullable = false)
+    @JoinColumn(name = "camp_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private Camp camp;
 
     @Column(length = 50, nullable = false)

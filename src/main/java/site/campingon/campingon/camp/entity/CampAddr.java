@@ -1,6 +1,9 @@
 package site.campingon.campingon.camp.entity;
 
+
+import org.locationtech.jts.geom.Point;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Type;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,11 +19,11 @@ public class CampAddr {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(columnDefinition = "INT UNSIGNED")
+    @Column(columnDefinition = "BIGINT UNSIGNED")
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "camp_id", nullable = false)
+    @JoinColumn(name = "camp_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private Camp camp;
 
     @Column(length = 50)
@@ -30,39 +33,21 @@ public class CampAddr {
     private String state; // 시/군/구
 
     @Column(length = 20)
-    private String zipcode;
+    private String zipcode;  // 우편번호
+
+    /*@Column(nullable = false)
+    private Double longitude;  // mayX - 경도
+
+    @Column(nullable = false)
+    private Double latitude;  // maxY - 위도*/
+
+    @Column(columnDefinition = "POINT SRID 4326", nullable = false) // MySQL POINT 유형 및 SRID 지정
+    private Point location;
 
     @Column(name = "street_addr", length = 50)
-    private String streetAddr;
+    private String streetAddr;   // 기본 도로명 주소
 
     @Column(name = "detailed_addr", length = 50)
-    private String detailedAddr;
+    private String detailedAddr;   // 상세 주소 (없는 경우 많음)
 
-  // 도로명 주소 총 출력
-  public String getFullAddress() {
-      StringBuilder fullAddress = new StringBuilder();
-
-      // city 추가
-      if (city != null && !city.isBlank()) {
-          fullAddress.append(city).append(" ");
-      }
-
-      // state 추가
-      if (state != null && !state.isBlank()) {
-          fullAddress.append(state).append(" ");
-      }
-
-      // streetAddr 추가
-      if (streetAddr != null && !streetAddr.isBlank()) {
-          fullAddress.append(streetAddr).append(" ");
-      }
-
-      // detailedAddr 추가
-      if (detailedAddr != null && !detailedAddr.isBlank()) {
-          fullAddress.append(detailedAddr).append(" ");
-      }
-
-      // 공백 제거 후 반환
-      return fullAddress.toString().trim();
-  }
 }

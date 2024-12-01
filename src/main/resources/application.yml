@@ -1,26 +1,21 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_ON_EXIT=FALSE;MODE=MYSQL  # Prevent H2 from closing when JVM shuts down
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-  h2:
-    console:
-      enabled: true  # H2 console activation
-      path: /h2-console  # Access H2 console at /h2-console
+    url: ${MYSQL_URL}  # MySQL 데이터베이스 URL
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
   jpa:
-    defer-datasource-initialization: true  # Correctly defers initialization for H2 database
-    show-sql: true  # Log SQL statements
+    show-sql: true  # SQL 로그 출력
     hibernate:
-      ddl-auto: update  # Auto-update schema
-    database-platform: org.hibernate.dialect.H2Dialect  # Explicit dialect (optional for H2)
+      ddl-auto: update
+    database-platform: org.hibernate.spatial.dialect.mysql.MySQLSpatialDialect  # 공간 데이터 처리 Dialect
     properties:
       hibernate:
-        format_sql: true  # Pretty-print SQL in logs
-        auto_quote_keyword: true
+        format_sql: true  # SQL 로그를 보기 좋게 포맷
+        auto_quote_keyword: true  # 예약어를 자동으로 따옴표 처리
   sql:
     init:
-      mode: always  # Always run SQL scripts during initialization
+      mode: always  # 애플리케이션 초기화 시 SQL 스크립트 실행
   security:
     oauth2:
       client:
@@ -29,6 +24,16 @@ spring:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
             scope: profile, email
+  profiles:
+    active: dev, s3Bucket  # logback-spring SpringProfile 설정 및 AWS S3 Bucket 설정
 
 public-data:
   go-camping: ${GO_CAMPING_SERVICE_KEY}
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY}
+
+app:
+  pagination:
+    reservation:
+      size: 10
