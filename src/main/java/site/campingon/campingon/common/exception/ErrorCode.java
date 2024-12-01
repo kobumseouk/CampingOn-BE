@@ -47,8 +47,7 @@ public enum ErrorCode {
 
     CAMP_INDUTY_NOT_FOUND(HttpStatus.NOT_FOUND, "INDUTY-001", "존재하지 않는 업종입니다."),
 
-    CAMPSITE_NOT_FOUND(HttpStatus.NOT_FOUND, "CAMPSITE-001", "캠핑지를 찾을 수 없습니다."),
-    CAMPSITE_NOT_FOUND_BY_ID(HttpStatus.NOT_FOUND, "CAMPSITE-002", "해당 ID의 캠핑지를 찾을 수 없습니다."),
+    CAMPSITE_NOT_FOUND_BY_ID(HttpStatus.NOT_FOUND, "CAMPSITE-001", "해당 ID의 캠핑지를 찾을 수 없습니다."),
 
     BOOKMARK_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "BOOKMARK-001", "찜하기를 요청한 사용자를 찾을 수 없습니다."),
 
