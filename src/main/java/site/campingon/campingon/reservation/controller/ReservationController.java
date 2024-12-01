@@ -26,14 +26,14 @@ public class ReservationController {
     // 유저의 예약 목록 조회
     @GetMapping
     public ResponseEntity<Page<ReservationResponseDto>> getReservations(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                                        @RequestParam int page) {
+                                                                        @RequestParam("page") int page) {
         Pageable pageable = PageRequest.of(page, pageSize);
         return ResponseEntity.ok(reservationService.getReservations(userDetails.getId(), pageable));
     }
 
     // 새로운 예약 후 확인을 위한 조회
     @GetMapping("/{reservationId}")
-    public ResponseEntity<ReservationResponseDto> getReservation(@PathVariable Long reservationId) {
+    public ResponseEntity<ReservationResponseDto> getReservation(@PathVariable("reservationId") Long reservationId) {
 
         return ResponseEntity.ok(reservationService.getReservation(reservationId));
     }
@@ -49,7 +49,7 @@ public class ReservationController {
 
     // 예약 취소
     @PatchMapping("/{reservationId}")
-    public ResponseEntity<Void> cancelReservation(@PathVariable Long reservationId, @RequestBody ReservationCancelRequestDto requestDto) {
+    public ResponseEntity<Void> cancelReservation(@PathVariable("reservationId") Long reservationId, @RequestBody ReservationCancelRequestDto requestDto) {
         
         reservationService.cancelReservation(reservationId, requestDto);
 
