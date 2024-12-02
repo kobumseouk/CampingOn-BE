@@ -86,7 +86,7 @@ public class UserAuthService {
         User user = userService.findUserByEmail(signInRequestDto.getEmail());
 
         if (!passwordEncoder.matches(signInRequestDto.getPassword(), user.getPassword())) {
-            throw new GlobalException(ErrorCode.INVALID_PASSWORD);
+            throw new GlobalException(ErrorCode.LOGIN_FAILED);
         }
         return user;
     }
