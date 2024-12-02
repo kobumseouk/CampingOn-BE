@@ -2,7 +2,10 @@ package site.campingon.campingon.reservation.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import site.campingon.campingon.camp.dto.CampSiteResponseDto;
 import site.campingon.campingon.reservation.dto.*;
+
+import java.util.List;
 
 public interface ReservationService {
 
@@ -20,5 +23,8 @@ public interface ReservationService {
 
     // 예약가능한 캠프사이트 조회를 위해 특정 날짜에 예약이 됐는지 조회
     ReservedCampSiteIdListResponseDto getReservedCampSiteIds(ReservationCheckDateRequestDto requestDto);
+
+    // 예약가능한 캠프사이트를 타입별로 하나씩 조회
+    List<CampSiteResponseDto> getAvailableCampSites(ReservationCheckDateRequestDto requestDto);
 
 }
