@@ -25,6 +25,9 @@ public class SecurityPath {
     public static final String[] ADMIN_ENDPOINTS = {
         "/api/camps/*/toggle-availability",
         "/api/admin/camps/**",
-        "/api/keywords/**"
+        "/api/keywords/**",
+        "/api/basedList/**",
+        "/api/imageList/**"
+
     };
 }
