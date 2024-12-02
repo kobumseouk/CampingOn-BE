@@ -33,7 +33,7 @@ public class ReservationController {
         return ResponseEntity.ok(reservationService.getReservations(userDetails.getId(), pageable));
     }
 
-    // 새로운 예약 후 확인을 위한 조회
+    // 단일 예약 정보 조회
     @GetMapping("/{reservationId}")
     public ResponseEntity<ReservationResponseDto> getReservation(@PathVariable("reservationId") Long reservationId) {
 
@@ -42,9 +42,9 @@ public class ReservationController {
 
     // 새로운 예약 생성
     @PostMapping
-    public ResponseEntity<Void> createReservation(@RequestBody ReservationCreateRequestDto requestDto) {
+    public ResponseEntity<Void> createReservation(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody ReservationCreateRequestDto requestDto) {
 
-        reservationService.createReservation(requestDto);
+        reservationService.createReservation(userDetails.getId(), requestDto);
 
         return ResponseEntity.ok().build();
     }

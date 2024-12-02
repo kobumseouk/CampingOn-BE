@@ -13,7 +13,7 @@ public interface ReservationService {
     ReservationResponseDto getReservation(Long reservationId);
 
     // 캠프사이트 선택 후 예약 요청
-    void createReservation(ReservationCreateRequestDto requestDto);
+    void createReservation(Long userId, ReservationCreateRequestDto requestDto);
 
     // 예약완료 이후 예약취소 요청
     void cancelReservation(Long reservationId, ReservationCancelRequestDto requestDto);

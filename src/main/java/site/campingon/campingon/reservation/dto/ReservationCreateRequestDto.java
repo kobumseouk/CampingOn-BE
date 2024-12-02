@@ -11,8 +11,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ReservationCreateRequestDto {
 
-    private Long userId;
-
     private Long campId;
 
     private Long campSiteId;

@@ -45,9 +45,9 @@ public class ReservationServiceImpl implements ReservationService {
 
     // 캠프사이트 선택 후 예약 요청
     @Transactional
-    public void createReservation(ReservationCreateRequestDto requestDto) {
+    public void createReservation(Long userId, ReservationCreateRequestDto requestDto) {
 
-        User user = reservationValidate.validateUserById(requestDto.getUserId());
+        User user = reservationValidate.validateUserById(userId);
         
         CampSite campSite = reservationValidate.validateCampSiteById(requestDto.getCampId());
 
