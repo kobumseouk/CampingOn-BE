@@ -27,7 +27,7 @@ public class GoCampingScheduler {
     private static final Long NUM_OF_ROWS = 10L;
     private static final Long IMAGE_CNT = 10L;  // 테스트 용
 
-    @Scheduled(initialDelay = 10000)    //스케줄러에 등록되고 10초뒤에 메소드 실행 -> 최초에 한번 실행
+    //    @Scheduled(initialDelay = 10000)    //스케줄러에 등록되고 10초뒤에 메소드 실행 -> 최초에 한번 실행
 //    @Scheduled(cron = "0 0 1 * * ?", zone = "Asia/Seoul")  //매달 1일 오전 00:00에 실행
     public void scheduleCampCreation() {
         try {
@@ -83,7 +83,8 @@ public class GoCampingScheduler {
             throw new RuntimeException(e);
         }
     }
-    @Scheduled(initialDelay = 10000)    //스케줄러에 등록되고 10초뒤에 메소드 실행 -> 최초에 한번 실행
+
+    //    @Scheduled(initialDelay = 10000)    //스케줄러에 등록되고 10초뒤에 메소드 실행 -> 최초에 한번 실행
 //    @Scheduled(cron = "0 0 1 * * ?", zone = "Asia/Seoul")  //매달 1일 오전 00:00에 실행
     public void scheduleCampUpdate() {
         Long pageNo = 1L;      // 현재 페이지 번호
@@ -152,11 +153,10 @@ public class GoCampingScheduler {
                         "syncStatus", SYNC_STATUS_DELETE
                 );
 
-                List<GoCampingParsedResponseDto> goCampingParsedResponseDtos =
-                        goCampingService.updateCampByGoCampingData(goCampingDataDto);
+                long deleteCnt = goCampingService.deleteCampByGoCampingData(goCampingDataDto);
 
                 // 성공 로그
-                log.info("캠프 데이터 삭제 성공: " + goCampingParsedResponseDtos.size() + "개");
+                log.info("캠프 데이터 삭제 성공: " + deleteCnt + "개");
 
 
                 //그 다음에 몇초 기다리기

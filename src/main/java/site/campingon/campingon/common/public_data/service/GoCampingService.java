@@ -36,7 +36,7 @@ public class GoCampingService {
     private final CampImageRepository campImageRepository;
     private final CampRepository campRepository;
     private final RestTemplate restTemplate;
-    private final GoCampingCampSiteService goCampingProviderService;
+    private final GoCampingProviderService goCampingProviderService;
     private static final String IMAGE_PAGE_NO = "1";    //이미지 몇번부터 값 꺼내올지
 
     //Camp 관련 엔티티 생성 및 DB 저장 메서드
@@ -256,5 +256,21 @@ public class GoCampingService {
 
         }
         return goCampingParsedResponseDtoList;
+    }
+
+    @Transactional
+    public long deleteCampByGoCampingData(GoCampingDataDto goCampingDataDto) {
+        List<GoCampingDataDto.Item> items = goCampingDataDto.getResponse().getBody().getItems().getItem();
+        List<GoCampingParsedResponseDto> goCampingParsedResponseDtoList = goCampingMapper.toGoCampingParsedResponseDtoList(items);
+
+        long beforeCnt = campRepository.count();
+
+        for (GoCampingParsedResponseDto data : goCampingParsedResponseDtoList) {
+            campRepository.deleteById(data.getContentId());
+        }
+
+        long afterCnt = campRepository.count();
+
+        return beforeCnt - afterCnt;
     }
 }
