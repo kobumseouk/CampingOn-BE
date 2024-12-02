@@ -41,7 +41,7 @@ public class GoCampingService {
 
     //Camp 관련 엔티티 생성 및 DB 저장 메서드
     @Transactional
-    public List<GoCampingParsedResponseDto> createCampByGoCampingData(GoCampingDataDto goCampingDataDto) throws ParseException {
+    public List<GoCampingParsedResponseDto> createCampByGoCampingData(GoCampingDataDto goCampingDataDto) {
         List<GoCampingDataDto.Item> items = goCampingDataDto.getResponse().getBody().getItems().getItem();
         List<GoCampingParsedResponseDto> goCampingParsedResponseDtoList = goCampingMapper.toGoCampingParsedResponseDtoList(items);
 
