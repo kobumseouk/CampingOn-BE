@@ -71,12 +71,12 @@ public class CampSiteService {
 
         // 예약 불가능한 사이트들 제외하고 타입별 그룹화
         return allCampSites.stream()
-            .filter(site -> !reservedSiteIds.contains(site.getId()))  // 이미 예약된 사이트 제외
-            .collect(Collectors.groupingBy(CampSite::getSiteType)) // 그룹화
-            .values().stream()
-            .map(sites -> sites.get(0))  // 각 타입별 첫 번째 사이트만 선택
-            .map(campSiteMapper::toCampSiteListDto)
-            .collect(Collectors.toList());
+                .filter(site -> !reservedSiteIds.contains(site.getId()))  // 이미 예약된 사이트 제외
+                .collect(Collectors.groupingBy(CampSite::getSiteType)) // 그룹화
+                .values().stream()
+                .map(sites -> sites.get(0))  // 각 타입별 첫 번째 사이트만 선택
+                .map(campSiteMapper::toCampSiteListDto)
+                .collect(Collectors.toList());
     }
 
     // 특정 캠핑지 조회
@@ -105,6 +105,7 @@ public class CampSiteService {
     public boolean getAvailability(Long campSiteId) {
         CampSite campSite = campSiteRepository.findById(campSiteId)
                 .orElseThrow(() -> new GlobalException(ErrorCode.CAMPSITE_NOT_FOUND_BY_ID));
+
         return campSite.isAvailable();
     }
 }

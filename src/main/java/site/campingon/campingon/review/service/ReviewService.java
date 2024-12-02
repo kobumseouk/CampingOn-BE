@@ -9,6 +9,7 @@ import site.campingon.campingon.camp.entity.Camp;
 import site.campingon.campingon.camp.entity.CampSite;
 import site.campingon.campingon.camp.repository.CampRepository;
 import site.campingon.campingon.camp.repository.CampSiteRepository;
+import site.campingon.campingon.common.exception.GlobalException;
 import site.campingon.campingon.reservation.entity.Reservation;
 import site.campingon.campingon.reservation.repository.ReservationRepository;
 import site.campingon.campingon.review.dto.ReviewCreateRequestDto;
@@ -25,6 +26,9 @@ import site.campingon.campingon.user.repository.UserRepository;
 
 import java.io.IOException;
 import java.util.List;
+
+import static site.campingon.campingon.common.exception.ErrorCode.*;
+import static site.campingon.campingon.common.exception.ErrorCode.USER_NOT_FOUND_BY_ID;
 
 @Service
 @RequiredArgsConstructor
@@ -50,9 +54,9 @@ public class ReviewService {
             ReviewCreateRequestDto requestDto
     ) throws IOException {
         Camp camp = campRepository.findById(campId)
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 캠프장 ID입니다."));
+                .orElseThrow(() -> new GlobalException(CAMP_NOT_FOUND_BY_ID));
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 예약 ID입니다."));
+                .orElseThrow(() -> new GlobalException(RESERVATION_NOT_FOUND_BY_ID));
 
         // 3. ReviewCreateRequestDto를 Review 엔티티로 변환하고 저장
         Review review = reviewMapper.toEntity(requestDto, camp, reservation);
@@ -67,7 +71,7 @@ public class ReviewService {
         // 7. 저장된 Review 엔티티를 ReviewResponseDto로 변환하여 반환
         return reviewMapper.toResponseDto(savedReview);
     }
-      // 추후 단건 예약에 대해 중복 리뷰 작성 불가 로직 추가 예정
+    // 추후 단건 예약에 대해 중복 리뷰 작성 불가 로직 추가 예정
 //    // 예약이 완료된 상태를 기준으로 리뷰 작성
 //    @Transactional
 //    public ReviewResponseDto createReview(Long reservationId, ReviewCreateRequestDto requestDto) throws IOException {
@@ -108,11 +112,11 @@ public class ReviewService {
     public ReviewResponseDto updateReview(Long campId, Long reviewId, ReviewUpdateRequestDto requestDto) throws IOException {
         // 1. 기존 리뷰 조회
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 리뷰 ID입니다."));
+                .orElseThrow(() -> new GlobalException(REVIEW_NOT_FOUND_BY_ID));
 
         // 2. 캠프 ID 확인
         if (!review.getCamp().getId().equals(campId)) {
-            throw new IllegalArgumentException("리뷰가 해당 캠프에 속하지 않습니다.");
+            throw new GlobalException(REVIEW_NOT_IN_CAMP);
         }
 
         Review updatedReview = reviewMapper.updateFromRequest(review, requestDto);
@@ -150,7 +154,7 @@ public class ReviewService {
     @Transactional
     public void deleteReview(Long reviewId) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new IllegalArgumentException("Review not found with id: " + reviewId));
+                .orElseThrow(() -> new GlobalException(REVIEW_NOT_FOUND_BY_ID));
 
         List<ReviewImage> reviewImages = reviewImageRepository.findByReview(review);
         if (!reviewImages.isEmpty()) {
@@ -164,7 +168,7 @@ public class ReviewService {
     // 캠핑장 id로 리뷰 조회
     public List<ReviewResponseDto> getReviewsByCampId(Long campId) {
         Camp camp = campRepository.findById(campId)
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 캠프장 ID입니다."));
+                .orElseThrow(() -> new GlobalException(CAMP_NOT_FOUND_BY_ID));
 
         List<Review> reviews = reviewRepository.findByCampId(camp.getId());
         return reviewMapper.toResponseDtoList(reviews);
@@ -173,7 +177,7 @@ public class ReviewService {
     // 캠핑지 id로 리뷰 조회
     public List<ReviewResponseDto> getReviewsByCampSiteId(Long campSiteId) {
         CampSite campSite = campSiteRepository.findById(campSiteId)
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 캠핑지 ID입니다."));
+                .orElseThrow(() -> new GlobalException(CAMPSITE_NOT_FOUND_BY_ID));
 
         List<Review> reviews = reviewRepository.findByCampSiteId(campSite.getId());
         return reviewMapper.toResponseDtoList(reviews);
@@ -183,11 +187,11 @@ public class ReviewService {
     public boolean toggleRecommend(Long reviewId, Long userId) {
         // 리뷰 가져오기
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new EntityNotFoundException("Review not found with ID: " + reviewId));
+                .orElseThrow(() -> new GlobalException(REVIEW_NOT_FOUND_BY_ID));
 
         // 작성자 확인
         if (!review.getReservation().getUser().getId().equals(userId)) {
-            throw new IllegalArgumentException("User is not authorized to toggle recommend for this review.");
+            throw new GlobalException(USER_NOT_FOUND_BY_ID);
         }
         Review updatedReview = reviewMapper.toUpdatedReview(review);
         reviewRepository.save(updatedReview);
