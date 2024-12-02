@@ -63,7 +63,7 @@ public class SecurityConfig {
                         .requestMatchers(SecurityPath.ADMIN_ENDPOINTS).hasRole("ADMIN")
                         .requestMatchers(SecurityPath.USER_ENDPOINTS).hasRole("USER")
                         .requestMatchers(SecurityPath.PUBLIC_ENDPOINTS).permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 );
 
         // JwtFilter 추가
