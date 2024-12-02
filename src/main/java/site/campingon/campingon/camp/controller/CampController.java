@@ -6,19 +6,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import site.campingon.campingon.camp.dto.CampDetailResponseDto;
 import site.campingon.campingon.camp.dto.CampListResponseDto;
-import site.campingon.campingon.camp.dto.CampSiteListResponseDto;
 import site.campingon.campingon.camp.service.CampService;
+import site.campingon.campingon.common.exception.ErrorCode;
+import site.campingon.campingon.common.exception.GlobalException;
 import site.campingon.campingon.common.jwt.CustomUserDetails;
-import site.campingon.campingon.user.entity.User;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import site.campingon.campingon.user.repository.UserKeywordRepository;
 
-import java.util.*;
 
 @Slf4j
 @RestController
@@ -50,11 +48,23 @@ public class CampController {
       @RequestParam(defaultValue = "0") int page,
       @AuthenticationPrincipal CustomUserDetails userDetails
   ) {
-    boolean hasKeywords = userKeywordRepository.existsByUserId(userDetails.getId());
+    // 인증 상태 검증
+    if (userDetails == null) {
+      throw new GlobalException(ErrorCode.ACCESS_DENIED);
+    }
+
+    Long userId = userDetails.getId();
+    if (userId == null) {
+      throw new GlobalException(ErrorCode.USER_NOT_FOUND_BY_ID);
+    }
+
+    // 사용자 키워드 기반으로 페이지 크기 결정
+    boolean hasKeywords = userKeywordRepository.existsByUserId(userId);
     int pageSize = hasKeywords ? KEYWORD_MATCHED_PAGE_SIZE : DEFAULT_PAGE_SIZE;
 
+    // 인기 캠핑장 조회
     return ResponseEntity.ok(
-        campService.getPopularCamps(userDetails.getId(), PageRequest.of(page, pageSize))
+        campService.getPopularCamps(userId, PageRequest.of(page, pageSize))
     );
   }
 

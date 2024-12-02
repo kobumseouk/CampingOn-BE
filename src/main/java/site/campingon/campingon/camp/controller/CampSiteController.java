@@ -17,7 +17,7 @@ import java.util.List;
 public class CampSiteController {
   private final CampSiteService campSiteService;
 
-  // 캠핑지 목록 조회
+  // 캠핑장의 예약가능한 캠핑지 목록 조회
   @GetMapping("/{campId}/available-sites")
   public ResponseEntity<List<CampSiteListResponseDto>> getAvailableCampSites(
           @PathVariable("campId") Long campId,

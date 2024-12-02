@@ -7,6 +7,8 @@ import site.campingon.campingon.bookmark.entity.Bookmark;
 import site.campingon.campingon.bookmark.repository.BookmarkRepository;
 import site.campingon.campingon.camp.entity.Camp;
 import site.campingon.campingon.camp.repository.CampRepository;
+import site.campingon.campingon.common.exception.ErrorCode;
+import site.campingon.campingon.common.exception.GlobalException;
 import site.campingon.campingon.user.entity.User;
 import site.campingon.campingon.user.repository.UserRepository;
 
@@ -37,10 +39,10 @@ public class BookmarkService {
 
     // 새로운 찜 관계 생성
     Camp camp = campRepository.findById(campId)
-        .orElseThrow(() -> new RuntimeException("캠핑장을 찾을 수 없습니다."));
+        .orElseThrow(() -> new GlobalException(ErrorCode.CAMP_NOT_FOUND_BY_ID));
 
     User user = userRepository.findById(userId)
-        .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        .orElseThrow(() -> new GlobalException(ErrorCode.BOOKMARK_USER_NOT_FOUND));
 
     Bookmark bookmark = Bookmark.builder()
         .camp(camp)

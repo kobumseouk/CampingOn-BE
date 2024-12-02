@@ -53,6 +53,10 @@ public enum ErrorCode {
 
     CAMP_INDUTY_NOT_FOUND(HttpStatus.NOT_FOUND, "INDUTY-001", "존재하지 않는 업종입니다."),
 
+    CAMPSITE_NOT_FOUND_BY_ID(HttpStatus.NOT_FOUND, "CAMPSITE-001", "해당 ID의 캠핑지를 찾을 수 없습니다."),
+
+    BOOKMARK_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "BOOKMARK-001", "찜하기를 요청한 사용자를 찾을 수 없습니다."),
+
     RESERVATION_STATUS_NOT_FOUND(HttpStatus.NOT_FOUND, "RESERVATION-001", "알 수없는 예약 상태입니다."),
     RESERVATION_NOT_FOUND_BY_ID(HttpStatus.NOT_FOUND, "RESERVATION-002", "해당 예약 ID를 찾을 수 없습니다."),
     RESERVATION_NOT_CANCELED(HttpStatus.BAD_REQUEST, "RESERVATION-003", "예약취소를 할 수 없습니다.");

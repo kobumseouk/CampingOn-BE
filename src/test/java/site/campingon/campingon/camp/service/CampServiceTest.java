@@ -22,6 +22,8 @@ import site.campingon.campingon.camp.entity.*;
 import site.campingon.campingon.camp.mapper.CampMapper;
 import site.campingon.campingon.camp.repository.CampRepository;
 import site.campingon.campingon.camp.repository.CampSiteRepository;
+import site.campingon.campingon.common.exception.ErrorCode;
+import site.campingon.campingon.common.exception.GlobalException;
 import site.campingon.campingon.user.repository.UserKeywordRepository;
 
 import java.util.Arrays;
@@ -282,10 +284,10 @@ class CampServiceTest {
     when(campRepository.findById(invalidCampId)).thenReturn(Optional.empty());
 
     // when & then
-    RuntimeException exception = assertThrows(RuntimeException.class, () ->
+    GlobalException exception = assertThrows(GlobalException.class, () ->
         campService.getCampDetail(invalidCampId)
     );
-    assertEquals("캠핑장을 찾을 수 없습니다.", exception.getMessage());
+    assertEquals(ErrorCode.CAMP_NOT_FOUND_BY_ID.getMessage(), exception.getErrorCode().getMessage());
     verify(campRepository).findById(invalidCampId);
   }
 
