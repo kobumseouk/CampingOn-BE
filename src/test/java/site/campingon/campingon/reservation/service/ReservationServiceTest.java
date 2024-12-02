@@ -24,6 +24,7 @@ import site.campingon.campingon.reservation.repository.ReservationRepository;
 import site.campingon.campingon.reservation.utils.ReservationValidate;
 import site.campingon.campingon.user.entity.User;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -79,8 +80,8 @@ class ReservationServiceTest {
                 .user(mockUser)
                 .camp(mockCamp)
                 .campSite(mockCampSite)
-                .checkIn(LocalDateTime.now())
-                .checkOut(LocalDateTime.now().plusDays(1))
+                .checkInDate(LocalDate.from(LocalDateTime.now()))
+                .checkOutDate(LocalDate.from(LocalDateTime.now().plusDays(1)))
                 .guestCnt(2)
                 .status(ReservationStatus.RESERVED)
                 .totalPrice(50000)
@@ -104,8 +105,6 @@ class ReservationServiceTest {
                 .id(1L)
                 .userId(mockUser.getId())
                 .campSiteId(mockCampSite.getId())
-                .checkIn(mockReservation.getCheckIn())
-                .checkOut(mockReservation.getCheckOut())
                 .guestCnt(mockReservation.getGuestCnt())
                 .status(mockReservation.getStatus())
                 .totalPrice(mockReservation.getTotalPrice())
@@ -146,26 +145,25 @@ class ReservationServiceTest {
 
         // given
         ReservationCreateRequestDto requestDto = new ReservationCreateRequestDto(
-            mockUser.getId(),
             mockCamp.getId(),
             mockCampSite.getId(),
-            LocalDateTime.now(),
-            LocalDateTime.now().plusDays(1),
+            LocalDate.now(),
+            LocalDate.now().plusDays(1),
             2,
             50000
         );
 
-        when(reservationValidate.validateUserById(requestDto.getUserId()))
+        when(reservationValidate.validateUserById(mockUser.getId()))
             .thenReturn(mockUser);
         when(reservationValidate.validateCampSiteById(requestDto.getCampSiteId()))
             .thenReturn(mockCampSite);
 
         // when
-        reservationService.createReservation(requestDto);
+        reservationService.createReservation(mockUser.getId(), requestDto);
 
         // then
         verify(reservationRepository).save(any(Reservation.class));
-        verify(reservationValidate).validateUserById(requestDto.getUserId());
+        verify(reservationValidate).validateUserById(mockUser.getId());
         verify(reservationValidate).validateCampSiteById(requestDto.getCampSiteId());
     }
 
@@ -199,8 +197,8 @@ class ReservationServiceTest {
         // given
         ReservationCheckDateRequestDto requestDto = new ReservationCheckDateRequestDto(
             mockCamp.getId(),
-            LocalDateTime.now(),
-            LocalDateTime.now().plusDays(1)
+            LocalDate.now(),
+            LocalDate.now().plusDays(1)
         );
 
         List<Long> reservedIds = Arrays.asList(2L, 3L);
@@ -228,21 +226,21 @@ class ReservationServiceTest {
     void createReservationUserNotFound() {
         // given
         ReservationCreateRequestDto requestDto = new ReservationCreateRequestDto(
-            999L, // 존재하지 않는 유저 ID
             mockCamp.getId(),
             mockCampSite.getId(),
-            LocalDateTime.now(),
-            LocalDateTime.now().plusDays(1),
+            LocalDate.now(),
+            LocalDate.now().plusDays(1),
             2,
             50000
         );
 
-        when(reservationValidate.validateUserById(requestDto.getUserId()))
+        Long wrongId = 999L; // 존재하지 않는 유저 ID
+        when(reservationValidate.validateUserById(wrongId))
             .thenThrow(new GlobalException(ErrorCode.USER_NOT_FOUND_BY_ID));
 
         // when & then
         assertThrows(GlobalException.class, () -> 
-            reservationService.createReservation(requestDto));
+            reservationService.createReservation(wrongId, requestDto));
         verify(reservationRepository, never()).save(any());
     }
 
@@ -251,23 +249,22 @@ class ReservationServiceTest {
     void createReservationCampSiteNotFound() {
         // given
         ReservationCreateRequestDto requestDto = new ReservationCreateRequestDto(
-            mockUser.getId(),
             mockCamp.getId(),
             mockCampSite.getId(),
-            LocalDateTime.now(),
-            LocalDateTime.now().plusDays(1),
+            LocalDate.now(),
+            LocalDate.now().plusDays(1),
             2,
             50000
         );
 
-        when(reservationValidate.validateUserById(requestDto.getUserId()))
+        when(reservationValidate.validateUserById(mockUser.getId()))
             .thenReturn(mockUser);
         when(reservationValidate.validateCampSiteById(requestDto.getCampId()))
             .thenThrow(new GlobalException(ErrorCode.CAMP_NOT_FOUND_BY_ID));
 
         // when & then
         assertThrows(GlobalException.class, () -> 
-            reservationService.createReservation(requestDto));
+            reservationService.createReservation(mockUser.getId(), requestDto));
         verify(reservationRepository, never()).save(any());
     }
 

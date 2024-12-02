@@ -30,8 +30,7 @@ public class CampSiteService {
     @Transactional
     public CampSiteResponseDto createCampSite(Long campId, CampSiteCreateRequestDto createRequestDto) {
         Camp camp = campRepository.findById(campId)
-            .orElseThrow(() -> new GlobalException(ErrorCode.CAMP_NOT_FOUND_BY_ID));
-
+                .orElseThrow(() -> new GlobalException(ErrorCode.CAMP_NOT_FOUND_BY_ID));
         CampSite campSite = campSiteMapper.toCampSite(createRequestDto, camp);
         return campSiteMapper.toCampSiteResponseDto(campSiteRepository.save(campSite));
     }
@@ -64,6 +63,7 @@ public class CampSiteService {
                 .toList();
     }
 
+    // REFACTOR: ReservationService.getAvailableCampSites()으로 통합
     // 캠핑장의 예약 가능한 SiteType별 캠핑지 조회
     public List<CampSiteListResponseDto> getAvailableCampSites(Long campId, List<Long> reservedSiteIds) {
         // 해당 캠핑장의 모든 캠프사이트 조회

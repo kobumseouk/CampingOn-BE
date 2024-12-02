@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Getter
 @ToString
@@ -15,8 +15,8 @@ public class ReservationCheckDateRequestDto {
 
     private Long campId;
 
-    private LocalDateTime checkIn;
+    private LocalDate checkIn;
 
-    private LocalDateTime checkOut;
+    private LocalDate checkOut;
 
 }
