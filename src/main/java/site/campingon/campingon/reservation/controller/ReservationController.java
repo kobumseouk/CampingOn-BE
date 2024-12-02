@@ -17,17 +17,19 @@ import site.campingon.campingon.reservation.service.ReservationService;
 @RequestMapping("/api/reservations")
 public class ReservationController {
 
+    @Value("${app.pagination.reservation.page}")
+    private int page;
+
     @Value("${app.pagination.reservation.size}")
-    private int pageSize;
+    private int size;
 
 
     private final ReservationService reservationService;
 
     // 유저의 예약 목록 조회
     @GetMapping
-    public ResponseEntity<Page<ReservationResponseDto>> getReservations(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                                        @RequestParam("page") int page) {
-        Pageable pageable = PageRequest.of(page, pageSize);
+    public ResponseEntity<Page<ReservationResponseDto>> getReservations(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(reservationService.getReservations(userDetails.getId(), pageable));
     }
 
