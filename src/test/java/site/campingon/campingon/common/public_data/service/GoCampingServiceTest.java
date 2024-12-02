@@ -111,7 +111,7 @@ class GoCampingServiceTest {
         doReturn(goCampingDataDto).when(restTemplate).getForObject(any(URI.class), eq(GoCampingDataDto.class));
 
         //when
-        GoCampingDataDto result = goCampingService.getAndConvertToGoCampingDataDto("numOfRows", numOfRows, "pageNo", pageNo);
+        GoCampingDataDto result = goCampingService.getAndConvertToGoCampingDataDto(GoCampingPath.BASED_LIST,"numOfRows", numOfRows, "pageNo", pageNo);
 
         // then
         assertThat(result).isNotNull();
