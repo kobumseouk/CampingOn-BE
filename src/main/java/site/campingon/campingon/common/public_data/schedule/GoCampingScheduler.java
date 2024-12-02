@@ -153,23 +153,10 @@ public class GoCampingScheduler {
                         "syncStatus", SYNC_STATUS_DELETE
                 );
 
-                long deleteCnt = goCampingService.deleteCampByGoCampingData(goCampingDataDto);
+                int deleteCnt = goCampingService.deleteCampByGoCampingData(goCampingDataDto);
 
                 // 성공 로그
                 log.info("캠프 데이터 삭제 성공: " + deleteCnt + "개");
-
-
-                //그 다음에 몇초 기다리기
-//                Thread.sleep(10000);  //일단보류
-
-                //공공데이터를 조회하고 dto로 변환(이미지)
-                List<GoCampingImageDto> goCampingImageDto = goCampingService.getAndConvertToGoCampingImageDataDto(IMAGE_CNT);
-
-                //CampImage 를 생성하고 DB에 저장한다.
-                List<List<GoCampingImageParsedResponseDto>> goCampingImageParsedResponseDtos
-                        = goCampingService.createOrUpdateCampImageByGoCampingImageData(goCampingImageDto);
-
-                log.info("캠프 이미지 데이터 삭제 성공: " + goCampingImageParsedResponseDtos.size() + "개");
 
                 //그 다음에 몇초 기다리기
 //                Thread.sleep(10000); //일단보류

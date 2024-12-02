@@ -259,18 +259,14 @@ public class GoCampingService {
     }
 
     @Transactional
-    public long deleteCampByGoCampingData(GoCampingDataDto goCampingDataDto) {
+    public int deleteCampByGoCampingData(GoCampingDataDto goCampingDataDto) {
         List<GoCampingDataDto.Item> items = goCampingDataDto.getResponse().getBody().getItems().getItem();
         List<GoCampingParsedResponseDto> goCampingParsedResponseDtoList = goCampingMapper.toGoCampingParsedResponseDtoList(items);
 
-        long beforeCnt = campRepository.count();
+        List<Long> idsToDelete = goCampingParsedResponseDtoList.stream()
+                .map(GoCampingParsedResponseDto::getContentId)
+                .toList();
 
-        for (GoCampingParsedResponseDto data : goCampingParsedResponseDtoList) {
-            campRepository.deleteById(data.getContentId());
-        }
-
-        long afterCnt = campRepository.count();
-
-        return beforeCnt - afterCnt;
+        return campRepository.deleteByIds(idsToDelete);
     }
 }
