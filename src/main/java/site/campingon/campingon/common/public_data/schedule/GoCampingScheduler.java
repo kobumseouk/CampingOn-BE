@@ -127,8 +127,7 @@ public class GoCampingScheduler {
     }
 
     //불필요한 데이터 삭제
-    @Scheduled(initialDelay = 10000)
-//    @Scheduled(cron = "0 0 0 3 * ?", zone = "Asia/Seoul")   //매월 3일 00:00 실행
+    @Scheduled(cron = "0 0 0 3 * ?", zone = "Asia/Seoul")   //매월 3일 00:00 실행
     public void scheduleCampDelete() {
         Long pageNo = 1L;      // 현재 페이지 번호
 

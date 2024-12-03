@@ -1,6 +1,5 @@
 package site.campingon.campingon.common.public_data.service;
 
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
