@@ -177,7 +177,7 @@ public class GoCampingService {
     public GoCampingDataDto getAndConvertToGoCampingDataDto(
             GoCampingPath goCampingPath,
             String... params
-    ) throws URISyntaxException, InvalidFormatException {
+    ) throws URISyntaxException {
         URI uri = goCampingProviderService.createUri(goCampingPath, params);
 
         return restTemplate.getForObject(uri, GoCampingDataDto.class);  //API 호출
