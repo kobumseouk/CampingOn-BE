@@ -15,6 +15,8 @@ import site.campingon.campingon.reservation.entity.Reservation;
 import site.campingon.campingon.reservation.utils.ReservationValidate;
 import site.campingon.campingon.user.entity.User;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,7 +47,6 @@ public class ReservationServiceImpl implements ReservationService {
         return reservationMapper.toResponse(reservation);
     }
 
-
     // 캠프사이트 선택 후 예약 요청
     @Transactional
     public void createReservation(Long userId, ReservationCreateRequestDto requestDto) {
@@ -58,8 +59,8 @@ public class ReservationServiceImpl implements ReservationService {
                 .user(user)
                 .camp(campSite.getCamp())
                 .campSite(campSite)
-                .checkInDate(requestDto.getCheckIn())
-                .checkOutDate(requestDto.getCheckOut())
+                .checkinDate(requestDto.getCheckin())
+                .checkoutDate(requestDto.getCheckout())
                 .guestCnt(requestDto.getGuestCnt())
                 .totalPrice(requestDto.getTotalPrice())
                 .build();
@@ -82,34 +83,4 @@ public class ReservationServiceImpl implements ReservationService {
         reservationRepository.save(canceledReservation);
     }
 
-
-    // 예약가능한 캠프사이트 조회를 위해 특정 날짜에 예약이 됐는지 조회
-    @Transactional(readOnly = true)
-    public ReservedCampSiteIdListResponseDto getReservedCampSiteIds(ReservationCheckDateRequestDto requestDto) {
-
-        List<Long> reservedIds = reservationRepository.findReservedCampSiteIds(
-                requestDto.getCampId(),
-                requestDto.getCheckIn(),
-                requestDto.getCheckOut());
-
-        return new ReservedCampSiteIdListResponseDto(reservedIds);
-    }
-
-    // 예약가능한 캠프사이트를 타입별로 하나씩 조회
-    @Transactional(readOnly = true)
-    public List<CampSiteResponseDto> getAvailableCampSites(ReservationCheckDateRequestDto requestDto) {
-
-        List<CampSite> campSites = reservationRepository.findAvailableCampSites(
-                requestDto.getCampId(),
-                requestDto.getCheckIn(),
-                requestDto.getCheckOut());
-
-        // 타입별 첫 번째 행 데이터만 가져오기
-        return campSites.stream()
-                .collect(Collectors.groupingBy(CampSite::getSiteType))
-                .values().stream()
-                .map(group -> group.get(0))
-                .map(campSiteMapper::toCampSiteResponseDto)
-                .toList();
-    }
 }

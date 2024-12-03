@@ -28,8 +28,8 @@ public class CampSiteAdminController {
     public ResponseEntity<CampSiteResponseDto> createCampSite(
             @PathVariable("campId") Long campId,
             @RequestBody @Valid CampSiteCreateRequestDto createRequestDto) {
-        CampSiteResponseDto responseDto = campSiteService.createCampSite(campId, createRequestDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(campSiteService.createCampSite(campId, createRequestDto));
     }
 
     // 캠핑지 수정
@@ -38,8 +38,8 @@ public class CampSiteAdminController {
             @PathVariable("campId") Long campId,
             @PathVariable("siteId") Long siteId,
             @RequestBody @Valid CampSiteUpdateRequestDto updateRequestDto) {
-        CampSiteResponseDto responseDto = campSiteService.updateCampSite(campId, siteId, updateRequestDto);
-        return ResponseEntity.ok(responseDto);
+
+        return ResponseEntity.ok(campSiteService.updateCampSite(campId, siteId, updateRequestDto));
     }
 
     // 캠핑지 삭제
@@ -47,7 +47,9 @@ public class CampSiteAdminController {
     public ResponseEntity<Void> deleteCampSite(
             @PathVariable("campId") Long campId,
             @PathVariable("siteId") Long siteId) {
+
         campSiteService.deleteCampSite(campId, siteId);
+
         return ResponseEntity.noContent().build();
     }
 
@@ -55,8 +57,8 @@ public class CampSiteAdminController {
     @GetMapping
     public ResponseEntity<List<CampSiteListResponseDto>> getCampSites(
             @PathVariable("campId") Long campId) {
-        List<CampSiteListResponseDto> responseDtos = campSiteService.getCampSites(campId);
-        return ResponseEntity.ok(responseDtos);
+
+        return ResponseEntity.ok(campSiteService.getCampSites(campId));
     }
 
     // 특정 캠핑지 조회
@@ -64,7 +66,25 @@ public class CampSiteAdminController {
     public ResponseEntity<CampSiteResponseDto> getCampSite(
             @PathVariable("campId") Long campId,
             @PathVariable("siteId") Long siteId) {
-        CampSiteResponseDto responseDto = campSiteService.getCampSite(campId, siteId);
-        return ResponseEntity.ok(responseDto);
+
+        return ResponseEntity.ok(campSiteService.getCampSite(campId, siteId));
+    }
+
+    // 특정 캠핑지의 isAvailable 상태를 토글 - 변경된 isAvailable 상태 반환
+    @PutMapping("/{siteId}/available")
+    public ResponseEntity<Boolean> toggleAvailability(
+            @PathVariable("campId") Long campId,
+            @PathVariable("siteId") Long siteId) {
+
+        return ResponseEntity.ok(campSiteService.toggleAvailability(campId, siteId));
+    }
+
+    // 특정 캠핑지의 isAvailable 상태 조회 - 현재 isAvailable 상태 반환
+    @GetMapping("/{campSiteId}/available")
+    public ResponseEntity<Boolean> getAvailability(
+            @PathVariable("campId") Long campId,
+            @PathVariable("campSiteId") Long campSiteId) {
+
+        return ResponseEntity.ok(campSiteService.getAvailability(campId, campSiteId));
     }
 }

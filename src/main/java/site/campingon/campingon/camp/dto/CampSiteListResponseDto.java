@@ -18,10 +18,8 @@ public class CampSiteListResponseDto {
   private Induty siteType;
   private String indoorFacility;
 
-  @Builder.Default  // 기본값 자동 설정
-  private LocalTime checkInTime = LocalTime.of(15, 0);  // 15:00
+  private LocalTime checkInTime;
 
-  @Builder.Default  // 기본값 자동 설정
-  private LocalTime checkOutTime = LocalTime.of(11, 0);  // 11:00
+  private LocalTime checkOutTime;
 
 }

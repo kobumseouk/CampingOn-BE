@@ -2,11 +2,13 @@ package site.campingon.campingon.camp.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import site.campingon.campingon.camp.dto.CampSiteListResponseDto;
-import site.campingon.campingon.camp.service.CampSiteService;
+import site.campingon.campingon.camp.service.CampSiteReserveService;
 
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -15,34 +17,22 @@ import java.util.List;
 @RequestMapping("/api/camps")
 @RequiredArgsConstructor
 public class CampSiteController {
-  private final CampSiteService campSiteService;
 
-  // REFACTOR: ReservationController.getAvailableCampSites()으로 통합
-  // 캠핑지 목록 조회
-  // 캠핑장의 예약가능한 캠핑지 목록 조회
-  @GetMapping("/{campId}/available-sites")
-  public ResponseEntity<List<CampSiteListResponseDto>> getAvailableCampSites(
-          @PathVariable("campId") Long campId,
-          @RequestParam List<Long> reservedSiteIds
-  ) {
-    return ResponseEntity.ok(campSiteService.getAvailableCampSites(campId, reservedSiteIds));
-  }
+    private final CampSiteReserveService campSiteReserveService;
 
-  // 특정 캠핑지의 isAvailable 상태를 토글
-  @PutMapping("/{campSiteId}/toggle-availability")
-  public ResponseEntity<Boolean> toggleAvailability(
-          @PathVariable("campSiteId") Long campSiteId
-  ) {
-    boolean newAvailability = campSiteService.toggleAvailability(campSiteId);
-    return ResponseEntity.ok(newAvailability); // 변경된 isAvailable 상태 반환
-  }
+    // 캠핑장의 예약가능한 캠핑지 목록 조회
+    @GetMapping("/{campId}/available")
+    public ResponseEntity<List<CampSiteListResponseDto>> getAvailableCampSites(@PathVariable("campId") Long campId,
 
-  // 특정 캠핑지의 isAvailable 상태 조회
-  @GetMapping("/{campSiteId}/availability")
-  public ResponseEntity<Boolean> getAvailability(
-          @PathVariable("campSiteId") Long campSiteId
-  ) {
-    boolean isAvailable = campSiteService.getAvailability(campSiteId);
-    return ResponseEntity.ok(isAvailable); // 현재 isAvailable 상태 반환
-  }
+                                                                               @RequestParam(value = "checkin")
+                                                                               @DateTimeFormat(pattern = "yyyy-MM-dd")
+                                                                               LocalDate checkin,
+
+                                                                               @RequestParam(value = "checkout")
+                                                                               @DateTimeFormat(pattern = "yyyy-MM-dd")
+                                                                               LocalDate checkout) {
+
+        return ResponseEntity.ok(campSiteReserveService.getAvailableCampSites(campId, checkin, checkout));
+    }
+
 }
