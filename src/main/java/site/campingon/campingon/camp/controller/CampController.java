@@ -26,8 +26,8 @@ public class CampController {
   // 사용자 키워드 맞춤 캠핑장 목록 조회 (페이지네이션 - 횡스크롤)
   @GetMapping("/matched")
   public ResponseEntity<Page<CampListResponseDto>> getMatchedCamps(
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "3") int size,
+      @RequestParam(name = "page", defaultValue = "0") int page,
+      @RequestParam(name = "size", defaultValue = "3") int size,
       @AuthenticationPrincipal CustomUserDetails userDetails
   ) {
     return ResponseEntity.ok(campService.getMatchedCampsByKeywords(
@@ -38,8 +38,8 @@ public class CampController {
   // 캠핑장 인기 목록 조회 (페이지네이션)
   @GetMapping("/popular")
   public ResponseEntity<Page<CampListResponseDto>> getPopularCamps(
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "9") int size,
+      @RequestParam(name = "page", defaultValue = "0") int page,
+      @RequestParam(name = "size", defaultValue = "9") int size,
       @AuthenticationPrincipal CustomUserDetails userDetails
   ) {
     Long userId = userDetails != null ? userDetails.getId() : null;
@@ -54,8 +54,8 @@ public class CampController {
   public ResponseEntity<Page<CampListResponseDto>> searchCamps(
       @RequestParam String keyword,
       @RequestParam(required = false) String city,
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "12") int size,
+      @RequestParam(name = "page", defaultValue = "0") int page,
+      @RequestParam(name = "size", defaultValue = "12") int size,
       //TODO: 사용자별 검색 기록 사용 시 필요(Redis - 서버사이드 캐시)
       @AuthenticationPrincipal CustomUserDetails userDetails
   ) {
@@ -76,8 +76,8 @@ public class CampController {
   // 사용자 찜 목록 조회
   @GetMapping("/bookmarked")
   public ResponseEntity<Page<CampListResponseDto>> getBookmarkedCamps(
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "3") int size,
+      @RequestParam(name = "page", defaultValue = "0") int page,
+      @RequestParam(name = "size", defaultValue = "3") int size,
       @AuthenticationPrincipal CustomUserDetails userDetails
   ) {
     return ResponseEntity.ok(campService.getBookmarkedCamps(
