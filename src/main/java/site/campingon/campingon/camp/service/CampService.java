@@ -9,14 +9,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.campingon.campingon.camp.dto.CampDetailResponseDto;
 import site.campingon.campingon.camp.dto.CampListResponseDto;
-import site.campingon.campingon.camp.dto.CampSiteListResponseDto;
 import site.campingon.campingon.camp.entity.Camp;
-import site.campingon.campingon.camp.entity.CampInduty;
-import site.campingon.campingon.camp.entity.CampSite;
 import site.campingon.campingon.camp.mapper.CampMapper;
 import site.campingon.campingon.camp.repository.CampRepository;
-import site.campingon.campingon.camp.repository.CampSiteRepository;
 import site.campingon.campingon.bookmark.repository.BookmarkRepository;
+import site.campingon.campingon.camp.repository.mongodb.SearchInfoRepository;
 import site.campingon.campingon.common.exception.ErrorCode;
 import site.campingon.campingon.common.exception.GlobalException;
 import site.campingon.campingon.user.repository.UserKeywordRepository;
@@ -31,6 +28,7 @@ import java.util.stream.Collectors;
 public class CampService {
 
   private final CampRepository campRepository;
+  private final SearchInfoRepository searchInfoRepository;
   private final UserKeywordRepository userKeywordRepository;
   private final BookmarkRepository bookMarkRepository;
   private final CampMapper campMapper;
@@ -57,7 +55,9 @@ public class CampService {
     return campRepository.findPopularCamps(pageable)
         .map(camp -> {
           CampListResponseDto dto = campMapper.toCampListDto(camp);
-          dto.setMarked(bookMarkRepository.existsByCampIdAndUserId(camp.getId(), userId));
+          if (userId != null) {
+            dto.setMarked(bookMarkRepository.existsByCampIdAndUserId(camp.getId(), userId));
+          }
           return dto;
         });
   }

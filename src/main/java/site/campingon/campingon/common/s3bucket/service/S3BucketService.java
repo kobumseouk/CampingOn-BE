@@ -1,4 +1,4 @@
-package site.campingon.campingon.s3bucket.service;
+package site.campingon.campingon.common.s3bucket.service;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;

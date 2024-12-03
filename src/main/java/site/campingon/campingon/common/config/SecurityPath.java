@@ -9,7 +9,8 @@ public class SecurityPath {
         "/api/logout",
         "/api/token/refresh",
         "/api/users/check-duplicate",
-        "/"
+        "/",
+        "/api/search/**"
     };
 
 
