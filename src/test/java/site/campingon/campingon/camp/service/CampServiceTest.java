@@ -127,7 +127,7 @@ class CampServiceTest {
         .name("Test Camp")
         .lineIntro("Test Line Intro")
         .thumbImage("test.jpg")
-        .address("Test Address")
+        .streetAddr("Test Address")
         .keywords(Arrays.asList("keyword1", "keyword2"))
         .isMarked(false)
         .build();
@@ -198,11 +198,11 @@ class CampServiceTest {
 
 
   @Test
-  @DisplayName("추천수 기반 인기있는 캠핑장 목록 조회 성공 확인 테스트")
-  void getPopularCamps_success() {
+  @DisplayName("로그인한 사용자의 인기 캠핑장 목록 조회 성공 테스트")
+  void getPopularCamps_withUserId_success() {
     // given
     Long userId = 1L;
-    Pageable pageable = PageRequest.of(0, 12);
+    Pageable pageable = PageRequest.of(0, 9);
     List<Camp> camps = Arrays.asList(mockCamp);
     Page<Camp> campPage = new PageImpl<>(camps, pageable, camps.size());
 
@@ -218,9 +218,38 @@ class CampServiceTest {
     assertEquals(1, result.getTotalElements());
     assertEquals(mockCampListDto, result.getContent().get(0));
 
+    assertEquals(mockCampListDto.getName(), result.getContent().get(0).getName());
+    assertEquals(mockCampListDto.getLineIntro(), result.getContent().get(0).getLineIntro());
+    assertEquals(mockCampListDto.isMarked(), result.getContent().get(0).isMarked());
+
     verify(campRepository).findPopularCamps(pageable);
     verify(campMapper).toCampListDto(any(Camp.class));
     verify(bookMarkRepository).existsByCampIdAndUserId(anyLong(), anyLong());
+  }
+
+  @Test
+  @DisplayName("비로그인 사용자의 인기 캠핑장 목록 조회 성공 테스트")
+  void getPopularCamps_withoutUserId_success() {
+    // given
+    Long userId = null;
+    Pageable pageable = PageRequest.of(0, 9);
+    List<Camp> camps = Arrays.asList(mockCamp);
+    Page<Camp> campPage = new PageImpl<>(camps, pageable, camps.size());
+
+    when(campRepository.findPopularCamps(pageable)).thenReturn(campPage);
+    when(campMapper.toCampListDto(any(Camp.class))).thenReturn(mockCampListDto);
+
+    // when
+    Page<CampListResponseDto> result = campService.getPopularCamps(userId, pageable);
+
+    // then
+    assertNotNull(result);
+    assertEquals(1, result.getTotalElements());
+    assertEquals(mockCampListDto, result.getContent().get(0));
+
+    verify(campRepository).findPopularCamps(pageable);
+    verify(campMapper).toCampListDto(any(Camp.class));
+    verify(bookMarkRepository, never()).existsByCampIdAndUserId(anyLong(), anyLong());
   }
 
   @Test
@@ -228,7 +257,7 @@ class CampServiceTest {
   void getPopularCamps_noRecommendations_returnsEmptyList() {
     // given
     Long userId = 1L;
-    Pageable pageable = PageRequest.of(0, 12);
+    Pageable pageable = PageRequest.of(0, 9);
     Page<Camp> emptyPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
 
     when(campRepository.findPopularCamps(pageable)).thenReturn(emptyPage);

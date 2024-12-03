@@ -67,7 +67,7 @@ class CampSiteServiceTest {
         .siteId(1L)
         .maximumPeople(4)
         .price(50000)
-        .indoor_facility("화장실, 취사장")
+        .indoorFacility("화장실, 취사장")
         .siteType(Induty.NORMAL_SITE)
         .checkInTime(LocalTime.of(15, 0))
         .checkOutTime(LocalTime.of(11, 0))
