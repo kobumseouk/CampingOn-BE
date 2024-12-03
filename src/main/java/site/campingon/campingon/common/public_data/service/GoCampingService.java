@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static site.campingon.campingon.camp.entity.Induty.*;
+import static site.campingon.campingon.common.exception.ErrorCode.CAMP_NOT_FOUND_BY_ID;
 
 @Service
 @RequiredArgsConstructor
@@ -43,50 +44,25 @@ public class GoCampingService {
     //Camp 관련 엔티티 생성 및 DB 저장 메서드
     @Transactional
     public List<GoCampingParsedResponseDto> createCampByGoCampingData(GoCampingDataDto goCampingDataDto) {
-        List<GoCampingDataDto.Item> items = goCampingDataDto.getResponse().getBody().getItems().getItem();
-        List<GoCampingParsedResponseDto> goCampingParsedResponseDtoList = goCampingMapper.toGoCampingParsedResponseDtoList(items);
+        List<GoCampingParsedResponseDto> goCampingParsedResponseDtoList = parseGoCampingData(goCampingDataDto);
 
         for (GoCampingParsedResponseDto data : goCampingParsedResponseDtoList) {
-            Integer normalSiteCnt = data.getGnrlSiteCo();//주요시설 일반야영장
-            Integer carSiteCnt = data.getAutoSiteCo();//주요시설 자동차야영장
-            Integer glampSiteCnt = data.getGlampSiteCo();//주요시설 글램핑
-            Integer caravSiteCnt = data.getCaravSiteCo();//주요시설 카라반
-            Integer personalCaravanSiteCnt = data.getIndvdlCaravSiteCo();//주요시설 개인 카라반
-            String glampInnerFacility = data.getGlampInnerFclty();//글램핑 - 내부시설
-            String caravInnerFacility = data.getCaravInnerFclty();//카라반 - 내부시설
+            Integer normalSiteCnt = data.getGnrlSiteCo();   //주요시설 일반야영장
+            Integer carSiteCnt = data.getAutoSiteCo();  //주요시설 자동차야영장
+            Integer glampSiteCnt = data.getGlampSiteCo();   //주요시설 글램핑
+            Integer caravSiteCnt = data.getCaravSiteCo();   //주요시설 카라반
+            Integer personalCaravanSiteCnt = data.getIndvdlCaravSiteCo();   //주요시설 개인 카라반
+            String glampInnerFacility = data.getGlampInnerFclty();  //글램핑 - 내부시설
+            String caravInnerFacility = data.getCaravInnerFclty();  //카라반 - 내부시설
 
             //데이터에 주요시설이 단, 한개도 없는 경우 DB 생성하지않는다.
-            if (normalSiteCnt + carSiteCnt
-                    + glampSiteCnt + caravSiteCnt
-                    + personalCaravanSiteCnt == 0) {
-                continue;
-            }
+            if (checkNoFacility(data)) continue;
 
-            Camp camp = Camp.builder()
-                    .id(data.getContentId())
-                    .campName(data.getFacltNm())
-                    .lineIntro(data.getLineIntro())
-                    .intro(data.getIntro())
-                    .tel(data.getTel())
-                    .homepage(data.getHomepage())
-                    .outdoorFacility(data.getSbrsCl())
-                    .thumbImage(data.getFirstImageUrl())
-                    .createdAt(
-                            LocalDateTime.parse(
-                                    data.getCreatedtime()
-                                    , DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-                    )
-                    .modifiedAt(LocalDateTime.parse(
-                            data.getModifiedtime()
-                            , DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-                    )
-                    .build();
+            Camp camp = buildCampFromData(data);
 
             campRepository.save(camp);
 
-            campInfoRepository.save(CampInfo.builder()
-                    .camp(camp)
-                    .build());
+            campInfoRepository.save(CampInfo.builder().camp(camp).build());
 
             goCampingProviderService.createOrUpdateCampInduty(camp, normalSiteCnt, carSiteCnt, glampSiteCnt, caravSiteCnt, personalCaravanSiteCnt);
 
@@ -172,7 +148,7 @@ public class GoCampingService {
             Camp camp = campRepository.findById(
                             goCampingImageParsedResponseDto.getFirst().getContentId()
                     )
-                    .orElseThrow(() -> new GlobalException(ErrorCode.CAMP_NOT_FOUND_BY_ID));
+                    .orElseThrow(() -> new GlobalException(CAMP_NOT_FOUND_BY_ID));
             for (GoCampingImageParsedResponseDto data : goCampingImageParsedResponseDto) {
                 CampImage campImage = CampImage.builder()
                         .id(data.getSerialnum())
@@ -189,8 +165,7 @@ public class GoCampingService {
 
     @Transactional
     public List<GoCampingParsedResponseDto> updateCampByGoCampingData(GoCampingDataDto goCampingDataDto) {
-        List<GoCampingDataDto.Item> items = goCampingDataDto.getResponse().getBody().getItems().getItem();
-        List<GoCampingParsedResponseDto> goCampingParsedResponseDtoList = goCampingMapper.toGoCampingParsedResponseDtoList(items);
+        List<GoCampingParsedResponseDto> goCampingParsedResponseDtoList = parseGoCampingData(goCampingDataDto);
 
         for (GoCampingParsedResponseDto data : goCampingParsedResponseDtoList) {
             Integer normalSiteCnt = data.getGnrlSiteCo();//주요시설 일반야영장
@@ -202,31 +177,10 @@ public class GoCampingService {
             String caravInnerFacility = data.getCaravInnerFclty();//카라반 - 내부시설
 
             //데이터에 주요시설이 단, 한개도 없는 경우 DB 생성하지않는다.
-            if (normalSiteCnt + carSiteCnt
-                    + glampSiteCnt + caravSiteCnt
-                    + personalCaravanSiteCnt == 0) {
+            if (checkNoFacility(data))
                 continue;
-            }
 
-            Camp camp = Camp.builder()
-                    .id(data.getContentId())
-                    .campName(data.getFacltNm())
-                    .lineIntro(data.getLineIntro())
-                    .intro(data.getIntro())
-                    .tel(data.getTel())
-                    .homepage(data.getHomepage())
-                    .outdoorFacility(data.getSbrsCl())
-                    .thumbImage(data.getFirstImageUrl())
-                    .createdAt(
-                            LocalDateTime.parse(
-                                    data.getCreatedtime()
-                                    , DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-                    )
-                    .modifiedAt(LocalDateTime.parse(
-                            data.getModifiedtime()
-                            , DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-                    )
-                    .build();
+            Camp camp = buildCampFromData(data);
 
             campRepository.save(camp);
 
@@ -265,13 +219,45 @@ public class GoCampingService {
 
     @Transactional
     public int deleteCampByGoCampingData(GoCampingDataDto goCampingDataDto) {
-        List<GoCampingDataDto.Item> items = goCampingDataDto.getResponse().getBody().getItems().getItem();
-        List<GoCampingParsedResponseDto> goCampingParsedResponseDtoList = goCampingMapper.toGoCampingParsedResponseDtoList(items);
+        List<GoCampingParsedResponseDto> goCampingParsedResponseDtoList = parseGoCampingData(goCampingDataDto);
 
         List<Long> idsToDelete = goCampingParsedResponseDtoList.stream()
                 .map(GoCampingParsedResponseDto::getContentId)
                 .toList();
 
         return campRepository.deleteByIds(idsToDelete);
+    }
+
+    private Camp buildCampFromData(GoCampingParsedResponseDto data) {
+        return Camp.builder()
+                .id(data.getContentId())
+                .campName(data.getFacltNm())
+                .lineIntro(data.getLineIntro())
+                .intro(data.getIntro())
+                .tel(data.getTel())
+                .homepage(data.getHomepage())
+                .outdoorFacility(data.getSbrsCl())
+                .thumbImage(data.getFirstImageUrl())
+                .createdAt(
+                        LocalDateTime.parse(
+                                data.getCreatedtime()
+                                , DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                )
+                .modifiedAt(LocalDateTime.parse(
+                        data.getModifiedtime()
+                        , DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                )
+                .build();
+    }
+
+    private boolean checkNoFacility(GoCampingParsedResponseDto data) {
+        return data.getGnrlSiteCo() + data.getAutoSiteCo()
+                + data.getGlampSiteCo() + data.getCaravSiteCo()
+                + data.getIndvdlCaravSiteCo() == 0;
+    }
+
+    private List<GoCampingParsedResponseDto> parseGoCampingData(GoCampingDataDto goCampingDataDto) {
+        List<GoCampingDataDto.Item> items = goCampingDataDto.getResponse().getBody().getItems().getItem();
+        return goCampingMapper.toGoCampingParsedResponseDtoList(items);
     }
 }
