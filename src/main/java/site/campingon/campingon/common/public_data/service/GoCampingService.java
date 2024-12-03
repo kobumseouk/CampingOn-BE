@@ -38,6 +38,7 @@ public class GoCampingService {
     private final CampInfoRepository campInfoRepository;
     private final CampRepository campRepository;
     private final RestTemplate restTemplate;
+    private final CampIndutyRepository campIndutyRepository;
     private final GoCampingProviderService goCampingProviderService;
     private static final String IMAGE_PAGE_NO = "1";    //이미지 몇번부터 값 꺼내올지
 
@@ -64,7 +65,7 @@ public class GoCampingService {
 
             campInfoRepository.save(CampInfo.builder().camp(camp).build());
 
-            goCampingProviderService.createOrUpdateCampInduty(camp, normalSiteCnt, carSiteCnt, glampSiteCnt, caravSiteCnt, personalCaravanSiteCnt);
+            goCampingProviderService.createOrUpdateCampInduty(camp, data);
 
             String pointWKT = String.format("POINT(%f %f)", data.getMapY(), data.getMapX());
 
@@ -184,7 +185,7 @@ public class GoCampingService {
 
             campRepository.save(camp);
 
-            goCampingProviderService.createOrUpdateCampInduty(camp, normalSiteCnt, carSiteCnt, glampSiteCnt, caravSiteCnt, personalCaravanSiteCnt);
+            goCampingProviderService.createOrUpdateCampInduty(camp, data);
 
             String pointWKT = String.format("POINT(%f %f)", data.getMapY(), data.getMapX());
 
