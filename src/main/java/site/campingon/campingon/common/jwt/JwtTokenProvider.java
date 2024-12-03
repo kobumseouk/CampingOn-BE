@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
@@ -179,18 +178,15 @@ public class JwtTokenProvider {
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("Invalid JWT Token", e);
-            throw new AuthenticationException("Invalid JWT Token", e) {}; // 예외를 래핑
         } catch (ExpiredJwtException e) {
             log.info("Expired JWT Token", e);
-            throw new AuthenticationException("Expired JWT Token", e) {}; // 예외를 래핑
         } catch (UnsupportedJwtException e) {
             log.info("Unsupported JWT Token", e);
-            throw new AuthenticationException("Unsupported JWT Token", e) {}; // 예외를 래핑
         } catch (IllegalArgumentException e) {
             log.info("JWT claims string is empty.", e);
-            throw new AuthenticationException("JWT claims string is empty", e) {}; // 예외를 래핑
 
         }
+        return false;
     }
 
     public Claims parseClaims(String accessToken) {
