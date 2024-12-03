@@ -17,9 +17,12 @@ import site.campingon.campingon.camp.entity.Induty;
 import site.campingon.campingon.camp.mapper.CampSiteMapper;
 import site.campingon.campingon.camp.repository.CampRepository;
 import site.campingon.campingon.camp.repository.CampSiteRepository;
+import site.campingon.campingon.reservation.dto.ReservedCampSiteIdListResponseDto;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,6 +44,9 @@ class CampSiteServiceTest {
 
   @InjectMocks
   private CampSiteService campSiteService;
+
+  @InjectMocks
+  private CampSiteReserveService campSiteReserveService;
 
   private Camp mockCamp;
   private CampSite mockCampSite;
@@ -67,7 +73,7 @@ class CampSiteServiceTest {
         .siteId(1L)
         .maximumPeople(4)
         .price(50000)
-        .indoor_facility("화장실, 취사장")
+        .indoorFacility("화장실, 취사장")
         .siteType(Induty.NORMAL_SITE)
         .checkInTime(LocalTime.of(15, 0))
         .checkOutTime(LocalTime.of(11, 0))
@@ -76,48 +82,51 @@ class CampSiteServiceTest {
 
   @Test
   @DisplayName("TEST - 예약 가능한 캠프사이트 조회 성공 확인 테스트")
-  void getAvailableCampSites_success() {
+  void getAvailableCampSitesSuccess() {
+
     // given
     Long campId = 1L;
-    List<Long> reservedSiteIds = Arrays.asList(2L, 3L);
-    List<CampSite> allCampSites = Arrays.asList(
-        mockCampSite,
-        CampSite.builder().id(2L).camp(mockCamp).siteType(Induty.NORMAL_SITE).build(),
-        CampSite.builder().id(3L).camp(mockCamp).siteType(Induty.CAR_SITE).build()
-    );
+    LocalDate checkin = LocalDate.of(2023, 10, 1);
+    LocalDate checkout = LocalDate.of(2023, 10, 5);
+    List<CampSite> availableCampSites = Arrays.asList(mockCampSite);
 
-    when(campSiteRepository.findByCampId(campId)).thenReturn(allCampSites);
-    when(campSiteMapper.toCampSiteListDto(any(CampSite.class))).thenReturn(mockCampSiteListDto);
+    when(campSiteRepository.findAvailableCampSites(campId, checkin, checkout)).thenReturn(availableCampSites);
+    when(campSiteMapper.toCampSiteListResponseDto(any(CampSite.class))).thenReturn(mockCampSiteListDto);
 
     // when
-    List<CampSiteListResponseDto> result = campSiteService.getAvailableCampSites(campId, reservedSiteIds);
+    List<CampSiteListResponseDto> result = campSiteReserveService.getAvailableCampSites(campId, checkin, checkout);
 
     // then
     assertNotNull(result);
     assertEquals(1, result.size());
     assertEquals(mockCampSiteListDto, result.get(0));
-    verify(campSiteRepository).findByCampId(campId);
-    verify(campSiteMapper).toCampSiteListDto(any(CampSite.class));
+
+    verify(campSiteRepository).findAvailableCampSites(campId, checkin, checkout);
+    verify(campSiteMapper).toCampSiteListResponseDto(any(CampSite.class));
+
   }
 
   @Test
   @DisplayName("TEST - 모든 캠프사이트가 예약 불가능할 때 빈 리스트 반환 확인 테스트")
-  void getAvailableCampSites_allReserved_returnsEmptyList() {
+  void getAvailableCampSitesReturnsEmptyList() {
+
     // given
     Long campId = 1L;
-    List<Long> reservedSiteIds = Arrays.asList(1L);
-    List<CampSite> allCampSites = Arrays.asList(mockCampSite);
+    LocalDate checkin = LocalDate.of(2023, 10, 1);
+    LocalDate checkout = LocalDate.of(2023, 10, 5);
+    List<CampSite> emptyCampSites = Collections.emptyList();
 
-    when(campSiteRepository.findByCampId(campId)).thenReturn(allCampSites);
+    when(campSiteRepository.findAvailableCampSites(campId, checkin, checkout)).thenReturn(emptyCampSites);
 
     // when
-    List<CampSiteListResponseDto> result = campSiteService.getAvailableCampSites(campId, reservedSiteIds);
+    List<CampSiteListResponseDto> result = campSiteReserveService.getAvailableCampSites(campId, checkin, checkout);
 
     // then
     assertNotNull(result);
     assertTrue(result.isEmpty());
-    verify(campSiteRepository).findByCampId(campId);
-    verify(campSiteMapper, never()).toCampSiteListDto(any(CampSite.class));
+
+    verify(campSiteRepository).findAvailableCampSites(campId, checkin, checkout);
+    verify(campSiteMapper, never()).toCampSiteListResponseDto(any(CampSite.class));
   }
 
 
@@ -337,6 +346,7 @@ class CampSiteServiceTest {
   @DisplayName("TEST - 캠프사이트 예약 가능 여부 토글")
   public void testToggleAvailability() {
     // Given
+    Long campId = 1L;
     Long campSiteId = 1L;
     CampSite existingCampSite = CampSite.builder()
             .id(campSiteId)
@@ -355,7 +365,7 @@ class CampSiteServiceTest {
     when(campSiteRepository.save(any(CampSite.class))).thenReturn(updatedCampSite);
 
     // When
-    boolean updatedStatus = campSiteService.toggleAvailability(campSiteId);
+    boolean updatedStatus = campSiteService.toggleAvailability(campId, campSiteId);
 
     // Then
     assertTrue(updatedStatus);
@@ -367,6 +377,7 @@ class CampSiteServiceTest {
   @DisplayName("TEST - 캠프사이트 예약 가능 여부 조회")
   public void testGetAvailability() {
     // Given
+    Long campId = 1L;
     Long campSiteId = 1L;
     CampSite campSite = CampSite.builder()
             .id(campSiteId)
@@ -380,7 +391,7 @@ class CampSiteServiceTest {
     when(campSiteRepository.findById(campSiteId)).thenReturn(Optional.of(campSite));
 
     // When
-    boolean isAvailable = campSiteService.getAvailability(campSiteId);
+    boolean isAvailable = campSiteService.getAvailability(campId, campSiteId);
 
     // Then
     assertTrue(isAvailable);
