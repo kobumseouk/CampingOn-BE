@@ -62,8 +62,11 @@ public class SecurityConfig {
         // 경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/","/h2-console/**").permitAll()
-                        .anyRequest().permitAll());
+                        .requestMatchers(SecurityPath.ADMIN_ENDPOINTS).hasRole("ADMIN")
+                        .requestMatchers(SecurityPath.USER_ENDPOINTS).hasRole("USER")
+                        .requestMatchers(SecurityPath.PUBLIC_ENDPOINTS).permitAll()
+                        .anyRequest().permitAll()
+                );
 
         // 예외 처리
         http
