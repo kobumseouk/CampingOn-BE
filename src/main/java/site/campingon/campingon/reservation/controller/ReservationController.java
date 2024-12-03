@@ -8,12 +8,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import site.campingon.campingon.camp.dto.CampSiteResponseDto;
 import site.campingon.campingon.common.jwt.CustomUserDetails;
 import site.campingon.campingon.reservation.dto.*;
 import site.campingon.campingon.reservation.service.ReservationService;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -55,23 +52,10 @@ public class ReservationController {
     // 예약 취소
     @PatchMapping("/{reservationId}")
     public ResponseEntity<Void> cancelReservation(@PathVariable("reservationId") Long reservationId, @RequestBody ReservationCancelRequestDto requestDto) {
-        
+
         reservationService.cancelReservation(reservationId, requestDto);
 
         return ResponseEntity.ok().build();
     }
 
-    // 해당 날짜에 이미 예약된 캠프사이트 ID 목록 조회
-    @GetMapping("/reserved")
-    public ResponseEntity<ReservedCampSiteIdListResponseDto> getReservedCampSiteIds(@RequestBody ReservationCheckDateRequestDto requestDto) {
-
-        return ResponseEntity.ok(reservationService.getReservedCampSiteIds(requestDto));
-    }
-
-    // 해당 날짜에 예약 가능한 캠프사이트 조회
-    @GetMapping("/available")
-    public ResponseEntity<List<CampSiteResponseDto>> getAvailableCampSites(@RequestBody ReservationCheckDateRequestDto requestDto) {
-
-        return ResponseEntity.ok(reservationService.getAvailableCampSites(requestDto));
-    }
 }

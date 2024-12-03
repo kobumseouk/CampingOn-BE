@@ -80,8 +80,8 @@ class ReservationServiceTest {
                 .user(mockUser)
                 .camp(mockCamp)
                 .campSite(mockCampSite)
-                .checkInDate(LocalDate.from(LocalDateTime.now()))
-                .checkOutDate(LocalDate.from(LocalDateTime.now().plusDays(1)))
+                .checkinDate(LocalDate.from(LocalDateTime.now()))
+                .checkoutDate(LocalDate.from(LocalDateTime.now().plusDays(1)))
                 .guestCnt(2)
                 .status(ReservationStatus.RESERVED)
                 .totalPrice(50000)
@@ -188,37 +188,6 @@ class ReservationServiceTest {
         // then
         verify(reservationRepository).save(any(Reservation.class));
         verify(reservationValidate).validateReservationById(requestDto.getId());
-    }
-
-    @Test
-    @DisplayName("조회성공 - 예약 가능한 캠프사이트 조회")
-    void getAvailableCampSitesSuccess() {
-
-        // given
-        ReservationCheckDateRequestDto requestDto = new ReservationCheckDateRequestDto(
-            mockCamp.getId(),
-            LocalDate.now(),
-            LocalDate.now().plusDays(1)
-        );
-
-        List<Long> reservedIds = Arrays.asList(2L, 3L);
-        when(reservationRepository.findReservedCampSiteIds(
-            requestDto.getCampId(),
-            requestDto.getCheckIn(),
-            requestDto.getCheckOut()
-        )).thenReturn(reservedIds);
-
-        // when
-        ReservedCampSiteIdListResponseDto result = reservationService.getReservedCampSiteIds(requestDto);
-
-        // then
-        assertNotNull(result);
-        assertEquals(reservedIds, result.getCampSiteId());
-        verify(reservationRepository).findReservedCampSiteIds(
-            requestDto.getCampId(),
-            requestDto.getCheckIn(),
-            requestDto.getCheckOut()
-        );
     }
 
     @Test

@@ -16,10 +16,10 @@ public class ReservationCreateRequestDto {
     private Long campSiteId;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate checkIn;
+    private LocalDate checkin;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate checkOut;
+    private LocalDate checkout;
 
     private int guestCnt;
 

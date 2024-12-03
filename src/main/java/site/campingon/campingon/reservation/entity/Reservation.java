@@ -36,18 +36,18 @@ public class Reservation extends BaseEntity {
     private CampSite campSite;
 
     @Column(nullable = false, columnDefinition = "DATE")
-    private LocalDate checkInDate;
+    private LocalDate checkinDate;
 
     @Column(nullable = false, columnDefinition = "DATE")
-    private LocalDate checkOutDate;
+    private LocalDate checkoutDate;
 
     @Builder.Default
     @Column(nullable = false, columnDefinition = "TIME(0)")
-    private CheckTime checkInTime = CheckTime.CHECKIN;
+    private CheckTime checkinTime = CheckTime.CHECKIN;
 
     @Builder.Default
     @Column(nullable = false, columnDefinition = "TIME(0)")
-    private CheckTime checkOutTime = CheckTime.CHECKOUT;
+    private CheckTime checkoutTime = CheckTime.CHECKOUT;
 
     @Column(nullable = false)
     private int guestCnt;
