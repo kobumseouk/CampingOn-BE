@@ -1,6 +1,6 @@
 package site.campingon.campingon.common.public_data.service;
 
-import org.locationtech.jts.io.ParseException;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import site.campingon.campingon.camp.entity.*;
 import site.campingon.campingon.camp.repository.*;
-import site.campingon.campingon.common.exception.ErrorCode;
 import site.campingon.campingon.common.exception.GlobalException;
 import site.campingon.campingon.common.public_data.GoCampingPath;
 import site.campingon.campingon.common.public_data.dto.GoCampingDataDto;
@@ -23,6 +22,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static site.campingon.campingon.camp.entity.Induty.*;
 import static site.campingon.campingon.common.exception.ErrorCode.CAMP_NOT_FOUND_BY_ID;
@@ -38,13 +38,12 @@ public class GoCampingService {
     private final CampInfoRepository campInfoRepository;
     private final CampRepository campRepository;
     private final RestTemplate restTemplate;
-    private final CampIndutyRepository campIndutyRepository;
     private final GoCampingProviderService goCampingProviderService;
     private static final String IMAGE_PAGE_NO = "1";    //이미지 몇번부터 값 꺼내올지
 
     //Camp 관련 엔티티 생성 및 DB 저장 메서드
     @Transactional
-    public List<GoCampingParsedResponseDto> createCampByGoCampingData(GoCampingDataDto goCampingDataDto) {
+    public List<GoCampingParsedResponseDto> createOrUpdateCampByGoCampingData(GoCampingDataDto goCampingDataDto) {
         List<GoCampingParsedResponseDto> goCampingParsedResponseDtoList = parseGoCampingData(goCampingDataDto);
 
         for (GoCampingParsedResponseDto data : goCampingParsedResponseDtoList) {
@@ -55,82 +54,81 @@ public class GoCampingService {
             Integer personalCaravanSiteCnt = data.getIndvdlCaravSiteCo();   //주요시설 개인 카라반
             String glampInnerFacility = data.getGlampInnerFclty();  //글램핑 - 내부시설
             String caravInnerFacility = data.getCaravInnerFclty();  //카라반 - 내부시설
+            String pointWKT = String.format("POINT(%f %f)", data.getMapY(), data.getMapX());    //공간데이터
 
             //데이터에 주요시설이 단, 한개도 없는 경우 DB 생성하지않는다.
             if (checkNoFacility(data)) continue;
 
-            Camp camp = buildCampFromData(data);
+            Optional<Camp> findCamp = campRepository.findById(data.getContentId());
+            if (findCamp.isPresent()) {
+                //이미 캠프가 존재한다면 update
+                Camp updateCamp = findCamp.orElseThrow(() -> new GlobalException(CAMP_NOT_FOUND_BY_ID))
+                        .updateCamp(data);
 
-            campRepository.save(camp);
+                goCampingProviderService.createOrUpdateCampInduty(updateCamp, data);
 
-            campInfoRepository.save(CampInfo.builder().camp(camp).build());
+                campAddrRepository.updateWithPoint(
+                        updateCamp.getId(),
+                        data.getDoNm(),
+                        data.getSigunguNm(),
+                        data.getZipcode(),
+                        data.getAddr1(),
+                        data.getAddr2(),
+                        pointWKT
+                );
 
-            goCampingProviderService.createOrUpdateCampInduty(camp, data);
+                goCampingProviderService.updateCampSite(updateCamp, normalSiteCnt, NORMAL_SITE, null,
+                        NORMAL_SITE.getMaximum_people(), NORMAL_SITE.getPrice());
 
-            String pointWKT = String.format("POINT(%f %f)", data.getMapY(), data.getMapX());
+                goCampingProviderService.updateCampSite(updateCamp, carSiteCnt, CAR_SITE, null,
+                        CAR_SITE.getMaximum_people(), CAR_SITE.getPrice());
 
-            //create
-            campAddrRepository.saveWithPoint(
-                    camp.getId(),
-                    data.getDoNm(),
-                    data.getSigunguNm(),
-                    data.getZipcode(),
-                    data.getAddr1(),
-                    data.getAddr2(),
-                    pointWKT
-            );
+                goCampingProviderService.updateCampSite(updateCamp, glampSiteCnt, GLAMP_SITE, glampInnerFacility,
+                        GLAMP_SITE.getMaximum_people(), GLAMP_SITE.getPrice());
 
-            //캠핑지 DB 저장
-            goCampingProviderService.createCampSite(camp, normalSiteCnt, NORMAL_SITE, null,
-                    NORMAL_SITE.getMaximum_people(), NORMAL_SITE.getPrice());
+                goCampingProviderService.updateCampSite(updateCamp, caravSiteCnt, CARAV_SITE, caravInnerFacility,
+                        CAR_SITE.getMaximum_people(), CAR_SITE.getPrice());
 
-            goCampingProviderService.createCampSite(camp, carSiteCnt, CAR_SITE, null,
-                    CAR_SITE.getMaximum_people(), CAR_SITE.getPrice());
+                goCampingProviderService.updateCampSite(updateCamp, personalCaravanSiteCnt, PERSONAL_CARAV_SITE,
+                        null, PERSONAL_CARAV_SITE.getMaximum_people(), PERSONAL_CARAV_SITE.getPrice());
+            } else {
+                //그렇지 않다면 create
+                Camp createCamp = buildCampFromData(data);
 
-            goCampingProviderService.createCampSite(camp, glampSiteCnt, GLAMP_SITE, glampInnerFacility,
-                    GLAMP_SITE.getMaximum_people(), GLAMP_SITE.getPrice());
+                campRepository.save(createCamp);
 
-            goCampingProviderService.createCampSite(camp, caravSiteCnt, CARAV_SITE, caravInnerFacility,
-                    CAR_SITE.getMaximum_people(), CAR_SITE.getPrice());
+                campInfoRepository.save(CampInfo.builder().camp(createCamp).build());
 
-            goCampingProviderService.createCampSite(camp, personalCaravanSiteCnt, PERSONAL_CARAV_SITE,
-                    null, PERSONAL_CARAV_SITE.getMaximum_people(), PERSONAL_CARAV_SITE.getPrice());
+                goCampingProviderService.createOrUpdateCampInduty(createCamp, data);
 
+                campAddrRepository.saveWithPoint(
+                        createCamp.getId(),
+                        data.getDoNm(),
+                        data.getSigunguNm(),
+                        data.getZipcode(),
+                        data.getAddr1(),
+                        data.getAddr2(),
+                        pointWKT
+                );
 
+                //캠핑지 DB 저장
+                goCampingProviderService.createCampSite(createCamp, normalSiteCnt, NORMAL_SITE, null,
+                        NORMAL_SITE.getMaximum_people(), NORMAL_SITE.getPrice());
+
+                goCampingProviderService.createCampSite(createCamp, carSiteCnt, CAR_SITE, null,
+                        CAR_SITE.getMaximum_people(), CAR_SITE.getPrice());
+
+                goCampingProviderService.createCampSite(createCamp, glampSiteCnt, GLAMP_SITE, glampInnerFacility,
+                        GLAMP_SITE.getMaximum_people(), GLAMP_SITE.getPrice());
+
+                goCampingProviderService.createCampSite(createCamp, caravSiteCnt, CARAV_SITE, caravInnerFacility,
+                        CAR_SITE.getMaximum_people(), CAR_SITE.getPrice());
+
+                goCampingProviderService.createCampSite(createCamp, personalCaravanSiteCnt, PERSONAL_CARAV_SITE,
+                        null, PERSONAL_CARAV_SITE.getMaximum_people(), PERSONAL_CARAV_SITE.getPrice());
+            }
         }
         return goCampingParsedResponseDtoList;
-    }
-
-    //공공데이터 전체 API 조회하고 dto 변환
-    public GoCampingDataDto getAndConvertToGoCampingDataDto(
-            GoCampingPath goCampingPath,
-            String... params
-    ) throws URISyntaxException {
-        URI uri = goCampingProviderService.createUri(goCampingPath, params);
-
-        return restTemplate.getForObject(uri, GoCampingDataDto.class);  //API 호출
-    }
-
-    //공공데이터 이미지 API 조회하고 dto 변환
-    public List<GoCampingImageDto> getAndConvertToGoCampingImageDataDto(
-            Long imageCnt)
-            throws URISyntaxException {
-        List<GoCampingImageDto> goCampingDataDtoList = new ArrayList<>();
-
-        List<Long> campIdList = campRepository.findAll().stream()
-                .map(Camp::getId)
-                .toList();
-
-        for (Long campId : campIdList) {
-            URI uri = goCampingProviderService.createUri(GoCampingPath.IMAGE_LIST,
-                    "numOfRows", imageCnt.toString(),
-                    "pageNo", IMAGE_PAGE_NO,  //몇번부터 시작할지
-                    "contentId", campId.toString());
-
-            goCampingDataDtoList.add(
-                    restTemplate.getForObject(uri, GoCampingImageDto.class)); //API 호출
-        }
-        return goCampingDataDtoList;
     }
 
     //CampImage 를 생성 및 DB 저장 메서드
@@ -165,60 +163,6 @@ public class GoCampingService {
     }
 
     @Transactional
-    public List<GoCampingParsedResponseDto> updateCampByGoCampingData(GoCampingDataDto goCampingDataDto) {
-        List<GoCampingParsedResponseDto> goCampingParsedResponseDtoList = parseGoCampingData(goCampingDataDto);
-
-        for (GoCampingParsedResponseDto data : goCampingParsedResponseDtoList) {
-            Integer normalSiteCnt = data.getGnrlSiteCo();//주요시설 일반야영장
-            Integer carSiteCnt = data.getAutoSiteCo();//주요시설 자동차야영장
-            Integer glampSiteCnt = data.getGlampSiteCo();//주요시설 글램핑
-            Integer caravSiteCnt = data.getCaravSiteCo();//주요시설 카라반
-            Integer personalCaravanSiteCnt = data.getIndvdlCaravSiteCo();//주요시설 개인 카라반
-            String glampInnerFacility = data.getGlampInnerFclty();//글램핑 - 내부시설
-            String caravInnerFacility = data.getCaravInnerFclty();//카라반 - 내부시설
-
-            //데이터에 주요시설이 단, 한개도 없는 경우 DB 생성하지않는다.
-            if (checkNoFacility(data))
-                continue;
-
-            Camp camp = buildCampFromData(data);
-
-            campRepository.save(camp);
-
-            goCampingProviderService.createOrUpdateCampInduty(camp, data);
-
-            String pointWKT = String.format("POINT(%f %f)", data.getMapY(), data.getMapX());
-
-            campAddrRepository.updateWithPoint(
-                    camp.getId(),
-                    data.getDoNm(),
-                    data.getSigunguNm(),
-                    data.getZipcode(),
-                    data.getAddr1(),
-                    data.getAddr2(),
-                    pointWKT
-            );
-
-            goCampingProviderService.updateCampSite(camp, normalSiteCnt, NORMAL_SITE, null,
-                    NORMAL_SITE.getMaximum_people(), NORMAL_SITE.getPrice());
-
-            goCampingProviderService.updateCampSite(camp, carSiteCnt, CAR_SITE, null,
-                    CAR_SITE.getMaximum_people(), CAR_SITE.getPrice());
-
-            goCampingProviderService.updateCampSite(camp, glampSiteCnt, GLAMP_SITE, glampInnerFacility,
-                    GLAMP_SITE.getMaximum_people(), GLAMP_SITE.getPrice());
-
-            goCampingProviderService.updateCampSite(camp, caravSiteCnt, CARAV_SITE, caravInnerFacility,
-                    CAR_SITE.getMaximum_people(), CAR_SITE.getPrice());
-
-            goCampingProviderService.updateCampSite(camp, personalCaravanSiteCnt, PERSONAL_CARAV_SITE,
-                    null, PERSONAL_CARAV_SITE.getMaximum_people(), PERSONAL_CARAV_SITE.getPrice());
-
-        }
-        return goCampingParsedResponseDtoList;
-    }
-
-    @Transactional
     public int deleteCampByGoCampingData(GoCampingDataDto goCampingDataDto) {
         List<GoCampingParsedResponseDto> goCampingParsedResponseDtoList = parseGoCampingData(goCampingDataDto);
 
@@ -227,6 +171,38 @@ public class GoCampingService {
                 .toList();
 
         return campRepository.deleteByIds(idsToDelete);
+    }
+
+    //공공데이터 전체 API 조회하고 dto 변환
+    public GoCampingDataDto getAndConvertToGoCampingDataDto(
+            GoCampingPath goCampingPath,
+            String... params
+    ) throws URISyntaxException, InvalidFormatException {
+        URI uri = goCampingProviderService.createUri(goCampingPath, params);
+
+        return restTemplate.getForObject(uri, GoCampingDataDto.class);  //API 호출
+    }
+
+    //공공데이터 이미지 API 조회하고 dto 변환
+    public List<GoCampingImageDto> getAndConvertToGoCampingImageDataDto(
+            Long imageCnt)
+            throws URISyntaxException {
+        List<GoCampingImageDto> goCampingDataDtoList = new ArrayList<>();
+
+        List<Long> campIdList = campRepository.findAll().stream()
+                .map(Camp::getId)
+                .toList();
+
+        for (Long campId : campIdList) {
+            URI uri = goCampingProviderService.createUri(GoCampingPath.IMAGE_LIST,
+                    "numOfRows", imageCnt.toString(),
+                    "pageNo", IMAGE_PAGE_NO,  //몇번부터 시작할지
+                    "contentId", campId.toString());
+
+            goCampingDataDtoList.add(
+                    restTemplate.getForObject(uri, GoCampingImageDto.class)); //API 호출
+        }
+        return goCampingDataDtoList;
     }
 
     private Camp buildCampFromData(GoCampingParsedResponseDto data) {
