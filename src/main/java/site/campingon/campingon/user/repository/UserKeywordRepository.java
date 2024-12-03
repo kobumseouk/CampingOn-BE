@@ -12,5 +12,4 @@ import java.util.List;
 public interface UserKeywordRepository extends JpaRepository<UserKeyword, Long> {
   @Query("SELECT k.keyword FROM UserKeyword k WHERE k.user.id = :userId")
   List<String> findKeywordsByUserId(@Param("userId")Long userId);
-  boolean existsByUserId(Long userId);  // 키워드 존재 여부 확인
 }
