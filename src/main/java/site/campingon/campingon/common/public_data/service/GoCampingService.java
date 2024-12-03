@@ -34,6 +34,7 @@ public class GoCampingService {
     private final GoCampingMapper goCampingMapper;
     private final CampAddrRepository campAddrRepository;
     private final CampImageRepository campImageRepository;
+    private final CampInfoRepository campInfoRepository;
     private final CampRepository campRepository;
     private final RestTemplate restTemplate;
     private final GoCampingProviderService goCampingProviderService;
@@ -82,6 +83,10 @@ public class GoCampingService {
                     .build();
 
             campRepository.save(camp);
+
+            campInfoRepository.save(CampInfo.builder()
+                    .camp(camp)
+                    .build());
 
             goCampingProviderService.createOrUpdateCampInduty(camp, normalSiteCnt, carSiteCnt, glampSiteCnt, caravSiteCnt, personalCaravanSiteCnt);
 
