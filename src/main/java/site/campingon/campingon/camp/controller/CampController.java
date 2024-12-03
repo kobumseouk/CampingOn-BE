@@ -13,7 +13,6 @@ import site.campingon.campingon.camp.service.CampService;
 import site.campingon.campingon.common.jwt.CustomUserDetails;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import site.campingon.campingon.user.repository.UserKeywordRepository;
 
 
 @Slf4j

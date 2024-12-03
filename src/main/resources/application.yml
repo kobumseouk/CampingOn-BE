@@ -1,4 +1,7 @@
 spring:
+  data:
+    mongodb:
+      uri: mongodb+srv://elicer:${MONGODB_PASSWORD}@campingon.njpfg.mongodb.net/camp?retryWrites=true&w=majority&appName=CampingOn
   datasource:
     url: ${MYSQL_URL}  # MySQL 데이터베이스 URL
     driver-class-name: com.mysql.cj.jdbc.Driver

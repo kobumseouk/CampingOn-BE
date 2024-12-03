@@ -1,6 +1,5 @@
 package site.campingon.campingon.review.service;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +20,7 @@ import site.campingon.campingon.review.mapper.ReviewImageMapper;
 import site.campingon.campingon.review.mapper.ReviewMapper;
 import site.campingon.campingon.review.repository.ReviewImageRepository;
 import site.campingon.campingon.review.repository.ReviewRepository;
-import site.campingon.campingon.s3bucket.service.S3BucketService;
+import site.campingon.campingon.common.s3bucket.service.S3BucketService;
 import site.campingon.campingon.user.repository.UserRepository;
 
 import java.io.IOException;
