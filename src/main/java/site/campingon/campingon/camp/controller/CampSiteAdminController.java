@@ -71,7 +71,7 @@ public class CampSiteAdminController {
     }
 
     // 특정 캠핑지의 isAvailable 상태를 토글 - 변경된 isAvailable 상태 반환
-    @PutMapping("/{siteId}")
+    @PutMapping("/{siteId}/available")
     public ResponseEntity<Boolean> toggleAvailability(
             @PathVariable("campId") Long campId,
             @PathVariable("siteId") Long siteId) {
@@ -81,7 +81,7 @@ public class CampSiteAdminController {
 
     // TODO: 관리자 UI를 생각했을 때 특정 캠핑지의 상태만 조회할 일이 있을까? 안 쓰는 API 같다.
     // 특정 캠핑지의 isAvailable 상태 조회 - 현재 isAvailable 상태 반환
-    @GetMapping("/{SiteId}")
+    @GetMapping("/{SiteId}/available")
     public ResponseEntity<Boolean> getAvailability(
             @PathVariable("campId") Long campId,
             @PathVariable("SiteId") Long siteId) {
