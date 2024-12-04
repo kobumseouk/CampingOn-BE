@@ -35,7 +35,7 @@ public class ReservationServiceImpl implements ReservationService {
     @Transactional(readOnly = true)
     public Page<ReservationResponseDto> getReservations(Long userId, Pageable pageable) {
 
-        reservationValidate.validateUserById(userId);
+        User user = reservationValidate.validateUserById(userId);
 
         Page<Reservation> reservations = reservationRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
 
@@ -46,7 +46,7 @@ public class ReservationServiceImpl implements ReservationService {
     @Transactional(readOnly = true)
     public ReservationResponseDto getReservation(Long userId, Long reservationId) {
 
-        reservationValidate.validateUserById(userId);
+        User user = reservationValidate.validateUserById(userId);
 
         Reservation reservation = reservationValidate.validateReservationById(reservationId);
 

@@ -1,17 +1,19 @@
 package site.campingon.campingon.reservation.dto;
 
 import lombok.*;
+import site.campingon.campingon.camp.entity.Induty;
 
 @Getter
 @ToString
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class CampResponseDto {
+public class CampSiteResponseDto {
 
     private Long id;
 
-    private String campName;
+    private String indoorFacility;
 
-    private String thumbImage;
+    private Induty siteType;
+
 }

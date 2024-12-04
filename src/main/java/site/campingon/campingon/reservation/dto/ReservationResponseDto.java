@@ -5,7 +5,6 @@ import site.campingon.campingon.reservation.entity.CheckTime;
 import site.campingon.campingon.reservation.entity.ReservationStatus;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Getter
 @ToString
@@ -15,10 +14,6 @@ import java.time.LocalTime;
 public class ReservationResponseDto {
 
     private Long id;
-
-    private Long userId;
-
-    private Long campSiteId;
 
     private LocalDate checkinDate;
 
@@ -37,5 +32,7 @@ public class ReservationResponseDto {
     private CampResponseDto campResponseDto;
 
     private CampAddrResponseDto campAddrResponseDto;
+
+    private CampSiteResponseDto campSiteResponseDto;
 
 }
