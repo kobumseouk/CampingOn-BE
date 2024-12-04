@@ -32,6 +32,23 @@ public class CampSiteAdminController {
         return ResponseEntity.status(HttpStatus.CREATED).body(campSiteService.createCampSite(campId, createRequestDto));
     }
 
+    // 캠핑장의 모든 캠핑지 조회
+    @GetMapping
+    public ResponseEntity<List<CampSiteListResponseDto>> getCampSites(
+            @PathVariable("campId") Long campId) {
+
+        return ResponseEntity.ok(campSiteService.getCampSites(campId));
+    }
+
+    // 특정 캠핑지 조회
+    @GetMapping("/{siteId}")
+    public ResponseEntity<CampSiteResponseDto> getCampSite(
+            @PathVariable("campId") Long campId,
+            @PathVariable("siteId") Long siteId) {
+
+        return ResponseEntity.ok(campSiteService.getCampSite(campId, siteId));
+    }
+
     // 캠핑지 수정
     @PutMapping("/{siteId}")
     public ResponseEntity<CampSiteResponseDto> updateCampSite(
@@ -53,25 +70,8 @@ public class CampSiteAdminController {
         return ResponseEntity.noContent().build();
     }
 
-    // 특정 캠핑장의 모든 캠핑지 조회
-    @GetMapping
-    public ResponseEntity<List<CampSiteListResponseDto>> getCampSites(
-            @PathVariable("campId") Long campId) {
-
-        return ResponseEntity.ok(campSiteService.getCampSites(campId));
-    }
-
-    // 특정 캠핑지 조회
-    @GetMapping("/{siteId}")
-    public ResponseEntity<CampSiteResponseDto> getCampSite(
-            @PathVariable("campId") Long campId,
-            @PathVariable("siteId") Long siteId) {
-
-        return ResponseEntity.ok(campSiteService.getCampSite(campId, siteId));
-    }
-
     // 특정 캠핑지의 isAvailable 상태를 토글 - 변경된 isAvailable 상태 반환
-    @PutMapping("/{siteId}/available")
+    @PutMapping("/{siteId}")
     public ResponseEntity<Boolean> toggleAvailability(
             @PathVariable("campId") Long campId,
             @PathVariable("siteId") Long siteId) {
@@ -79,12 +79,13 @@ public class CampSiteAdminController {
         return ResponseEntity.ok(campSiteService.toggleAvailability(campId, siteId));
     }
 
+    // TODO: 관리자 UI를 생각했을 때 특정 캠핑지의 상태만 조회할 일이 있을까? 안 쓰는 API 같다.
     // 특정 캠핑지의 isAvailable 상태 조회 - 현재 isAvailable 상태 반환
-    @GetMapping("/{campSiteId}/available")
+    @GetMapping("/{SiteId}")
     public ResponseEntity<Boolean> getAvailability(
             @PathVariable("campId") Long campId,
-            @PathVariable("campSiteId") Long campSiteId) {
+            @PathVariable("SiteId") Long siteId) {
 
-        return ResponseEntity.ok(campSiteService.getAvailability(campId, campSiteId));
+        return ResponseEntity.ok(campSiteService.getAvailability(campId, siteId));
     }
 }
