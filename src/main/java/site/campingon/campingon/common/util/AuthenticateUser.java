@@ -1,4 +1,4 @@
-package site.campingon.campingon.camp.utils;
+package site.campingon.campingon.common.util;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

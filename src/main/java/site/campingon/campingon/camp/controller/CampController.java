@@ -9,14 +9,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import site.campingon.campingon.camp.dto.CampDetailResponseDto;
 import site.campingon.campingon.camp.dto.CampListResponseDto;
 import site.campingon.campingon.camp.service.CampService;
-import site.campingon.campingon.camp.utils.AuthenticateUser;
+import site.campingon.campingon.common.util.AuthenticateUser;
 import site.campingon.campingon.common.jwt.CustomUserDetails;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
