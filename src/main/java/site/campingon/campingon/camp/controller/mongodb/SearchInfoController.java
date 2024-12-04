@@ -31,8 +31,9 @@ public class SearchInfoController {
         PageRequest.of(page, size)
     );
 
-    return results.isEmpty()
-        ? ResponseEntity.noContent().build()
-        : ResponseEntity.ok(results);
+    return ResponseEntity.ok(results);
+//    return results.isEmpty()
+//        ? ResponseEntity.noContent().build()
+//        : ResponseEntity.ok(results);
   }
 }
