@@ -8,23 +8,6 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum ErrorCode {
 
-    // TODO: 참고 예시입니다.
-    /*
-    400 BAD_REQUEST : 잘못된 요청
-    HAS_EMAIL(HttpStatus.BAD_REQUEST, "ACCOUNT-002", "존재하는 이메일입니다."),
-    INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "ACCOUNT-003", "비밀번호가 일치하지 않습니다."),
-
-    401 UNAUTHORIZED : 인증되지 않은 사용자
-    INVALID_AUTH_TOKEN(HttpStatus.UNAUTHORIZED, "권한 정보가 없는 토큰입니다."),
-
-    404 NOT_FOUND : Resource를 찾을 수 없음
-    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 정보의 사용자를 찾을 수 없습니다."),
-
-    409 : CONFLICT : Resource의 현재 상태와 충돌. 보통 중복된 데이터 존재
-    DUPLICATE_RESOURCE(HttpStatus.CONFLICT, "데이터가 이미 존재합니다."),
-    DUPLICATE_CATEGORY(HttpStatus.CONFLICT, "CATEGORY-03", "이미 존재하는 카테고리입니다.");
-    */
-
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "AUTH-001", "비밀번호가 일치하지 않습니다."),
     REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "AUTH-002", "리프레시 토큰이 만료되었습니다."),
     NO_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH-003", "토큰이 존재하지 않습니다."),
@@ -51,13 +34,15 @@ public enum ErrorCode {
     REVIEW_NOT_IN_CAMP(HttpStatus.NOT_FOUND, "REVIEW-002", "리뷰가 해당 캠프에 속하지 않습니다."),
     REVIEW_ALREADY_SUBMITTED(HttpStatus.BAD_REQUEST, "REVIEW-003", "이미 이 예약에 대해 리뷰를 작성하셨습니다."),
 
-
     CAMP_INDUTY_NOT_FOUND(HttpStatus.NOT_FOUND, "INDUTY-001", "존재하지 않는 업종입니다."),
 
-    RESERVATION_STATUS_NOT_FOUND(HttpStatus.NOT_FOUND, "RESERVATION-001", "알 수없는 예약 상태입니다."),
+    RESERVATION_STATUS_NOT_FOUND(HttpStatus.BAD_REQUEST, "RESERVATION-001", "알 수없는 예약 상태입니다."),
     RESERVATION_NOT_FOUND_BY_ID(HttpStatus.NOT_FOUND, "RESERVATION-002", "해당 예약 ID를 찾을 수 없습니다."),
-    RESERVATION_NOT_CANCELED(HttpStatus.BAD_REQUEST, "RESERVATION-003", "예약취소를 할 수 없습니다."),
-    RESERVATION_NOT_COMPLETED_FOR_REVIEW(HttpStatus.BAD_REQUEST, "RESERVATION-004", "후기는 체크인이 완료된 상태에서만 작성할 수 있습니다."),
+    RESERVATION_ALREADY_CANCELED(HttpStatus.BAD_REQUEST, "RESERVATION-003", "이미 취소된 예약입니다."),
+    RESERVATION_ALREADY_COMPLETE(HttpStatus.BAD_REQUEST, "RESERVATION-004", "이미 지난 예약입니다."),
+    RESERVATION_NOT_COMPLETED_FOR_REVIEW(HttpStatus.BAD_REQUEST, "RESERVATION-005", "후기는 체크인이 완료된 상태에서만 작성할 수 있습니다."),
+    RESERVATION_INVALID_CHECKTIME(HttpStatus.BAD_REQUEST, "RESERVATION-006", "유효하지 않은 체크인/체크아웃 시간입니다."),
+
     BOOKMARK_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "BOOKMARK-001", "북유찾없"),
     FORBIDDEN_ACCESS(HttpStatus.FORBIDDEN, "미완", "잘못된 접근입니다.");
 
