@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class CampListResponseDto {
-  private Long id;
+  private Long campId;
   private String name;
   private String lineIntro;
   private String thumbImage;

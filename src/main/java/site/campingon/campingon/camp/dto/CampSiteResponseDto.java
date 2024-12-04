@@ -4,7 +4,6 @@ import lombok.*;
 import site.campingon.campingon.camp.entity.Induty;
 
 import java.time.LocalTime;
-import java.util.List;
 
 @Getter
 @NoArgsConstructor

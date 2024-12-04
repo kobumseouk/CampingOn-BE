@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class CampDetailResponseDto {
-  private Long id;
+  private Long campId;
   private String name;
   private String tel;
   private String lineIntro;
