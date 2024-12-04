@@ -51,8 +51,12 @@ public class ReservationValidate {
     // 예약취소가 가능한지 체크
     public void validateStatus(ReservationStatus status) {
 
-        if (status == ReservationStatus.CANCELED || status == ReservationStatus.COMPLETED) {
-            throw new GlobalException(ErrorCode.RESERVATION_NOT_CANCELED);
+        if (status == ReservationStatus.CANCELED) {
+            throw new GlobalException(ErrorCode.RESERVATION_ALREADY_CANCELED);
+        }
+
+        if (status == ReservationStatus.COMPLETED) {
+            throw new GlobalException(ErrorCode.RESERVATION_ALREADY_COMPLETE);
         }
     }
 }

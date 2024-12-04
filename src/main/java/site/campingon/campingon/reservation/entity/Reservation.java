@@ -8,7 +8,6 @@ import site.campingon.campingon.common.entity.BaseEntity;
 import site.campingon.campingon.user.entity.User;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Entity
 @Getter
@@ -60,5 +59,11 @@ public class Reservation extends BaseEntity {
     private String cancelReason;
 
     private int totalPrice;
+
+    // 예약 취소
+    public void cancel(String reason) {
+        this.status = ReservationStatus.CANCELED;
+        this.cancelReason = reason;
+    }
 
 }

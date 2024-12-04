@@ -10,6 +10,7 @@ import site.campingon.campingon.camp.entity.Camp;
 import site.campingon.campingon.camp.entity.CampSite;
 import site.campingon.campingon.camp.mapper.CampSiteMapper;
 import site.campingon.campingon.reservation.dto.*;
+import site.campingon.campingon.reservation.entity.ReservationStatus;
 import site.campingon.campingon.reservation.repository.ReservationRepository;
 import site.campingon.campingon.reservation.mapper.ReservationMapper;
 import site.campingon.campingon.reservation.entity.Reservation;
@@ -34,6 +35,8 @@ public class ReservationServiceImpl implements ReservationService {
     @Transactional(readOnly = true)
     public Page<ReservationResponseDto> getReservations(Long userId, Pageable pageable) {
 
+        reservationValidate.validateUserById(userId);
+
         Page<Reservation> reservations = reservationRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
 
         return reservations.map(reservationMapper::toResponse);
@@ -41,7 +44,9 @@ public class ReservationServiceImpl implements ReservationService {
 
     // 예약완료 직후 확인을 위해 예약 정보 조회
     @Transactional(readOnly = true)
-    public ReservationResponseDto getReservation(Long reservationId) {
+    public ReservationResponseDto getReservation(Long userId, Long reservationId) {
+
+        reservationValidate.validateUserById(userId);
 
         Reservation reservation = reservationValidate.validateReservationById(reservationId);
 
@@ -73,17 +78,21 @@ public class ReservationServiceImpl implements ReservationService {
 
     // 예약완료 이후 예약취소 요청
     @Transactional
-    public void cancelReservation(Long reservationId, ReservationCancelRequestDto requestDto) {
+    public void cancelReservation(Long userId, Long reservationId, ReservationCancelRequestDto requestDto) {
+
+        reservationValidate.validateUserById(userId);
+
+        reservationValidate.validateCampSiteById(requestDto.getCampSiteId());
+
+        reservationValidate.validateCampById(requestDto.getCampId());
+
         Reservation reservation = reservationValidate.validateReservationById(requestDto.getId());
 
         reservationValidate.validateStatus(requestDto.getStatus());
 
-        Reservation canceledReservation = reservationMapper.toEntity(requestDto);
-//                .status(requestDto.getStatus())
-//                .cancelReason(requestDto.getCancelReason())
-//                .build();
+        reservation.cancel(requestDto.getCancelReason());
 
-        reservationRepository.save(canceledReservation);
+        reservationRepository.save(reservation);
     }
 
 }
