@@ -77,19 +77,19 @@ public class GoCampingService {
                 );
 
                 goCampingProviderService.updateCampSite(updateCamp, normalSiteCnt, NORMAL_SITE, null,
-                        NORMAL_SITE.getMaximum_people(), NORMAL_SITE.getPrice());
+                        NORMAL_SITE.getMaximumPeople(), NORMAL_SITE.getPrice());
 
                 goCampingProviderService.updateCampSite(updateCamp, carSiteCnt, CAR_SITE, null,
-                        CAR_SITE.getMaximum_people(), CAR_SITE.getPrice());
+                        CAR_SITE.getMaximumPeople(), CAR_SITE.getPrice());
 
                 goCampingProviderService.updateCampSite(updateCamp, glampSiteCnt, GLAMP_SITE, glampInnerFacility,
-                        GLAMP_SITE.getMaximum_people(), GLAMP_SITE.getPrice());
+                        GLAMP_SITE.getMaximumPeople(), GLAMP_SITE.getPrice());
 
                 goCampingProviderService.updateCampSite(updateCamp, caravSiteCnt, CARAV_SITE, caravInnerFacility,
-                        CAR_SITE.getMaximum_people(), CAR_SITE.getPrice());
+                        CAR_SITE.getMaximumPeople(), CAR_SITE.getPrice());
 
                 goCampingProviderService.updateCampSite(updateCamp, personalCaravanSiteCnt, PERSONAL_CARAV_SITE,
-                        null, PERSONAL_CARAV_SITE.getMaximum_people(), PERSONAL_CARAV_SITE.getPrice());
+                        null, PERSONAL_CARAV_SITE.getMaximumPeople(), PERSONAL_CARAV_SITE.getPrice());
             } else {
                 //그렇지 않다면 create
                 Camp createCamp = buildCampFromData(data);
@@ -112,19 +112,19 @@ public class GoCampingService {
 
                 //캠핑지 DB 저장
                 goCampingProviderService.createCampSite(createCamp, normalSiteCnt, NORMAL_SITE, null,
-                        NORMAL_SITE.getMaximum_people(), NORMAL_SITE.getPrice());
+                        NORMAL_SITE.getMaximumPeople(), NORMAL_SITE.getPrice());
 
                 goCampingProviderService.createCampSite(createCamp, carSiteCnt, CAR_SITE, null,
-                        CAR_SITE.getMaximum_people(), CAR_SITE.getPrice());
+                        CAR_SITE.getMaximumPeople(), CAR_SITE.getPrice());
 
                 goCampingProviderService.createCampSite(createCamp, glampSiteCnt, GLAMP_SITE, glampInnerFacility,
-                        GLAMP_SITE.getMaximum_people(), GLAMP_SITE.getPrice());
+                        GLAMP_SITE.getMaximumPeople(), GLAMP_SITE.getPrice());
 
                 goCampingProviderService.createCampSite(createCamp, caravSiteCnt, CARAV_SITE, caravInnerFacility,
-                        CAR_SITE.getMaximum_people(), CAR_SITE.getPrice());
+                        CAR_SITE.getMaximumPeople(), CAR_SITE.getPrice());
 
                 goCampingProviderService.createCampSite(createCamp, personalCaravanSiteCnt, PERSONAL_CARAV_SITE,
-                        null, PERSONAL_CARAV_SITE.getMaximum_people(), PERSONAL_CARAV_SITE.getPrice());
+                        null, PERSONAL_CARAV_SITE.getMaximumPeople(), PERSONAL_CARAV_SITE.getPrice());
             }
         }
         return goCampingParsedResponseDtoList;
