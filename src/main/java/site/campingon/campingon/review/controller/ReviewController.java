@@ -4,14 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import site.campingon.campingon.common.jwt.CustomUserDetails;
 import site.campingon.campingon.review.dto.ReviewCreateRequestDto;
 import site.campingon.campingon.review.dto.ReviewResponseDto;
 import site.campingon.campingon.review.dto.ReviewUpdateRequestDto;
-import site.campingon.campingon.review.repository.ReviewRepository;
 import site.campingon.campingon.review.service.ReviewService;
-import site.campingon.campingon.user.entity.User;
 
 import java.io.IOException;
 import java.util.List;
@@ -75,10 +73,9 @@ public class ReviewController {
     @PatchMapping("/reviews/{reviewId}/recommend")
     public ResponseEntity<Boolean> toggleRecommend(
             @PathVariable("reviewId") Long reviewId,
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        User user = (User) userDetails;
-        boolean isRecommended = reviewService.toggleRecommend(reviewId, user.getId());
+        boolean isRecommended = reviewService.toggleRecommend(reviewId, userDetails.getId());
         return ResponseEntity.ok(isRecommended);
     }
 }

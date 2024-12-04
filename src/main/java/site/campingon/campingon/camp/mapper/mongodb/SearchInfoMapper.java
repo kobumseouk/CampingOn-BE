@@ -6,8 +6,6 @@ import org.springframework.data.domain.Page;
 import site.campingon.campingon.camp.dto.CampListResponseDto;
 import site.campingon.campingon.camp.entity.mongodb.SearchInfo;
 
-import java.util.List;
-
 @Mapper(componentModel = "spring")
 public interface SearchInfoMapper {
 

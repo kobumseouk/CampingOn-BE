@@ -1,6 +1,7 @@
 package site.campingon.campingon.review.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,12 +26,14 @@ import site.campingon.campingon.review.repository.ReviewRepository;
 import site.campingon.campingon.user.repository.UserRepository;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import static site.campingon.campingon.common.exception.ErrorCode.*;
 import static site.campingon.campingon.common.exception.ErrorCode.REVIEW_ALREADY_SUBMITTED;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -40,12 +43,17 @@ public class ReviewService {
     private final ReviewImageRepository reviewImageRepository;
     private final ReservationRepository reservationRepository;
     private final CampRepository campRepository;
-    private final CampSiteRepository campSiteRepository;
     private final ReviewMapper reviewMapper;
     private final ReviewImageMapper reviewImageMapper;
     private final S3BucketService s3BucketService;
-    private final UserRepository userRepository;
 
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
+    private static final int MAX_FILES_COUNT = 5; // 최대 파일 개수 제한
+    private static final Set<String> ALLOWED_TYPES = Set.of(
+        "image/jpeg",
+        "image/png",
+        "image/gif"
+    );
 
     // 리뷰 작성
     @Transactional
@@ -65,16 +73,25 @@ public class ReviewService {
         if (hasReview) {
             throw new GlobalException((REVIEW_ALREADY_SUBMITTED));
         }
+
+        // 리뷰 엔티티 생성 및 저장
         Review review = reviewMapper.toEntity(requestDto, camp, reservation);
         Review savedReview = reviewRepository.save(review);
 
-        List<String> uploadedUrls = s3BucketService.upload(requestDto.getS3Images(), "reviews/" + savedReview.getId());
+        // 이미지가 있는 경우에만 처리
+        if (requestDto.getS3Images() != null && !requestDto.getS3Images().isEmpty()) {
+            // 이미지 파일의 타입, 크기, 개수 검증
+            validateImages(requestDto.getS3Images());
+            try {
+                List<String> uploadedUrls = s3BucketService.upload(requestDto.getS3Images(), "reviews/" + savedReview.getId());
+                List<ReviewImage> reviewImages = reviewImageMapper.toEntityList(uploadedUrls, savedReview);
+                reviewImageRepository.saveAll(reviewImages);
+            } catch (IOException e) {
+                throw new GlobalException(FILE_UPLOAD_FAILED);
+            }
+        }
 
-        // 5. 업로드된 URL 리스트와 저장된 리뷰 데이터를 사용하여 ReviewImage 엔티티 리스트 생성
-        List<ReviewImage> reviewImages = reviewImageMapper.toEntityList(uploadedUrls, savedReview);
-        reviewImageRepository.saveAll(reviewImages);
-
-        // 7. 저장된 Review 엔티티를 ReviewResponseDto로 변환하여 반환
+        // 저장된 Review 엔티티를 ReviewResponseDto로 반환
         return reviewMapper.toResponseDto(savedReview);
     }
 
@@ -105,20 +122,58 @@ public class ReviewService {
         return reviewMapper.toResponseDto(review);
     }
 
-    private void updateReviewImages(Review review, List<MultipartFile> newImages) throws IOException {
-        // 1. 기존 이미지 삭제
-        List<ReviewImage> existingImages = reviewImageRepository.findByReview(review);
-        for (ReviewImage existingImage : existingImages) {
-            s3BucketService.remove(existingImage.getImageUrl());
+    private void updateReviewImages(Review review, List<MultipartFile> newImages) {
+        // 이미지가 없는 경우 기존 이미지만 삭제하고 종료
+        if (newImages == null || newImages.isEmpty()) {
+            List<ReviewImage> existingImages = reviewImageRepository.findByReview(review);
+            if (!existingImages.isEmpty()) {
+                existingImages.forEach(image -> {
+                    try {
+                        s3BucketService.remove(image.getImageUrl());
+                    } catch (Exception e) {
+                        log.error("기존 이미지 삭제 실패: {}", image.getImageUrl(), e);
+                    }
+                });
+                reviewImageRepository.deleteAll(existingImages);
+            }
+            return;
         }
-        reviewImageRepository.deleteAll(existingImages);
 
-        // 2. 새로운 이미지 업로드
-        List<String> uploadedUrls = s3BucketService.upload(newImages, "reviews/" + review.getId());
+        // 이미지 파일의 타입, 크기, 개수 검증
+        validateImages(newImages);
 
-        // 3. 새로운 이미지 엔티티 생성 및 저장
-        List<ReviewImage> newImageEntities = reviewImageMapper.toEntities(review, uploadedUrls);
-        reviewImageRepository.saveAll(newImageEntities);
+        List<String> uploadedUrls = new ArrayList<>();
+        List<ReviewImage> existingImages = reviewImageRepository.findByReview(review);
+
+        try {
+            // 새 이미지 업로드 시도
+            uploadedUrls = s3BucketService.upload(newImages, "reviews/" + review.getId());
+
+            // 새 이미지 업로드 성공 시 기존 이미지 삭제
+            for (ReviewImage existingImage : existingImages) {
+                try {
+                    s3BucketService.remove(existingImage.getImageUrl());
+                } catch (Exception e) {
+                    log.error("Failed to remove existing image: {}", existingImage.getImageUrl(), e);
+                }
+            }
+
+            reviewImageRepository.deleteAll(existingImages);
+
+            // 새 이미지 엔티티 저장
+            List<ReviewImage> newImageEntities = reviewImageMapper.toEntities(review, uploadedUrls);
+            reviewImageRepository.saveAll(newImageEntities);
+        } catch (IOException e) {
+            // 실패 시 새로 업로드된 이미지들 롤백
+            uploadedUrls.forEach(url -> {
+                try {
+                    s3BucketService.remove(url);
+                } catch (Exception ex) {
+                    log.error("Failed to remove uploaded file during rollback: {}", url, ex);
+                }
+            });
+            throw new GlobalException(FILE_UPLOAD_FAILED);
+        }
     }
 
     // 리뷰 삭제
@@ -166,5 +221,26 @@ public class ReviewService {
         Review updatedReview = reviewMapper.toUpdatedReview(review);
         reviewRepository.save(updatedReview);
         return updatedReview.isRecommend();
+    }
+
+    // 허용된 이미지 파일 타입 및 파일 개수 검증
+    private void validateImages(List<MultipartFile> images) {
+        // 이미지 파일 개수 제한
+        if (images.size() > MAX_FILES_COUNT) {
+            throw new GlobalException(FILE_COUNT_EXCEEDED);
+        }
+
+        for (MultipartFile image : images) {
+            // 파일 크기 검증
+            if (image.getSize() > MAX_FILE_SIZE) {
+                throw new GlobalException(FILE_SIZE_EXCEEDED);
+            }
+
+            // 파일 타입 검증
+            String contentType = image.getContentType();
+            if (contentType == null || !ALLOWED_TYPES.contains(contentType)) {
+                throw new GlobalException(INVALID_FILE_TYPE);
+            }
+        }
     }
 }
