@@ -36,7 +36,7 @@ public class CampController {
       @AuthenticationPrincipal CustomUserDetails userDetails
   ) {
     return ResponseEntity.ok(campService.getMatchedCampsByKeywords(
-        userDetails.getId(), PageRequest.of(page, size))
+        userDetails.getName(), userDetails.getId(), PageRequest.of(page, size))
     );
   }
 

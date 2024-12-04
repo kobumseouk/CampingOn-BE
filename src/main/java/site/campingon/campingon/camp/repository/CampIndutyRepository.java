@@ -9,5 +9,5 @@ import java.util.List;
 
 @Repository
 public interface CampIndutyRepository extends JpaRepository<CampInduty, Long> {
-    List<CampInduty> findAllByCamp(Camp camp);
+    void deleteAllByCampId(long contentId);
 }
