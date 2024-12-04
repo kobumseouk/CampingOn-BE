@@ -11,5 +11,5 @@ import java.util.Optional;
 
 @Repository
 public interface CampIndutyRepository extends JpaRepository<CampInduty, Long> {
-    List<CampInduty> findAllByCamp(Camp camp);
+    void deleteAllByCampId(long contentId);
 }

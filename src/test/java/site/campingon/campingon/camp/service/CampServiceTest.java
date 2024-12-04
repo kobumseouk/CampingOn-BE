@@ -154,6 +154,7 @@ class CampServiceTest {
   void getMatchedCampsByKeywords_success() {
     // given
     Long userId = 1L;
+    String username = "캠린이";
     Pageable pageable = PageRequest.of(0, 3);
     List<Camp> camps = Arrays.asList(mockCamp);
     Page<Camp> campPage = new PageImpl<>(camps, pageable, camps.size());
@@ -164,7 +165,7 @@ class CampServiceTest {
     when(bookMarkRepository.existsByCampIdAndUserId(anyLong(), anyLong())).thenReturn(false);
 
     // when
-    Page<CampListResponseDto> result = campService.getMatchedCampsByKeywords(userId, pageable);
+    Page<CampListResponseDto> result = campService.getMatchedCampsByKeywords(username, userId, pageable);
 
     // then
     assertNotNull(result);
@@ -182,11 +183,12 @@ class CampServiceTest {
   void getMatchedCampsByKeywords_emptyKeywords_returnsEmptyPage() {
     // given
     Long userId = 1L;
+    String username = "캠린이";
     Pageable pageable = PageRequest.of(0, 3);
     when(userKeywordRepository.findKeywordsByUserId(userId)).thenReturn(Collections.emptyList());
 
     // when
-    Page<CampListResponseDto> result = campService.getMatchedCampsByKeywords(userId, pageable);
+    Page<CampListResponseDto> result = campService.getMatchedCampsByKeywords(username, userId, pageable);
 
     // then
     assertTrue(result.isEmpty());

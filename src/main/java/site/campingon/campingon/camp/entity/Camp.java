@@ -3,8 +3,10 @@ package site.campingon.campingon.camp.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import site.campingon.campingon.bookmark.entity.Bookmark;
+import site.campingon.campingon.common.public_data.dto.GoCampingParsedResponseDto;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,4 +71,21 @@ public class Camp{
 
   @Column(name = "modified_at", nullable = false, columnDefinition = "DATETIME")
   private LocalDateTime modifiedAt;
+
+  public Camp updateCamp(GoCampingParsedResponseDto data) {
+    this.id = data.getContentId();
+    this.campName = data.getFacltNm();
+    this.lineIntro = data.getLineIntro();
+    this.tel = data.getTel();
+    this.homepage = data.getHomepage();
+    this.outdoorFacility = data.getSbrsCl();
+    this.thumbImage = data.getFirstImageUrl();
+    this.createdAt = LocalDateTime.parse(
+            data.getCreatedtime()
+            , DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    this.modifiedAt = LocalDateTime.parse(
+            data.getModifiedtime()
+            , DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    return this;  //자기자신 반환
+  }
 }
