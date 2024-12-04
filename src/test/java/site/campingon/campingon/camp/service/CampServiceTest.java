@@ -123,7 +123,7 @@ class CampServiceTest {
         .build();
 
     mockCampListDto = CampListResponseDto.builder()
-        .id(1L)
+        .campId(1L)
         .name("Test Camp")
         .lineIntro("Test Line Intro")
         .thumbImage("test.jpg")
@@ -133,7 +133,7 @@ class CampServiceTest {
         .build();
 
     mockCampDetailDto = CampDetailResponseDto.builder()
-        .id(1L)
+        .campId(1L)
         .name("Test Camp")
         .tel("010-1234-5678")
         .lineIntro("Test Line Intro")
@@ -289,7 +289,7 @@ class CampServiceTest {
 
     // then
     assertNotNull(result);
-    assertEquals(mockCampDetailDto.getId(), result.getId());
+    assertEquals(mockCampDetailDto.getCampId(), result.getCampId());
     assertEquals(mockCampDetailDto.getName(), result.getName());
     assertEquals("일반야영장, 자동차야영장", result.getIndutys());
 
@@ -435,7 +435,7 @@ class CampServiceTest {
 
     // then
     assertNotNull(result);
-    assertEquals(mockCampDetailDto.getId(), result.getId());
+    assertEquals(mockCampDetailDto.getCampId(), result.getCampId());
     assertEquals(mockCampDetailDto.getName(), result.getName());
 
     verify(campRepository).save(any(Camp.class));
@@ -461,7 +461,7 @@ class CampServiceTest {
 
     // 업데이트된 DetailResponseDto 설정
     CampDetailResponseDto updatedDto = CampDetailResponseDto.builder()
-        .id(1L)
+        .campId(1L)
         .name("Updated Camp")
         .tel("010-9876-5432")
         .lineIntro("Updated Intro")
@@ -482,7 +482,7 @@ class CampServiceTest {
 
     // then
     assertNotNull(result);
-    assertEquals(updatedDto.getId(), result.getId());
+    assertEquals(updatedDto.getCampId(), result.getCampId());
     assertEquals(updatedDto.getName(), result.getName());
     assertEquals(updatedDto.getTel(), result.getTel());
 
