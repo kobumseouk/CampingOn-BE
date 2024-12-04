@@ -72,7 +72,7 @@ class ReservationServiceTest {
                 .camp(mockCamp)
                 .siteType(Induty.NORMAL_SITE)
                 .price(Induty.NORMAL_SITE.getPrice())
-                .maximumPeople(Induty.NORMAL_SITE.getMaximum_people())
+                .maximumPeople(Induty.NORMAL_SITE.getMaximumPeople())
                 .build();
 
         mockReservation = Reservation.builder()

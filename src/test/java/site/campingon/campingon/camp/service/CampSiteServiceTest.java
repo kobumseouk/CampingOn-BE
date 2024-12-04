@@ -17,7 +17,6 @@ import site.campingon.campingon.camp.entity.Induty;
 import site.campingon.campingon.camp.mapper.CampSiteMapper;
 import site.campingon.campingon.camp.repository.CampRepository;
 import site.campingon.campingon.camp.repository.CampSiteRepository;
-import site.campingon.campingon.reservation.dto.ReservedCampSiteIdListResponseDto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -75,8 +74,8 @@ class CampSiteServiceTest {
         .price(50000)
         .indoorFacility("화장실, 취사장")
         .siteType(Induty.NORMAL_SITE)
-        .checkInTime(LocalTime.of(15, 0))
-        .checkOutTime(LocalTime.of(11, 0))
+        .checkinTime(LocalTime.of(15, 0))
+        .checkoutTime(LocalTime.of(11, 0))
         .build();
   }
 
