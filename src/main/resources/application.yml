@@ -41,3 +41,9 @@ app:
     reservation:
       page: 0
       size: 5
+    camp:
+      page: 0
+      size: 9
+    searchInfo:
+      page: 0
+      size: 12

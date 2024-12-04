@@ -1,6 +1,7 @@
 package site.campingon.campingon.camp.controller.mongodb;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -18,12 +19,16 @@ import site.campingon.campingon.camp.service.mongodb.SearchInfoService;
 public class SearchInfoController {
   private final SearchInfoService searchInfoService;
 
+  @Value("${app.pagination.searchInfo.page}")
+  private int page;
+
+  @Value("${app.pagination.searchInfo.size}")
+  private int size;
+
   @GetMapping("/search")
   public ResponseEntity<Page<SearchInfo>> searchCamps(
       @RequestParam(name = "city", required = false) String city,
-      @RequestParam(name = "name", required = false) String name,
-      @RequestParam(name = "page", defaultValue = "0") int page,
-      @RequestParam(name = "size", defaultValue = "12") int size
+      @RequestParam(name = "name", required = false) String name
   ) {
     Page<SearchInfo> results = searchInfoService.searchExactMatchByLocationAndName(
         city,
