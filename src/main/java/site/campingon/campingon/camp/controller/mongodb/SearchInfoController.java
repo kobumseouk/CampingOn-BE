@@ -13,13 +13,13 @@ import site.campingon.campingon.camp.service.mongodb.SearchInfoService;
 
 
 @RestController
-@RequestMapping("/api/search")
+@RequestMapping("/api/mongo/camps")
 @RequiredArgsConstructor
 public class SearchInfoController {
   private final SearchInfoService searchInfoService;
 
-  @GetMapping("/exact")
-  public ResponseEntity<Page<SearchInfo>> searchExactMatch(
+  @GetMapping("/search")
+  public ResponseEntity<Page<SearchInfo>> searchCamps(
       @RequestParam(name = "city", required = false) String city,
       @RequestParam(name = "name", required = false) String name,
       @RequestParam(name = "page", defaultValue = "0") int page,

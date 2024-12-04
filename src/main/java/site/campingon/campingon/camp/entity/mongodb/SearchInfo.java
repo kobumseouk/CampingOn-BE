@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 public class SearchInfo {
   @Field("camp_id")
-  private String campId;
+  private Long campId;
 
   private String name;
   private String intro;
