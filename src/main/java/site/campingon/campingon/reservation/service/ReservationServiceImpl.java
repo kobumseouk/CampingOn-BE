@@ -52,6 +52,9 @@ public class ReservationServiceImpl implements ReservationService {
     @Transactional
     public void createReservation(Long userId, ReservationCreateRequestDto requestDto) {
 
+        //REFACTOR: 예약테이블에서 기존 예약과의 유효성 검증을 한번 더 함
+        // 기존 예약 체크인 날짜 < 요청 체크아웃 날짜 && 기존 예약 체크아웃 날짜 > 요청 체크인 날짜 -> true 라면 예외던짐(예약중복)
+
         User user = reservationValidate.validateUserById(userId);
 
         CampSite campSite = reservationValidate.validateCampSiteById(requestDto.getCampSiteId());
