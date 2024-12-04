@@ -44,8 +44,7 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.updateReview(campId, reviewId, requestDto));
     }
 
-
-    // 캠핑장으로 리뷰 조회
+    // 캠핑장 id로 리뷰 목록 조회
     @GetMapping("/camp/{campId}")
     public ResponseEntity<List<ReviewResponseDto>> getReviewsByCampId(
             @PathVariable("campId") Long campId
@@ -54,14 +53,13 @@ public class ReviewController {
         return ResponseEntity.ok(reviews);
     }
 
-    // 필요 없는거 같음
-    // 캠핑지로 리뷰 조회
-    @GetMapping("/campsite/{campSiteId}")
-    public ResponseEntity<List<ReviewResponseDto>> getReviewsByCampSiteId(
-            @PathVariable("campSiteId") Long campSiteId
+    // 리뷰 상세 조회
+    @GetMapping("/reviews/{reviewId}")
+    public ResponseEntity<ReviewResponseDto> getReviewById(
+            @PathVariable("reviewId") Long reviewId
     ) {
-        List<ReviewResponseDto> reviews = reviewService.getReviewsByCampSiteId(campSiteId);
-        return ResponseEntity.ok(reviews);
+        ReviewResponseDto review = reviewService.getReviewById(reviewId);
+        return ResponseEntity.ok(review);
     }
 
     // 리뷰 삭제
@@ -74,7 +72,7 @@ public class ReviewController {
     }
 
     // 리뷰 추천
-    @PatchMapping("/{reviewId}/recommend")
+    @PatchMapping("/reviews/{reviewId}/recommend")
     public ResponseEntity<Boolean> toggleRecommend(
             @PathVariable("reviewId") Long reviewId,
             @AuthenticationPrincipal UserDetails userDetails

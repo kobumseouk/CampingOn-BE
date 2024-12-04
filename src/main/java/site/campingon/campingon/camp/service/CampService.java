@@ -20,7 +20,9 @@ import site.campingon.campingon.user.repository.UserKeywordRepository;
 import site.campingon.campingon.user.repository.UserRepository;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -70,12 +72,15 @@ public class CampService {
     Camp camp = campRepository.findById(campId)
         .orElseThrow(() -> new GlobalException(ErrorCode.CAMP_NOT_FOUND_BY_ID));
 
-    String indutyString = camp.getInduty().stream()
-        .map(induty -> induty.getInduty().getType())
-        .collect(Collectors.joining(", "));
+    // induty 리스트 생성
+    List<String> indutyList = Optional.ofNullable(camp.getInduty())
+        .orElse(Collections.emptyList()) // Null 방어 코드
+        .stream()
+        .map(induty -> induty.getInduty().getType()) // Induty Enum의 type 값 추출
+        .collect(Collectors.toList());
 
     CampDetailResponseDto dto = campMapper.toCampDetailDto(camp);
-    dto.setIndutys(indutyString);
+    dto.setIndutys(indutyList);
     return dto;
   }
 
