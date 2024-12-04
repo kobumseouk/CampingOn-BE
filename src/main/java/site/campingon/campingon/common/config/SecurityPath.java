@@ -11,12 +11,13 @@ public class SecurityPath {
         "/api/users/check-duplicate",
         "/",
         "/api/mongo/camps/search",
+        "/api/camps/popular",
     };
 
 
     // hasRole("USER")
     public static final String[] USER_ENDPOINTS = {
-        "/api/camps/**",
+//        "/api/camps/**",
         "/api/users/me/*",
         "/api/reservations/**",
         "/api/camps/*/bookmarks"
