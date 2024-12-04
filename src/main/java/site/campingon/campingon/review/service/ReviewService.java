@@ -9,7 +9,9 @@ import site.campingon.campingon.camp.entity.CampSite;
 import site.campingon.campingon.camp.repository.CampRepository;
 import site.campingon.campingon.camp.repository.CampSiteRepository;
 import site.campingon.campingon.common.exception.GlobalException;
+import site.campingon.campingon.common.s3bucket.service.S3BucketService;
 import site.campingon.campingon.reservation.entity.Reservation;
+import site.campingon.campingon.reservation.entity.ReservationStatus;
 import site.campingon.campingon.reservation.repository.ReservationRepository;
 import site.campingon.campingon.review.dto.ReviewCreateRequestDto;
 import site.campingon.campingon.review.dto.ReviewResponseDto;
@@ -20,14 +22,14 @@ import site.campingon.campingon.review.mapper.ReviewImageMapper;
 import site.campingon.campingon.review.mapper.ReviewMapper;
 import site.campingon.campingon.review.repository.ReviewImageRepository;
 import site.campingon.campingon.review.repository.ReviewRepository;
-import site.campingon.campingon.common.s3bucket.service.S3BucketService;
 import site.campingon.campingon.user.repository.UserRepository;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 import static site.campingon.campingon.common.exception.ErrorCode.*;
-import static site.campingon.campingon.common.exception.ErrorCode.USER_NOT_FOUND_BY_ID;
+import static site.campingon.campingon.common.exception.ErrorCode.REVIEW_ALREADY_SUBMITTED;
 
 @Service
 @RequiredArgsConstructor
@@ -45,7 +47,7 @@ public class ReviewService {
     private final UserRepository userRepository;
 
 
-    // 리뷰 생성
+    // 리뷰 작성
     @Transactional
     public ReviewResponseDto createReview(
             Long campId,
@@ -56,8 +58,13 @@ public class ReviewService {
                 .orElseThrow(() -> new GlobalException(CAMP_NOT_FOUND_BY_ID));
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new GlobalException(RESERVATION_NOT_FOUND_BY_ID));
-
-        // 3. ReviewCreateRequestDto를 Review 엔티티로 변환하고 저장
+        if (reservation.getStatus() != ReservationStatus.COMPLETED) {
+            throw new GlobalException((RESERVATION_NOT_COMPLETED_FOR_REVIEW));
+        }
+        boolean hasReview = reviewRepository.existsByReservationId(reservationId);
+        if (hasReview) {
+            throw new GlobalException((REVIEW_ALREADY_SUBMITTED));
+        }
         Review review = reviewMapper.toEntity(requestDto, camp, reservation);
         Review savedReview = reviewRepository.save(review);
 
@@ -70,41 +77,6 @@ public class ReviewService {
         // 7. 저장된 Review 엔티티를 ReviewResponseDto로 변환하여 반환
         return reviewMapper.toResponseDto(savedReview);
     }
-    // 추후 단건 예약에 대해 중복 리뷰 작성 불가 로직 추가 예정
-//    // 예약이 완료된 상태를 기준으로 리뷰 작성
-//    @Transactional
-//    public ReviewResponseDto createReview(Long reservationId, ReviewCreateRequestDto requestDto) throws IOException {
-//        // 1. 예약 정보 가져오기
-//        Reservation reservation = reservationRepository.findById(reservationId)
-//                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 예약 ID입니다."));
-//
-//        // 2. 예약 상태 확인
-//        if (reservation.getStatus() != ReservationStatus.COMPLETED) {
-//            throw new IllegalArgumentException("완료된 예약에 대해서만 리뷰를 작성할 수 있습니다.");
-//        }
-//
-//        // 3. 기존 리뷰 여부 확인
-//        boolean hasReview = reviewRepository.existsByReservationId(reservationId);
-//        if (hasReview) {
-//            throw new IllegalArgumentException("이미 이 예약에 대해 리뷰를 작성하셨습니다.");
-//        }
-//
-//        // 4. 캠핑지 정보 가져오기
-//        CampSite campSite = reservation.getCampSite();
-//
-//        // 5. 리뷰 생성
-//        Review review = reviewMapper.toEntity(requestDto, camp, reservation);
-//        Review savedReview = reviewRepository.save(review);
-//
-//        // 6. 이미지 업로드
-//        List<String> uploadedUrls = s3BucketService.upload(requestDto.getS3Images(), "reviews/" + savedReview.getId());
-//        List<ReviewImage> reviewImages = reviewImageMapper.toEntityList(uploadedUrls, savedReview);
-//        reviewImageRepository.saveAll(reviewImages);
-//
-//        // 7. 응답 DTO 반환
-//        return reviewMapper.toResponseDto(savedReview);
-//    }
-
 
     // 리뷰 수정
     @Transactional
@@ -164,7 +136,7 @@ public class ReviewService {
         reviewRepository.delete(review);
     }
 
-    // 캠핑장 id로 리뷰 조회
+    // 캠핑장 id로 리뷰 목록 조회
     public List<ReviewResponseDto> getReviewsByCampId(Long campId) {
         Camp camp = campRepository.findById(campId)
                 .orElseThrow(() -> new GlobalException(CAMP_NOT_FOUND_BY_ID));
@@ -173,16 +145,15 @@ public class ReviewService {
         return reviewMapper.toResponseDtoList(reviews);
     }
 
-    // 캠핑지 id로 리뷰 조회
-    public List<ReviewResponseDto> getReviewsByCampSiteId(Long campSiteId) {
-        CampSite campSite = campSiteRepository.findById(campSiteId)
-                .orElseThrow(() -> new GlobalException(CAMPSITE_NOT_FOUND_BY_ID));
-
-        List<Review> reviews = reviewRepository.findByCampSiteId(campSite.getId());
-        return reviewMapper.toResponseDtoList(reviews);
+    // 리뷰 상세 조회
+    public ReviewResponseDto getReviewById(Long reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new GlobalException(REVIEW_NOT_FOUND_BY_ID));
+        return reviewMapper.toResponseDto(review);
     }
 
     // 리뷰 추천 토글
+    @Transactional
     public boolean toggleRecommend(Long reviewId, Long userId) {
         // 리뷰 가져오기
         Review review = reviewRepository.findById(reviewId)

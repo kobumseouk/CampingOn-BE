@@ -19,14 +19,6 @@ public interface CampMapper {
   @Mapping(target = "streetAddr", source = "campAddr.streetAddr")
   CampListResponseDto toCampListDto(Camp camp);
 
-  // Camp -> CampDetailResponseDto 매핑
-  @Mapping(target = "campId", source = "id")
-  @Mapping(target = "name", source = "campName")
-  @Mapping(target = "images", source = "images", qualifiedByName = "imagesToUrlList")
-  CampDetailResponseDto toCampDetailDto(Camp camp);
-
-
-
   @Named("keywordsToStringList")
   default List<String> keywordsToStringList(List<CampKeyword> keywords) {
     return keywords.stream()
@@ -62,4 +54,34 @@ public interface CampMapper {
   // CampUpdateRequestDto -> Camp
   @Mapping(target = "images", source = "images", qualifiedByName = "urlsToImagesList")
   Camp toCampEntity(CampUpdateRequestDto updateRequestDto);
+
+  // 캠핑장 상세 페이지
+  // Camp -> CampDetailResponseDto 매핑
+  @Mapping(target = "name", source = "campName")
+  @Mapping(target = "intro", source = "intro")
+  @Mapping(target = "images", source = "images", qualifiedByName = "imagesToUrlList")
+  @Mapping(target = "campAddr", source = "campAddr", qualifiedByName = "toCampAddrDto")
+  @Mapping(target = "campInfo", source = "campInfo", qualifiedByName = "toCampInfoDto")
+  CampDetailResponseDto toCampDetailDto(Camp camp);
+
+  @Named("toCampAddrDto")
+  default CampAddrDto toCampAddrDto(CampAddr campAddr) {
+    if (campAddr == null) return null;
+    return CampAddrDto.builder()
+            .city(campAddr.getCity())
+            .state(campAddr.getState())
+            .zipcode(campAddr.getZipcode())
+            .streetAddr(campAddr.getStreetAddr())
+            .detailedAddr(campAddr.getDetailedAddr())
+            .build();
+  }
+
+  @Named("toCampInfoDto")
+  default CampInfoDto toCampInfoDto(CampInfo campInfo) {
+    if (campInfo == null) return null;
+    return CampInfoDto.builder()
+            .recommendCnt(campInfo.getRecommendCnt())
+            .bookmarkCnt(campInfo.getBookmarkCnt())
+            .build();
+  }
 }
