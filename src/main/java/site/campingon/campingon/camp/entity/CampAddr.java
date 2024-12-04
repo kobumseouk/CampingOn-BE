@@ -3,7 +3,6 @@ package site.campingon.campingon.camp.entity;
 
 import org.locationtech.jts.geom.Point;
 import jakarta.persistence.*;
-import org.hibernate.annotations.Type;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
