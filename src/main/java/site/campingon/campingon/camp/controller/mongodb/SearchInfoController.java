@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import site.campingon.campingon.camp.dto.CampListResponseDto;
 import site.campingon.campingon.camp.entity.mongodb.SearchInfo;
 import site.campingon.campingon.camp.service.mongodb.SearchInfoService;
 
@@ -26,19 +27,16 @@ public class SearchInfoController {
   private int size;
 
   @GetMapping("/search")
-  public ResponseEntity<Page<SearchInfo>> searchCamps(
-      @RequestParam(name = "city", required = false) String city,
-      @RequestParam(name = "name", required = false) String name
+  public ResponseEntity<Page<CampListResponseDto>> searchCamps(
+      @RequestParam(name = "city", required = false, defaultValue = "") String city,
+      @RequestParam(name = "name", required = false, defaultValue = "") String name
   ) {
-    Page<SearchInfo> results = searchInfoService.searchExactMatchByLocationAndName(
-        city,
-        name,
-        PageRequest.of(page, size)
+    return ResponseEntity.ok(
+        searchInfoService.searchExactMatchByLocationAndName(
+            city,
+            name,
+            PageRequest.of(page, size)
+        )
     );
-
-    return ResponseEntity.ok(results);
-//    return results.isEmpty()
-//        ? ResponseEntity.noContent().build()
-//        : ResponseEntity.ok(results);
   }
 }
