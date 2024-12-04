@@ -63,9 +63,8 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.EC2_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          # rsync 명령 실행
-          rsync -avz -e "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" *SNAPSHOT.jar ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:${{ secrets.EC2_TARGET_PATH }}
-          # 작업 종료 후 ssh 키 삭제
+          # scp 사용해서 파일 전송
+          scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no *SNAPSHOT.jar ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:${{ secrets.EC2_TARGET_PATH }}          # 작업 종료 후 ssh 키 삭제
           rm -f ~/.ssh/id_rsa
 
     # 3. EC2에서 환경 변수를 설정하고 애플리케이션 실행
