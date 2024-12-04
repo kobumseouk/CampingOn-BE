@@ -10,7 +10,6 @@ import site.campingon.campingon.camp.dto.CampSiteResponseDto;
 import site.campingon.campingon.camp.dto.CampSiteListResponseDto;
 import site.campingon.campingon.camp.dto.admin.CampSiteCreateRequestDto;
 import site.campingon.campingon.camp.dto.admin.CampSiteUpdateRequestDto;
-import site.campingon.campingon.camp.mapper.CampSiteMapper;
 import site.campingon.campingon.camp.service.CampSiteService;
 
 import java.util.List;

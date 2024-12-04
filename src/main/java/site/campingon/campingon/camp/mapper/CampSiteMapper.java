@@ -15,8 +15,6 @@ public interface CampSiteMapper {
 
     CampSiteListResponseDto toCampSiteListResponseDto(CampSite campSite);
 
-    CampSiteListResponseDto toCampSiteListDto(CampSite campSite);
-
     // CampSiteCreateRequestDto -> CampSite 엔티티 변환
     @Mapping(target = "camp", source = "camp") // Camp 객체를 직접 매핑
     CampSite toCampSite(CampSite source, @Context Camp camp);

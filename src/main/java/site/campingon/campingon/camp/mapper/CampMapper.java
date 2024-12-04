@@ -13,12 +13,14 @@ import java.util.List;
 public interface CampMapper {
 
   // Camp -> CampListResponseDto로 매핑
+  @Mapping(target = "campId", source = "id")
   @Mapping(target = "name", source = "campName")
   @Mapping(target = "keywords", source = "keywords", qualifiedByName = "keywordsToStringList")
   @Mapping(target = "streetAddr", source = "campAddr.streetAddr")
   CampListResponseDto toCampListDto(Camp camp);
 
   // Camp -> CampDetailResponseDto 매핑
+  @Mapping(target = "campId", source = "id")
   @Mapping(target = "name", source = "campName")
   @Mapping(target = "images", source = "images", qualifiedByName = "imagesToUrlList")
   CampDetailResponseDto toCampDetailDto(Camp camp);

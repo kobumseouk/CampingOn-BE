@@ -10,7 +10,7 @@ public class SecurityPath {
         "/api/token/refresh",
         "/api/users/check-duplicate",
         "/",
-        "/api/mongo/camps/**"
+        "/api/mongo/camps/search",
     };
 
 
