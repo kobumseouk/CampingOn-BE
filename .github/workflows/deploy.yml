@@ -30,7 +30,7 @@ jobs:
       run: chmod +x ./gradlew
       
     - name: Build with Gradle
-      uses: ./gradlew build -x test
+      run: ./gradlew build -x test
 
     # 빌드 결과물 업로드
     - name: Upload a Build Artifact
