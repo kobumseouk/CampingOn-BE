@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CampAddrDto {
-    private Long id;            // 주소 ID
+    private Long campAddrId;    // 주소 ID
     private String city;        // 도/광역시
     private String state;       // 시/군/구
     private String zipcode;     // 우편번호
