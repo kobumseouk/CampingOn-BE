@@ -11,13 +11,13 @@ import java.time.LocalTime;
 @Builder
 @Data
 public class CampSiteResponseDto {
-    private Long siteId;              // 캠핑지 ID
-    private Integer maximumPeople;        // 최대 수용 인원
-    private Integer price;            // 가격
-    private String indoorFacility;    // 실내 시설 설명
-    private Induty siteType;              // 업종 구분
+    private Long siteId;
+    private Integer maximumPeople;
+    private Integer price;
+    private String indoorFacility;
+    private Induty siteType;
     private boolean isAvailable;
 
-    private LocalTime checkInTime;    // 체크인 시간
-    private LocalTime checkOutTime;   // 체크아웃 시간
+    private LocalTime checkinTime;
+    private LocalTime checkoutTime;
 }

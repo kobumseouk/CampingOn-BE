@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.campingon.campingon.camp.dto.CampSiteResponseDto;
+import site.campingon.campingon.camp.entity.Camp;
 import site.campingon.campingon.camp.entity.CampSite;
 import site.campingon.campingon.camp.mapper.CampSiteMapper;
 import site.campingon.campingon.reservation.dto.*;
@@ -53,16 +54,15 @@ public class ReservationServiceImpl implements ReservationService {
 
         User user = reservationValidate.validateUserById(userId);
 
-        CampSite campSite = reservationValidate.validateCampSiteById(requestDto.getCampId());
+        CampSite campSite = reservationValidate.validateCampSiteById(requestDto.getCampSiteId());
 
-        Reservation reservation = Reservation.builder()
+        Camp camp = reservationValidate.validateCampById(requestDto.getCampId());
+
+        Reservation reservation = reservationMapper.toEntity(requestDto)
+                .toBuilder()
                 .user(user)
-                .camp(campSite.getCamp())
+                .camp(camp)
                 .campSite(campSite)
-                .checkinDate(requestDto.getCheckin())
-                .checkoutDate(requestDto.getCheckout())
-                .guestCnt(requestDto.getGuestCnt())
-                .totalPrice(requestDto.getTotalPrice())
                 .build();
 
         reservationRepository.save(reservation);
@@ -75,10 +75,10 @@ public class ReservationServiceImpl implements ReservationService {
 
         reservationValidate.validateStatus(requestDto.getStatus());
 
-        Reservation canceledReservation = reservation.toBuilder()
-                .status(requestDto.getStatus())
-                .cancelReason(requestDto.getCancelReason())
-                .build();
+        Reservation canceledReservation = reservationMapper.toEntity(requestDto);
+//                .status(requestDto.getStatus())
+//                .cancelReason(requestDto.getCancelReason())
+//                .build();
 
         reservationRepository.save(canceledReservation);
     }
