@@ -36,7 +36,7 @@ public class CampService {
   private final UserRepository userRepository;
 
   // 추천 캠핑장 조회 (페이지네이션 - 횡스크롤 3개)
-  public Page<CampListResponseDto> getMatchedCampsByKeywords(String userName, Long userId, Pageable pageable) {
+  public Page<CampListResponseDto> getMatchedCampsByKeywords(String username, Long userId, Pageable pageable) {
     List<String> userKeywords = userKeywordRepository.findKeywordsByUserId(userId);
 
     // 사용자에 저장된 키워드가 없는 경우
@@ -47,7 +47,7 @@ public class CampService {
     return campRepository.findMatchedCampsByKeywords(userKeywords, pageable)
         .map(camp -> {
           CampListResponseDto dto = campMapper.toCampListDto(camp);
-          dto.setName(userName);
+          dto.setName(username);
           dto.setMarked(bookMarkRepository.existsByCampIdAndUserId(camp.getId(), userId));
           return dto;
         });
