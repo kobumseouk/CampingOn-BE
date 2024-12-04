@@ -14,5 +14,5 @@ public enum Induty {
 
     private final String type;
     private final Integer price;
-    private final Integer maximum_people;
+    private final Integer maximumPeople;
 }
