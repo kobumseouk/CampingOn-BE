@@ -21,46 +21,46 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class SearchInfoService {
-  private final UserService userService;
-  private final SearchInfoRepository searchInfoRepository;
-  private final BookmarkRepository bookmarkRepository;
-  private final SearchInfoMapper searchInfoMapper;
+    private final UserService userService;
+    private final SearchInfoRepository searchInfoRepository;
+    private final BookmarkRepository bookmarkRepository;
+    private final SearchInfoMapper searchInfoMapper;
 
-  public Page<CampListResponseDto> searchExactMatchBySearchTermAndUserKeyword(
-      String city, String searchTerm, Long userId, Pageable pageable) {
+    public Page<CampListResponseDto> searchExactMatchBySearchTermAndUserKeyword(
+        String city, String searchTerm, Long userId, Pageable pageable) {
 
+        // city와 searchTerm이 모두 비어있으면 빈 페이지 반환
+        if (!StringUtils.hasText(city) && !StringUtils.hasText(searchTerm)) {
+            return Page.empty(pageable);
+        }
 
-    List<String> userKeywords = userId != 0L ?
-        userService.getKeywordsByUserId(userId) :
-        new ArrayList<>();
+        // 사용자 키워드 조회 (검색 조건이 있을 때만 사용됨)
+        List<String> userKeywords = userId != 0L ?
+            userService.getKeywordsByUserId(userId) :
+            new ArrayList<>();
 
-    // city와 searchTerm이 비어있는 경우 빈 문자열로 초기화
-    city = StringUtils.hasText(city) ? city : "";
-    searchTerm = StringUtils.hasText(searchTerm) ? searchTerm : "";
+        // 검색 수행 (결과와 전체 개수를 한 번에 조회)
+        SearchInfoRepositoryImpl.SearchResult searchResult =
+            searchInfoRepository.searchWithUserPreferences(searchTerm, userKeywords, city, pageable);
 
-    // 검색 수행 (결과와 전체 개수를 한 번에 조회)
-      SearchInfoRepositoryImpl.SearchResult searchResult =
-        searchInfoRepository.searchWithUserPreferences(searchTerm, userKeywords, city, pageable);
+        // 검색 결과가 없는 경우 빈 페이지 반환
+        if (searchResult.getResults().isEmpty()) {
+            return Page.empty(pageable);
+        }
 
-    // 검색 결과가 없는 경우 빈 페이지 반환
-    if (searchResult.getResults().isEmpty()) {
-      return Page.empty(pageable);
+        // DTO 변환 및 Page 객체 생성
+        List<CampListResponseDto> dtoList = searchResult.getResults().stream()
+            .map(searchInfo -> {
+                CampListResponseDto dto = searchInfoMapper.toDto(searchInfo);
+
+                // 인증된 사용자인 경우에만 북마크 상태 설정
+                if (userId != 0L) {
+                    dto.setMarked(bookmarkRepository.existsByCampIdAndUserId(searchInfo.getCampId(), userId));
+                }
+                return dto;
+            })
+            .collect(Collectors.toList());
+
+        return new PageImpl<>(dtoList, pageable, searchResult.getTotal());
     }
-
-    // DTO 변환 및 Page 객체 생성
-    List<CampListResponseDto> dtoList = searchResult.getResults().stream()
-        .map(searchInfo -> {
-          CampListResponseDto dto = searchInfoMapper.toDto(searchInfo);
-
-          // 인증된 사용자인 경우에만 북마크와 유저명 설정
-          if (userId != 0L) {
-            // 북마크 상태 설정
-            dto.setMarked(bookmarkRepository.existsByCampIdAndUserId(searchInfo.getCampId(), userId));
-          }
-          return dto;
-        })
-        .collect(Collectors.toList());
-
-    return new PageImpl<>(dtoList, pageable, searchResult.getTotal());
-  }
 }
