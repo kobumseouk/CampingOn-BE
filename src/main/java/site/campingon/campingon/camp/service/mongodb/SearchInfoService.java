@@ -9,8 +9,7 @@ import org.springframework.util.StringUtils;
 import site.campingon.campingon.bookmark.repository.BookmarkRepository;
 import site.campingon.campingon.camp.dto.CampListResponseDto;
 import site.campingon.campingon.camp.mapper.mongodb.SearchInfoMapper;
-import site.campingon.campingon.camp.repository.mongodb.SearchInfoRepository;
-import site.campingon.campingon.camp.repository.mongodb.SearchInfoRepositoryImpl;
+import site.campingon.campingon.camp.repository.mongodb.MongoSearchClient;
 import site.campingon.campingon.user.service.UserService;
 
 import java.util.ArrayList;
@@ -22,7 +21,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SearchInfoService {
     private final UserService userService;
-    private final SearchInfoRepository searchInfoRepository;
+    private final MongoSearchClient mongoSearchClient;
     private final BookmarkRepository bookmarkRepository;
     private final SearchInfoMapper searchInfoMapper;
 
@@ -40,8 +39,8 @@ public class SearchInfoService {
             new ArrayList<>();
 
         // 검색 수행 (결과와 전체 개수를 한 번에 조회)
-        SearchInfoRepositoryImpl.SearchResult searchResult =
-            searchInfoRepository.searchWithUserPreferences(searchTerm, userKeywords, city, pageable);
+        MongoSearchClient.SearchResult searchResult =
+            mongoSearchClient.searchWithUserPreferences(searchTerm, userKeywords, city, pageable);
 
         // 검색 결과가 없는 경우 빈 페이지 반환
         if (searchResult.getResults().isEmpty()) {

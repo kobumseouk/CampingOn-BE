@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import site.campingon.campingon.camp.entity.mongodb.SearchInfo;
 
@@ -18,9 +18,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Repository
+@Component
 @RequiredArgsConstructor
-public class SearchInfoRepositoryImpl implements SearchInfoRepository {
+public class MongoSearchClient {
     private final MongoTemplate mongoTemplate;
     private static final String INDEX_NAME = "searchIndex";
     private static final String COLLECTION_NAME = "search_info";
@@ -36,20 +36,20 @@ public class SearchInfoRepositoryImpl implements SearchInfoRepository {
             "score: {$meta: 'searchScore'}" +
         "}}";
 
-    @Override
     public SearchResult searchWithUserPreferences(String searchTerm, List<String> userKeywords, String city, Pageable pageable) {
         String mustClause = StringUtils.hasText(city) ?
-            ", must: [{text: {query: '" + city + "', path: 'address.city'}}]" :
+            ", must: [{phrase: {query: '" + city + "', path: 'address.city'}}]" :
             "";
 
         String searchQuery = String.format(
             "{$search: {" +
-                "index: 'searchIndex'," +
+                "index: '%s'," +
                 "compound: {" +
                     "should: %s" +
                         "%s" +  // must clause를 조건부로 추가
                     "}" +
                 "}}",
+            INDEX_NAME,
             createShouldClauses(searchTerm, userKeywords),
             mustClause
         );
@@ -87,8 +87,8 @@ public class SearchInfoRepositoryImpl implements SearchInfoRepository {
             clauses.add("{text: {query: '" + searchTerm + "', path: 'name', score: {boost: {value: 5}}, fuzzy: {maxEdits: 1}}}");
             clauses.add("{text: {query: '" + searchTerm + "', path: 'hashtags', score: {boost: {value: 4}}, fuzzy: {maxEdits: 1}}}");
             clauses.add("{text: {query: '" + searchTerm + "', path: 'address.state', score: {boost: {value: 3}}, fuzzy: {maxEdits: 1}}}");
-            clauses.add("{text: {query: '" + searchTerm + "', path: 'address.city', score: {boost: {value: 2}}, fuzzy: {maxEdits: 1}}}");
-            clauses.add("{text: {query: '" + searchTerm + "', path: 'intro', score: {boost: {value: 2}}, fuzzy: {maxEdits: 2}}}");
+            clauses.add("{text: {query: '" + searchTerm + "', path: 'address.city', score: {boost: {value: 2}}}}");
+            clauses.add("{text: {query: '" + searchTerm + "', path: 'intro', score: {boost: {value: 2}}}}");
         }
 
         if (userKeywords != null && !userKeywords.isEmpty()) {
