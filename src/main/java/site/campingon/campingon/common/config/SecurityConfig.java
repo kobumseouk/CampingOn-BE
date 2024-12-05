@@ -35,6 +35,8 @@ public class SecurityConfig {
     private final JwtTokenProvider jwtTokenProvider;
     private final ObjectMapper objectMapper;
     private final CustomUserDetailsService customUserDetailsService;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -71,8 +73,8 @@ public class SecurityConfig {
         // 예외 처리
         http
             .exceptionHandling(exceptionHandling -> exceptionHandling
-                .authenticationEntryPoint(new CustomAuthenticationEntryPoint(objectMapper)) // 인증 실패 처리
-                .accessDeniedHandler(new CustomAccessDeniedHandler(objectMapper))); // 인가 실패 처리
+                .authenticationEntryPoint(customAuthenticationEntryPoint) // 인증 실패 처리
+                .accessDeniedHandler(customAccessDeniedHandler)); // 인가 실패 처리
 
         // JwtFilter 추가
         http.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, objectMapper), UsernamePasswordAuthenticationFilter.class);

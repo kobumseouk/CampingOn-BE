@@ -3,6 +3,7 @@ package site.campingon.campingon.camp.dto;
 
 import lombok.*;
 import site.campingon.campingon.camp.entity.Induty;
+import site.campingon.campingon.reservation.entity.CheckTime;
 
 import java.time.LocalTime;
 
@@ -18,8 +19,9 @@ public class CampSiteListResponseDto {
   private Induty siteType;
   private String indoorFacility;
 
-  private LocalTime checkinTime;
-
-  private LocalTime checkoutTime;
+  @Builder.Default
+  private CheckTime checkinTime = CheckTime.CHECKIN;
+  @Builder.Default
+  private CheckTime checkoutTime = CheckTime.CHECKOUT;
 
 }

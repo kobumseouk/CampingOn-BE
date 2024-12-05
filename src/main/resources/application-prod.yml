@@ -7,7 +7,7 @@ spring:
             redirect-uri: https://camping-on.site/login/oauth2/code/google
 
 app:
-  front-url: http://localhost:3000
+  front-url: https://camping-on.site
 
 jwt:
   access-expired: 900 # 15분
