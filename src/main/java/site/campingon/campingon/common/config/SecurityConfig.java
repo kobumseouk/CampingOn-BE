@@ -85,6 +85,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
         configuration.addAllowedOrigin("http://localhost:3000"); // 허용할 클라이언트 도메인
+        configuration.addAllowedOrigin("https://camping-on.site");
+        configuration.addAllowedOrigin("https://www.camping-on.site");
         configuration.addAllowedMethod("*"); // 모든 HTTP 메서드 허용
         configuration.addAllowedHeader("*"); // 모든 헤더 허용
         configuration.setAllowCredentials(true); // 인증 정보 허용 (쿠키 등)
