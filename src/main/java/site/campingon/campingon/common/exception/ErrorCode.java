@@ -68,7 +68,11 @@ public enum ErrorCode {
     // 파일 업로드 실패
     FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FILE-003", "파일 업로드 중 오류가 발생했습니다."),
     // 잘못된 파일 형식
-    INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "FILE-004", "지원하지 않는 파일 형식입니다.");
+    INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "FILE-004", "지원하지 않는 파일 형식입니다."),
+
+    FILE_NOT_FOUND(HttpStatus.NOT_FOUND, "FILE-005", "요청한 파일을 찾을 수 없습니다."),
+    S3_OPERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FILE-006", "S3 작업 중 오류가 발생했습니다."),
+    FILE_MOVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FILE-007", "파일 이동 중 오류가 발생했습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

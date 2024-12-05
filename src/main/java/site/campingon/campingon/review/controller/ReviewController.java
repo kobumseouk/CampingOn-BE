@@ -22,12 +22,12 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     // 리뷰 생성
-    @PostMapping(value = "/{campId}/reviews", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/{campId}/reviews/{reservationId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ReviewResponseDto> createReview(
             @PathVariable("campId") Long campId,
             @PathVariable("reservationId") Long reservationId,
             @ModelAttribute ReviewCreateRequestDto requestDto
-    ) throws IOException {
+    ) {
         return ResponseEntity.ok(reviewService.createReview(campId, reservationId, requestDto));
     }
 
@@ -38,12 +38,12 @@ public class ReviewController {
             @PathVariable("campId") Long campId,
             @PathVariable("reviewId") Long reviewId,
             @ModelAttribute ReviewUpdateRequestDto requestDto
-    ) throws IOException {
+    ) {
         return ResponseEntity.ok(reviewService.updateReview(campId, reviewId, requestDto));
     }
 
     // 캠핑장 id로 리뷰 목록 조회
-    @GetMapping("/camp/{campId}")
+    @GetMapping("/{campId}/reviews")
     public ResponseEntity<List<ReviewResponseDto>> getReviewsByCampId(
             @PathVariable("campId") Long campId
     ) {
@@ -52,7 +52,7 @@ public class ReviewController {
     }
 
     // 리뷰 상세 조회
-    @GetMapping("/reviews/{reviewId}")
+    @GetMapping("/{campId}/reviews/{reviewId}")
     public ResponseEntity<ReviewResponseDto> getReviewById(
             @PathVariable("reviewId") Long reviewId
     ) {
