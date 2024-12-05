@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import site.campingon.campingon.camp.dto.CampDetailResponseDto;
 import site.campingon.campingon.camp.dto.CampListResponseDto;
 import site.campingon.campingon.camp.service.CampService;
+import site.campingon.campingon.common.util.AuthenticateUser;
 import site.campingon.campingon.common.jwt.CustomUserDetails;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,6 +28,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 public class CampController {
 
   private final CampService campService;
+  private final AuthenticateUser authenticateUser;
 
   // 사용자 키워드 맞춤 캠핑장 목록 조회 (페이지네이션 - 횡스크롤)
   @GetMapping("/matched")
@@ -44,10 +46,9 @@ public class CampController {
   @GetMapping("/popular")
   public ResponseEntity<Page<CampListResponseDto>> getPopularCamps(
       @RequestParam(name = "page", defaultValue = "0") @Min(0) int page,
-      @RequestParam(name = "size", defaultValue = "9") @Positive @Max(100) int size,
-      @AuthenticationPrincipal CustomUserDetails userDetails
-  ) {
-    Long userId = userDetails != null ? userDetails.getId() : null;
+      @RequestParam(name = "size", defaultValue = "9") @Positive @Max(100) int size) {
+    Long userId = authenticateUser.authenticateUserId();    //없으면 0 반환
+
     return ResponseEntity.ok(
         campService.getPopularCamps(userId, PageRequest.of(page, size))
     );

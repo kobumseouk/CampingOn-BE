@@ -10,4 +10,6 @@ public interface SearchInfoRepository extends MongoRepository<SearchInfo, String
   Page<SearchInfo> findByName(String name, Pageable pageable);
 
   Page<SearchInfo> findByAddress_City(String city, Pageable pageable);
+
+  Page<SearchInfo> findByAddress_CityAndName(String city, String name, Pageable pageable);
 }

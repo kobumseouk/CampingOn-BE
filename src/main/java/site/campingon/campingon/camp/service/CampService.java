@@ -60,7 +60,7 @@ public class CampService {
     return campRepository.findPopularCamps(pageable)
         .map(camp -> {
           CampListResponseDto dto = campMapper.toCampListDto(camp);
-          if (userId != null) {
+          if (userId != 0L) {
             dto.setMarked(bookMarkRepository.existsByCampIdAndUserId(camp.getId(), userId));
           }
           return dto;

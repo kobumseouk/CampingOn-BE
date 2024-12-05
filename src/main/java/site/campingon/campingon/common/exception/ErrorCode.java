@@ -44,7 +44,20 @@ public enum ErrorCode {
     RESERVATION_INVALID_CHECKTIME(HttpStatus.BAD_REQUEST, "RESERVATION-006", "유효하지 않은 체크인/체크아웃 시간입니다."),
 
     BOOKMARK_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "BOOKMARK-001", "북유찾없"),
-    FORBIDDEN_ACCESS(HttpStatus.FORBIDDEN, "미완", "잘못된 접근입니다.");
+    FORBIDDEN_ACCESS(HttpStatus.FORBIDDEN, "미완", "잘못된 접근입니다."),
+
+    // 파일 개수 제한 초과
+    FILE_COUNT_EXCEEDED(HttpStatus.BAD_REQUEST, "FILE-001", "업로드 가능한 파일 개수를 초과했습니다."),
+    // 파일 크기 제한 초과
+    FILE_SIZE_EXCEEDED(HttpStatus.BAD_REQUEST, "FILE-002", "파일 크기가 허용된 용량을 초과했습니다."),
+    // 파일 업로드 실패
+    FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FILE-003", "파일 업로드 중 오류가 발생했습니다."),
+    // 잘못된 파일 형식
+    INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "FILE-004", "지원하지 않는 파일 형식입니다."),
+
+    FILE_NOT_FOUND(HttpStatus.NOT_FOUND, "FILE-005", "요청한 파일을 찾을 수 없습니다."),
+    S3_OPERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FILE-006", "S3 작업 중 오류가 발생했습니다."),
+    FILE_MOVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FILE-007", "파일 이동 중 오류가 발생했습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
