@@ -73,6 +73,8 @@ public interface CampMapper {
             .zipcode(campAddr.getZipcode())
             .streetAddr(campAddr.getStreetAddr())
             .detailedAddr(campAddr.getDetailedAddr())
+            .latitude(campAddr.getLocation().getY())
+            .longitude(campAddr.getLocation().getX())
             .build();
   }
 
