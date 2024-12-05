@@ -18,8 +18,8 @@ public class CampSiteListResponseDto {
   private Induty siteType;
   private String indoorFacility;
 
-  private LocalTime checkInTime;
+  private LocalTime checkinTime;
 
-  private LocalTime checkOutTime;
+  private LocalTime checkoutTime;
 
 }
