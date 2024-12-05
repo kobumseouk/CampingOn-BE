@@ -22,6 +22,7 @@ public class SecurityPath {
         "/api/camps/matched",
         "/api/users/me/bookmarked",
         "/api/users/me/*",
+        "/api/users/me",
         "/api/reservations/**",
         "/api/camps/*/bookmarks"
     };
