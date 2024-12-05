@@ -26,7 +26,6 @@ import site.campingon.campingon.user.entity.User;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -172,8 +171,9 @@ class ReservationServiceTest {
     void cancelReservationSuccess() {
 
         // given
-
         ReservationCancelRequestDto requestDto = new ReservationCancelRequestDto(
+            mockUser.getId(),
+            mockCamp.getId(),
             mockReservation.getId(),
             ReservationStatus.CANCELED,
             "개인 사정"
@@ -183,7 +183,7 @@ class ReservationServiceTest {
             .thenReturn(mockReservation);
 
         // when
-        reservationService.cancelReservation(requestDto.getId(), requestDto);
+        reservationService.cancelReservation(mockUser.getId(), requestDto.getId(), requestDto);
 
         // then
         verify(reservationRepository).save(any(Reservation.class));
@@ -247,7 +247,7 @@ class ReservationServiceTest {
 
         // when & then
         assertThrows(GlobalException.class, () -> 
-            reservationService.getReservation(invalidReservationId));
+            reservationService.getReservation(mockUser.getId(), invalidReservationId));
     }
 
     @Test
@@ -256,6 +256,8 @@ class ReservationServiceTest {
         // given
         ReservationCancelRequestDto requestDto = new ReservationCancelRequestDto(
             999L,
+            mockUser.getId(),
+            mockCamp.getId(),
             ReservationStatus.CANCELED,
             "개인 사정"
         );
@@ -265,13 +267,14 @@ class ReservationServiceTest {
 
         // when & then
         assertThrows(GlobalException.class, () -> 
-            reservationService.cancelReservation(requestDto.getId(), requestDto));
+            reservationService.cancelReservation(mockUser.getId(), requestDto.getId(), requestDto));
         verify(reservationRepository, never()).save(any());
     }
 
     @Test
     @DisplayName("취소실패 - 이미 취소된 예약에 대한 취소")
     void cancelReservationAlreadyCanceled() {
+
         // given
         Reservation canceledReservation = mockReservation.toBuilder()
             .status(ReservationStatus.CANCELED)
@@ -279,6 +282,8 @@ class ReservationServiceTest {
 
         ReservationCancelRequestDto requestDto = new ReservationCancelRequestDto(
             canceledReservation.getId(),
+            mockUser.getId(),
+            mockCamp.getId(),
             ReservationStatus.CANCELED,
             "개인 사정"
         );
@@ -287,15 +292,15 @@ class ReservationServiceTest {
             .thenReturn(canceledReservation);
         
         // validateStatus에서 예외 발생하도록 설정
-        doThrow(new GlobalException(ErrorCode.RESERVATION_NOT_CANCELED))
+        doThrow(new GlobalException(ErrorCode.RESERVATION_ALREADY_CANCELED))
             .when(reservationValidate)
             .validateStatus(requestDto.getStatus());
 
         // when & then
         GlobalException exception = assertThrows(GlobalException.class, () ->
-            reservationService.cancelReservation(requestDto.getId(), requestDto));
+            reservationService.cancelReservation(mockUser.getId(), requestDto.getId(), requestDto));
         
-        assertEquals(ErrorCode.RESERVATION_NOT_CANCELED, exception.getErrorCode());
+        assertEquals(ErrorCode.RESERVATION_ALREADY_CANCELED, exception.getErrorCode());
         verify(reservationValidate).validateReservationById(requestDto.getId());
         verify(reservationValidate).validateStatus(requestDto.getStatus());
         verify(reservationRepository, never()).save(any());

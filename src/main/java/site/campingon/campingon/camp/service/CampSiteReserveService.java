@@ -1,11 +1,13 @@
 package site.campingon.campingon.camp.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.campingon.campingon.camp.dto.CampSiteListResponseDto;
 import site.campingon.campingon.camp.entity.CampSite;
 import site.campingon.campingon.camp.mapper.CampSiteMapper;
+import site.campingon.campingon.camp.repository.CampRepository;
 import site.campingon.campingon.camp.repository.CampSiteRepository;
 import site.campingon.campingon.common.exception.ErrorCode;
 import site.campingon.campingon.common.exception.GlobalException;
@@ -15,11 +17,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class CampSiteReserveService {
 
-    private final CampSiteRepository campRepository;
+    private final CampRepository campRepository;
     private final CampSiteRepository campSiteRepository;
     private final CampSiteMapper campSiteMapper;
 
@@ -31,6 +34,8 @@ public class CampSiteReserveService {
                 .orElseThrow(() -> new GlobalException(ErrorCode.CAMP_NOT_FOUND_BY_ID));
 
         List<CampSite> campSites = campSiteRepository.findAvailableCampSites(campId, checkin, checkout);
+
+        log.debug("\n{}\n", campSites.toString());
 
         // 타입별 첫 번째 행 데이터만 가져오기
         return campSites.stream()

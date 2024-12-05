@@ -11,8 +11,10 @@ import site.campingon.campingon.camp.entity.CampSite;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface CampSiteMapper {
 
+    @Mapping(target = "siteId", source = "id")
     CampSiteResponseDto toCampSiteResponseDto(CampSite campSite);
 
+    @Mapping(target = "siteId", source = "id")
     CampSiteListResponseDto toCampSiteListResponseDto(CampSite campSite);
 
     // CampSiteCreateRequestDto -> CampSite 엔티티 변환

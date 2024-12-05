@@ -29,20 +29,24 @@ public class ReservationController {
     // 유저의 예약 목록 조회
     @GetMapping
     public ResponseEntity<Page<ReservationResponseDto>> getReservations(@AuthenticationPrincipal CustomUserDetails userDetails) {
+
         Pageable pageable = PageRequest.of(page, size);
+
         return ResponseEntity.ok(reservationService.getReservations(userDetails.getId(), pageable));
     }
 
     // 단일 예약 정보 조회
     @GetMapping("/{reservationId}")
-    public ResponseEntity<ReservationResponseDto> getReservation(@PathVariable("reservationId") Long reservationId) {
+    public ResponseEntity<ReservationResponseDto> getReservation(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                 @PathVariable("reservationId") Long reservationId) {
 
-        return ResponseEntity.ok(reservationService.getReservation(reservationId));
+        return ResponseEntity.ok(reservationService.getReservation(userDetails.getId(), reservationId));
     }
 
     // 새로운 예약 생성
     @PostMapping
-    public ResponseEntity<Void> createReservation(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody ReservationCreateRequestDto requestDto) {
+    public ResponseEntity<Void> createReservation(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                  @RequestBody ReservationCreateRequestDto requestDto) {
 
         reservationService.createReservation(userDetails.getId(), requestDto);
 
@@ -51,9 +55,11 @@ public class ReservationController {
 
     // 예약 취소
     @PatchMapping("/{reservationId}")
-    public ResponseEntity<Void> cancelReservation(@PathVariable("reservationId") Long reservationId, @RequestBody ReservationCancelRequestDto requestDto) {
+    public ResponseEntity<Void> cancelReservation(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                  @PathVariable("reservationId") Long reservationId,
+                                                  @RequestBody ReservationCancelRequestDto requestDto) {
 
-        reservationService.cancelReservation(reservationId, requestDto);
+        reservationService.cancelReservation(userDetails.getId(), reservationId, requestDto);
 
         return ResponseEntity.ok().build();
     }
