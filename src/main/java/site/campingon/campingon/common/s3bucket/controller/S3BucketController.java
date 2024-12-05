@@ -17,43 +17,33 @@ public class S3BucketController {
   private final S3BucketService s3BucketService;
 
   @PostMapping("/one")
-  public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("path") String path) {
-    try {
-      String fileUrl = s3BucketService.upload(file, path);
-      return new ResponseEntity<>(fileUrl, HttpStatus.OK);
-    } catch (IOException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+  public ResponseEntity<String> uploadFile(
+      @RequestParam("file") MultipartFile file,
+      @RequestParam("path") String path
+  ) {
+    String fileUrl = s3BucketService.upload(file, path);
+    return ResponseEntity.ok(fileUrl);
   }
 
   @PostMapping("/many")
-  public ResponseEntity<?> uploadFiles(@RequestParam("file") List<MultipartFile> files, @RequestParam("path") String path) {
-    try {
-      List<String> fileUrls = s3BucketService.upload(files, path);
-      return new ResponseEntity<>(fileUrls, HttpStatus.OK);
-    } catch (IOException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+  public ResponseEntity<List<String>> uploadFiles(
+      @RequestParam("file") List<MultipartFile> files,
+      @RequestParam("path") String path
+  ) {
+    List<String> fileUrls = s3BucketService.upload(files, path);
+    return ResponseEntity.ok(fileUrls);
   }
 
   @DeleteMapping("/one")
-  public ResponseEntity<String> deleteFile(@RequestBody String filename) {
-    try {
-      s3BucketService.remove(filename);
-      return new ResponseEntity<>("File deleted successfully", HttpStatus.OK);
-    } catch (Exception e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+  public ResponseEntity<Void> deleteFile(@RequestBody String filename) {
+    s3BucketService.remove(filename);
+    return ResponseEntity.noContent().build();
   }
 
   @DeleteMapping("/many")
-  public ResponseEntity<?> deleteFiles(@RequestBody List<String> filenames) {
-    try {
-      s3BucketService.remove(filenames);
-      return new ResponseEntity<>("Files deleted successfully", HttpStatus.OK);
-    } catch (Exception e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+  public ResponseEntity<Void> deleteFiles(@RequestBody List<String> filenames) {
+    s3BucketService.remove(filenames);
+    return ResponseEntity.noContent().build();
   }
 }
 
