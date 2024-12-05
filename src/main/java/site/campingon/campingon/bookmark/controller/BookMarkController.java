@@ -20,7 +20,7 @@ public class BookMarkController {
   // 찜 기능 (토글활용)
   @PatchMapping("/{campId}/bookmarks")
   public ResponseEntity<Void> bookmarkCamp(
-      @PathVariable Long campId,
+      @PathVariable("campId") Long campId,
       @AuthenticationPrincipal CustomUserDetails customUserDetails
   ) {
     bookmarkService.bookmarkCamp(campId, customUserDetails.getId());

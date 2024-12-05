@@ -2,10 +2,7 @@ package site.campingon.campingon.bookmark.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import site.campingon.campingon.camp.entity.Camp;
 import site.campingon.campingon.common.entity.BaseEntity;
 import site.campingon.campingon.user.entity.User;
@@ -13,6 +10,7 @@ import site.campingon.campingon.user.entity.User;
 
 @Entity
 @Getter
+@Setter
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
