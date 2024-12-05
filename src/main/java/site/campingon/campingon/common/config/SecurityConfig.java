@@ -35,6 +35,8 @@ public class SecurityConfig {
     private final JwtTokenProvider jwtTokenProvider;
     private final ObjectMapper objectMapper;
     private final CustomUserDetailsService customUserDetailsService;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -71,8 +73,8 @@ public class SecurityConfig {
         // 예외 처리
         http
             .exceptionHandling(exceptionHandling -> exceptionHandling
-                .authenticationEntryPoint(new CustomAuthenticationEntryPoint(objectMapper)) // 인증 실패 처리
-                .accessDeniedHandler(new CustomAccessDeniedHandler(objectMapper))); // 인가 실패 처리
+                .authenticationEntryPoint(customAuthenticationEntryPoint) // 인증 실패 처리
+                .accessDeniedHandler(customAccessDeniedHandler)); // 인가 실패 처리
 
         // JwtFilter 추가
         http.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, objectMapper), UsernamePasswordAuthenticationFilter.class);
@@ -85,6 +87,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
         configuration.addAllowedOrigin("http://localhost:3000"); // 허용할 클라이언트 도메인
+        configuration.addAllowedOrigin("https://camping-on.site");
+        configuration.addAllowedOrigin("https://www.camping-on.site");
         configuration.addAllowedMethod("*"); // 모든 HTTP 메서드 허용
         configuration.addAllowedHeader("*"); // 모든 헤더 허용
         configuration.setAllowCredentials(true); // 인증 정보 허용 (쿠키 등)

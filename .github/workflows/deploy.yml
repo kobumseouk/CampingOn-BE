@@ -95,6 +95,6 @@ jobs:
           
           #새로운 애플리케이션 배포 및 실행
           cd ${{ secrets.EC2_TARGET_PATH }}
-          nohup java -Duser.timezone=Asia/Seoul -Dspring.profiles.active=prod -jar *.jar
+          nohup java -Duser.timezone=Asia/Seoul -Dspring.profiles.active=prod,s3Bucket -jar *.jar > log.txt 2>&1 &
           echo "New application deployed and started."
           

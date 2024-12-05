@@ -41,15 +41,16 @@ public interface CampSiteRepository extends JpaRepository<CampSite, Long> {
 
   List<CampSite> findAllByCampAndSiteType(Camp camp, Induty induty);
 
-  // 특정 캠핑장의 특정 날짜에 예약 가능한 캠프사이트를 타입별로 1개 반환되게끔 조회
+  // 특정 캠핑장의 특정 날짜에 예약 가능한 캠프사이트를 조회
   @Query("SELECT cs FROM CampSite cs " +
           "LEFT JOIN Reservation r ON cs.id = r.campSite.id " +
           "WHERE cs.isAvailable = true " +
           "AND cs.camp.id = :campId " +
-          "AND (r.id IS NULL OR r.status = 'CANCELED') " + // 예약테이블에 없거나 취소상태여야 함
-          "AND (r.checkinDate < :checkout AND r.checkoutDate > :checkin) " +
+          "AND (r.id IS NULL OR " +
+          "     (r.status = 'CANCELED' AND r.checkinDate < :checkout AND r.checkoutDate > :checkin)) " +
           "ORDER BY cs.id ASC")
   List<CampSite> findAvailableCampSites(@Param("campId") Long campId,
                                         @Param("checkin") LocalDate checkin,
                                         @Param("checkout") LocalDate checkout);
+
 }

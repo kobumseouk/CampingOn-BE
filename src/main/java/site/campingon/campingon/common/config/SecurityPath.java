@@ -11,22 +11,25 @@ public class SecurityPath {
         "/api/users/check-duplicate",
         "/",
         "/api/mongo/camps/search",
-        "/api/camps/popular",
+        "/api/camps/*/available",
+        "/api/camps/*",
+        "/api/keywords"
     };
 
 
     // hasRole("USER")
     public static final String[] USER_ENDPOINTS = {
-//        "/api/camps/**",
+        "/api/camps/matched",
+        "/api/users/me/bookmarked",
         "/api/users/me/*",
+        "/api/users/me",
         "/api/reservations/**",
         "/api/camps/*/bookmarks"
     };
 
     // hasRole("ADMIN")
     public static final String[] ADMIN_ENDPOINTS = {
-        "/api/camps/*/toggle-availability",
-        "/api/admin/camps/**",
+        "/api/admin/**",
         "/api/keywords/**",
         "/api/basedList/**",
         "/api/imageList/**"
