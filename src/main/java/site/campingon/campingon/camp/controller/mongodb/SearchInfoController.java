@@ -18,8 +18,6 @@ import site.campingon.campingon.camp.service.mongodb.SearchInfoService;
 import site.campingon.campingon.common.util.AuthenticateUser;
 import site.campingon.campingon.user.service.UserService;
 
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @Validated

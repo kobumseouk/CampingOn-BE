@@ -13,7 +13,7 @@ import site.campingon.campingon.camp.entity.Camp;
 import site.campingon.campingon.camp.mapper.CampMapper;
 import site.campingon.campingon.camp.repository.CampRepository;
 import site.campingon.campingon.bookmark.repository.BookmarkRepository;
-import site.campingon.campingon.camp.repository.mongodb.SearchInfoRepository;
+import site.campingon.campingon.camp.repository.mongodb.SearchInfoRepositoryImpl;
 import site.campingon.campingon.common.exception.ErrorCode;
 import site.campingon.campingon.common.exception.GlobalException;
 import site.campingon.campingon.user.repository.UserKeywordRepository;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 public class CampService {
 
   private final CampRepository campRepository;
-  private final SearchInfoRepository searchInfoRepository;
+  private final SearchInfoRepositoryImpl searchInfoRepositoryImpl;
   private final UserKeywordRepository userKeywordRepository;
   private final BookmarkRepository bookMarkRepository;
   private final CampMapper campMapper;
