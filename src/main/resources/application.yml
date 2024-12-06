@@ -43,5 +43,4 @@ jwt:
 app:
   pagination:
     reservation:
-      page: 0
       size: 5
