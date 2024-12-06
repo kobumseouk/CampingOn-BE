@@ -3,7 +3,7 @@ name: Blue-Green Deployment with Docker Hub
 on:
   push:
     branches:
-      - main
+      - dev
 
 jobs:
   deploy:
