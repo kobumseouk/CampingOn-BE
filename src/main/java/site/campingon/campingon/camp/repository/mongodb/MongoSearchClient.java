@@ -1,7 +1,5 @@
 package site.campingon.campingon.camp.repository.mongodb;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.bson.Document;
 import org.springframework.data.domain.Pageable;
@@ -110,6 +108,7 @@ public class MongoSearchClient {
 
         return clauses.isEmpty() ? "[]" : "[" + String.join(",", clauses) + "]";
     }
+
 
     private SearchResultDto processResults(AggregationResults<Document> results) {
         Document result = results.getUniqueMappedResult();
