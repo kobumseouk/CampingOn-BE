@@ -32,7 +32,7 @@ jobs:
       # 4. Nginx 전환 스크립트 실행
       - name: Update Nginx Configuration
         run: |
-          echo ${{ secrets.EC2_PRIVATE_KEY }} > private_key.pem
+          echo "${{ secrets.EC2_PRIVATE_KEY }}" > private_key.pem
           chmod 600 private_key.pem
           
           ssh -i private_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << EOF
