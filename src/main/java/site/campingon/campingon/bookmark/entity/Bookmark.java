@@ -10,7 +10,6 @@ import site.campingon.campingon.user.entity.User;
 
 @Entity
 @Getter
-@Setter
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor

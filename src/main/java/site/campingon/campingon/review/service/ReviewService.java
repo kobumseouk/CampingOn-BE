@@ -210,22 +210,6 @@ public class ReviewService {
         return reviewMapper.toResponseDto(review);
     }
 
-    // 리뷰 추천 토글
-    @Transactional
-    public boolean toggleRecommend(Long reviewId, Long userId) {
-        // 리뷰 가져오기
-        Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new GlobalException(REVIEW_NOT_FOUND_BY_ID));
-
-        // 작성자 확인
-        if (!review.getReservation().getUser().getId().equals(userId)) {
-            throw new GlobalException(USER_NOT_FOUND_BY_ID);
-        }
-        Review updatedReview = reviewMapper.toUpdatedReview(review);
-        reviewRepository.save(updatedReview);
-        return updatedReview.isRecommend();
-    }
-
     // 허용된 이미지 파일 타입 및 파일 개수 검증
     private void validateImages(List<MultipartFile> images) {
         // 이미지 파일 개수 제한
