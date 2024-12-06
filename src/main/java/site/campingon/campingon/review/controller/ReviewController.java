@@ -68,14 +68,4 @@ public class ReviewController {
         reviewService.deleteReview(reviewId);
         return ResponseEntity.noContent().build();
     }
-
-    // 리뷰 추천
-    @PatchMapping("/reviews/{reviewId}/recommend")
-    public ResponseEntity<Boolean> toggleRecommend(
-            @PathVariable("reviewId") Long reviewId,
-            @AuthenticationPrincipal CustomUserDetails userDetails
-    ) {
-        boolean isRecommended = reviewService.toggleRecommend(reviewId, userDetails.getId());
-        return ResponseEntity.ok(isRecommended);
-    }
 }
