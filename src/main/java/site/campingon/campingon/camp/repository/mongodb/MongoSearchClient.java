@@ -37,9 +37,17 @@ public class MongoSearchClient {
         "}}";
 
     public SearchResult searchWithUserPreferences(String searchTerm, List<String> userKeywords, String city, Pageable pageable) {
-        String mustClause = StringUtils.hasText(city) ?
-            ", must: [{phrase: {query: '" + city + "', path: 'address.city'}}]" :
-            "";
+        String mustClause = "";
+        if (StringUtils.hasText(city)) {
+            List<String> cityVariants = getCityVariants(city);
+            List<String> phrases = cityVariants.stream()
+                .map(variant -> "{phrase: {query: '" + variant + "', path: 'address.city'}}")
+                .collect(Collectors.toList());
+
+            mustClause = ", must: [{compound: {should: [" + String.join(",", phrases) + "]}}]";
+        }
+        /*", must: [{text: {query: '" + city + "', path: 'address.city'}}]" :
+        "";*/
 
         String searchQuery = String.format(
             "{$search: {" +
@@ -136,5 +144,46 @@ public class MongoSearchClient {
         }
 
         return new SearchResult(searchResults, total);
+    }
+
+    private List<String> getCityVariants(String city) {
+        List<String> variants = new ArrayList<>();
+        variants.add(city);  // 원본 도시명은 항상 포함
+
+        // 특별시 케이스 (서울)
+        if (city.endsWith("특별시")) {
+            String base = city.replace("특별시", "");
+            variants.add(base);        // 서울
+            variants.add(base + "시"); // 서울시
+        }
+
+        // 광역시 케이스 (부산, 대구, 인천, 광주, 대전, 울산)
+        else if (city.endsWith("광역시")) {
+            String base = city.replace("광역시", "");
+            variants.add(base);        // 부산
+            variants.add(base + "시"); // 부산시
+        }
+
+        // 특별자치시 케이스 (세종)
+        else if (city.endsWith("특별자치시")) {
+            String base = city.replace("특별자치시", "");
+            variants.add(base);        // 세종
+            variants.add(base + "시"); // 세종시
+        }
+
+        // 도 케이스 (경기도, 강원도 등)
+        else if (city.endsWith("도")) {
+            String base = city.replace("도", "");
+            variants.add(base);        // 경기
+        }
+
+        // 특별자치도 케이스 (제주)
+        else if (city.endsWith("특별자치도")) {
+            String base = city.replace("특별자치도", "");
+            variants.add(base);        // 제주
+            variants.add(base + "도"); // 제주도
+        }
+
+        return variants;
     }
 }
