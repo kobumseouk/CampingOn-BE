@@ -27,13 +27,10 @@ public class BookmarkService {
     // 이미 찜 관계가 있는지 확인
     Optional<Bookmark> existingBookmark = bookmarkRepository.findByCampIdAndUserId(campId, userId);
 
-    // 이미 찜 관계가 있는 상태
+    // 이미 찜 등록이 된경우
     if (existingBookmark.isPresent()) {
       // isMarked 상태를 반대로 토글 - true->false, false->true로 전환
-      Bookmark bookmark = existingBookmark.get().toBuilder()
-          .isMarked(!existingBookmark.get().isMarked())
-          .build();
-      bookmarkRepository.save(bookmark);
+      bookmarkRepository.delete(existingBookmark.get());
       return;  // 변경 후 반환
     }
 
