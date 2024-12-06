@@ -4,7 +4,7 @@ spring:
       client:
         registration:
           google:
-            redirect-uri: https://camping-on.site/login/oauth2/code/google
+            redirect-uri: https://api.camping-on.site/login/oauth2/code/google
 
 app:
   front-url: https://camping-on.site
