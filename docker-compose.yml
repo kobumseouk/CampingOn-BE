@@ -18,4 +18,4 @@ services:
 
 networks:
   app-network:
-    name: docker-network
+    name: app-network
