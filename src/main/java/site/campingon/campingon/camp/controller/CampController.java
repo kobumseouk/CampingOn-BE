@@ -30,18 +30,6 @@ public class CampController {
   private final CampService campService;
   private final AuthenticateUser authenticateUser;
 
-  // 사용자 키워드 맞춤 캠핑장 목록 조회 (페이지네이션 - 횡스크롤)
-  @GetMapping("/matched")
-  public ResponseEntity<Page<CampListResponseDto>> getMatchedCamps(
-      @RequestParam(name = "page", defaultValue = "0") @Min(0) int page,
-      @RequestParam(name = "size", defaultValue = "3") @Positive @Max(30) int size,
-      @AuthenticationPrincipal CustomUserDetails userDetails
-  ) {
-    return ResponseEntity.ok(campService.getMatchedCampsByKeywords(
-        userDetails.getName(), userDetails.getId(), PageRequest.of(page, size))
-    );
-  }
-
   // 캠핑장 인기 목록 조회 (페이지네이션)
   @GetMapping("/popular")
   public ResponseEntity<Page<CampListResponseDto>> getPopularCamps(

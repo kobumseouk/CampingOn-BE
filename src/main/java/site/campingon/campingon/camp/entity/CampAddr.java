@@ -34,12 +34,6 @@ public class CampAddr {
     @Column(length = 20)
     private String zipcode;  // 우편번호
 
-    /*@Column(nullable = false)
-    private Double longitude;  // mayX - 경도
-
-    @Column(nullable = false)
-    private Double latitude;  // maxY - 위도*/
-
     @Column(columnDefinition = "POINT SRID 4326", nullable = false) // MySQL POINT 유형 및 SRID 지정
     private Point location;
 

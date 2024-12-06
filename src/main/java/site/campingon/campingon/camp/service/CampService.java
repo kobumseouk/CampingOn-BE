@@ -3,7 +3,6 @@ package site.campingon.campingon.camp.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,9 +16,7 @@ import site.campingon.campingon.camp.repository.mongodb.MongoSearchClient;
 import site.campingon.campingon.common.exception.ErrorCode;
 import site.campingon.campingon.common.exception.GlobalException;
 import site.campingon.campingon.user.repository.UserKeywordRepository;
-import site.campingon.campingon.user.repository.UserRepository;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -35,25 +32,7 @@ public class CampService {
   private final UserKeywordRepository userKeywordRepository;
   private final BookmarkRepository bookMarkRepository;
   private final CampMapper campMapper;
-  private final UserRepository userRepository;
 
-  // 추천 캠핑장 조회 (페이지네이션 - 횡스크롤 3개)
-  public Page<CampListResponseDto> getMatchedCampsByKeywords(String username, Long userId, Pageable pageable) {
-    List<String> userKeywords = userKeywordRepository.findKeywordsByUserId(userId);
-
-    // 사용자에 저장된 키워드가 없는 경우
-    if (userKeywords.isEmpty()) {
-      return Page.empty(pageable);
-    }
-
-    return campRepository.findMatchedCampsByKeywords(userKeywords, pageable)
-        .map(camp -> {
-          CampListResponseDto dto = campMapper.toCampListDto(camp);
-          dto.setName(username);
-          dto.setMarked(bookMarkRepository.existsByCampIdAndUserId(camp.getId(), userId));
-          return dto;
-        });
-  }
 
   // 인기 캠핑장 조회
   public Page<CampListResponseDto> getPopularCamps(Long userId, Pageable pageable) {
@@ -98,43 +77,6 @@ public class CampService {
 
     return new PageImpl<>(campDtos, pageable, bookmarkedCamps.getTotalElements());
   }
-
-  // 지역(시/도)과 검색어를 통한 캠핑장 목록 조회
-  public Page<CampListResponseDto> searchCamps(Long userId, String keyword, String city, PageRequest pageRequest) {
-    // 검색어를 소문자로 변환
-    String searchKeyword = keyword != null ? keyword.toLowerCase() : null;
-
-    // 먼저 캠핑장명으로 검색
-    List<CampListResponseDto> nameSearchResult = campRepository.findByCampNameSearch(city, pageRequest)
-        .getContent().stream()
-        .map(camp -> {
-          CampListResponseDto dto = campMapper.toCampListDto(camp);
-          dto.setMarked(bookMarkRepository.existsByCampIdAndUserId(camp.getId(), userId));
-          return dto;
-        })
-        .filter(dto -> {
-          if (searchKeyword == null) return true;
-          String campName = dto.getName().toLowerCase();
-          return campName.equals(searchKeyword)
-              || Arrays.asList(campName.split(" ")).contains(searchKeyword);
-        })
-        .collect(Collectors.toList());
-
-
-    // 캠핑장명 검색 결과가 없으면 키워드 검색
-    if (nameSearchResult.isEmpty()) {
-      // 지역 조건과 키워드 검색(업종, 부대시설, 시/군/구, 캠핑장 키워드)을 추천수로 페이지 정렬
-      return campRepository.searchCampsByKeywordAndCity(searchKeyword, city, pageRequest)
-          .map(camp -> {
-            CampListResponseDto dto = campMapper.toCampListDto(camp);
-            dto.setMarked(bookMarkRepository.existsByCampIdAndUserId(camp.getId(), userId));
-            return dto;
-          });
-    }
-
-    return new PageImpl<>(nameSearchResult, pageRequest, nameSearchResult.size());
-  }
-
 
   // 캠핑장 생성
   @Transactional
