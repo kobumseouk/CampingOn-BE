@@ -66,7 +66,8 @@ public interface CampRepository extends JpaRepository<Camp, Long> {
 
 
   // 사용자의 isMarked 된 캠핑장 목록 페이지
-  Page<Camp> findByBookmarks_User_Id(Long userId, Pageable pageable);
+  @Query("SELECT c FROM Camp c JOIN c.bookmarks b WHERE b.user.id = :userId ORDER BY b.createdAt DESC")
+  Page<Camp> findByBookmarks_User_Id(@Param("userId") Long userId, Pageable pageable);
 
   //쿼리 최적화 where in 조건
   @Modifying
