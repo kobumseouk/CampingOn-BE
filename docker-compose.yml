@@ -1,24 +1,15 @@
-version: '3.8'
-
 services:
-  app-blue:
+  app:
     build:
       context: .
       dockerfile: Dockerfile
+    image: camping-on:latest
+    container_name: camping-on
+    env_file:
+      - .env # 환경 변수 파일 경로
     ports:
-      - "8081:8080"
-    environment:
-      SPRING_PROFILES_ACTIVE: prod,s3Bucket
-      TZ: Asia/Seoul
-    networks:
-      - app-network
-
-  app-green:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "8082:8080"
+      - "8080:8080"
+    restart: always
     environment:
       SPRING_PROFILES_ACTIVE: prod,s3Bucket
       TZ: Asia/Seoul
@@ -27,4 +18,4 @@ services:
 
 networks:
   app-network:
-    name: blue-green-network
+    name: app-network
