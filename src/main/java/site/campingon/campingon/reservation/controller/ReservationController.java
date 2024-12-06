@@ -43,6 +43,13 @@ public class ReservationController {
         return ResponseEntity.ok(reservationService.getReservation(userDetails.getId(), reservationId));
     }
 
+    // 가장 가까운 예약 정보 조회
+    @GetMapping("/upcoming")
+    public ResponseEntity<ReservationResponseDto> getReservation(@AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        return ResponseEntity.ok(reservationService.getUpcomingReservation(userDetails.getId()));
+    }
+
     // 새로운 예약 생성
     @PostMapping
     public ResponseEntity<Void> createReservation(@AuthenticationPrincipal CustomUserDetails userDetails,

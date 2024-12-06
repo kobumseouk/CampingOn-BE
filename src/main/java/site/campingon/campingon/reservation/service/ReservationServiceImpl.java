@@ -30,29 +30,36 @@ public class ReservationServiceImpl implements ReservationService {
     private final ReservationValidate reservationValidate;
     private final ReservationRepository reservationRepository;
 
-    // 유저의 모든 예약리스트를 조회
     @Transactional(readOnly = true)
     public Page<ReservationResponseDto> getReservations(Long userId, Pageable pageable) {
 
-        User user = reservationValidate.validateUserById(userId);
+        reservationValidate.validateUserById(userId);
 
         Page<Reservation> reservations = reservationRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
 
         return reservations.map(reservationMapper::toResponse);
     }
 
-    // 예약완료 직후 확인을 위해 예약 정보 조회
     @Transactional(readOnly = true)
     public ReservationResponseDto getReservation(Long userId, Long reservationId) {
 
-        User user = reservationValidate.validateUserById(userId);
+        reservationValidate.validateUserById(userId);
 
         Reservation reservation = reservationValidate.validateReservationById(reservationId);
 
         return reservationMapper.toResponse(reservation);
     }
 
-    // 캠프사이트 선택 후 예약 요청
+    @Transactional(readOnly = true)
+    public ReservationResponseDto getUpcomingReservation(Long userId) {
+
+        reservationValidate.validateUserById(userId);
+
+        Reservation reservation = reservationRepository.findUpcomingReservationByUserId(userId);
+
+        return reservationMapper.toResponse(reservation);
+    }
+
     @Transactional
     public void createReservation(Long userId, ReservationCreateRequestDto requestDto) {
 
@@ -75,7 +82,6 @@ public class ReservationServiceImpl implements ReservationService {
         reservationRepository.save(reservation);
     }
 
-    // 예약완료 이후 예약취소 요청
     @Transactional
     public void cancelReservation(Long userId, Long reservationId, ReservationCancelRequestDto requestDto) {
 

@@ -18,4 +18,7 @@ public interface ReservationService {
     // 예약완료 이후 예약취소 요청
     void cancelReservation(Long userId, Long reservationId, ReservationCancelRequestDto requestDto);
 
+    // 가장 가까운 예약 정보 조회
+    ReservationResponseDto getUpcomingReservation(Long userId);
+
 }
