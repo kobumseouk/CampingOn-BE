@@ -86,7 +86,7 @@ public class SearchInfoService {
         List<CampListResponseDto> dtoList = searchResult.getResults().stream()
             .map(searchInfo -> {
                 CampListResponseDto dto = searchInfoMapper.toDto(searchInfo);
-                dto.setName(username);
+                dto.setUsername(username);
 
                 // TODO: 찜관련 수정 필요
                 dto.setMarked(bookmarkRepository.existsByCampIdAndUserId(

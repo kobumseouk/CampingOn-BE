@@ -5,10 +5,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import site.campingon.campingon.common.jwt.CustomUserDetails;
 
+/**
+ * SecurityContextHolder 직접 다루기
+ * */
+
 @Component
 public class AuthenticateUser {
 
-
+    //인증된 사용자면 userId, 그렇지않으면 0 반환
     public Long authenticateUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 

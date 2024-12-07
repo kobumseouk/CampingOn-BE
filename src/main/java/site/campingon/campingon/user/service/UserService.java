@@ -66,7 +66,7 @@ public class UserService {
 
         User user = userRepository.save(newUser);
 
-        log.info("회원 가입 - 이메일: {}", user.getEmail());
+        log.debug("회원 가입 - 이메일: {}", user.getEmail());
         return userMapper.toSignUpResponseDto(user);
     }
 
@@ -123,13 +123,13 @@ public class UserService {
 
         // 변경된 사용자 정보 저장
         User updatedUser = userRepository.save(user);
-        log.info("회원 정보 업데이트 - 이메일: {}", updatedUser.getEmail());
+        log.debug("회원 정보 업데이트 - 이메일: {}", updatedUser.getEmail());
         return userMapper.toResponseDto(updatedUser);
     }
 
     // 회원 탈퇴
     @Transactional
-    public void deleteUser(Long userId, String deleteReson) {
+    public void deleteUser(Long userId, String deleteReason) {
         // 사용자 정보 조회
         User user = userRepository.findByIdAndDeletedAtIsNull(userId)
             .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND_BY_ID));
@@ -137,8 +137,8 @@ public class UserService {
         refreshTokenService.deleteRefreshTokenByEmail(user.getEmail());
 
         // 사용자 탈퇴 처리 (소프트 삭제)
-        user.deleteUser(deleteReson);
-        log.info("회원 탈퇴 - 이메일: {} , 탈퇴 사유: {}", userId, deleteReson);
+        user.deleteUser(deleteReason);
+        log.debug("회원 탈퇴 - 이메일: {} , 탈퇴 사유: {}", userId, deleteReason);
 
     }
 

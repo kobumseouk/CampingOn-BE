@@ -59,7 +59,7 @@ public class UserAuthService {
         lock.lock();
 
         try{
-            log.info("Refresh Token을 사용한 Access Token 재발급");
+            log.debug("Refresh Token을 사용한 Access Token 재발급");
 
             RefreshToken storedRefreshToken = refreshTokenService.getRefreshTokenByToken(refreshToken)
                 .orElseThrow(() -> new GlobalException(ErrorCode.NO_TOKEN));

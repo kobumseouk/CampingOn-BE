@@ -5,6 +5,7 @@ import lombok.*;
 import site.campingon.campingon.camp.entity.Camp;
 import site.campingon.campingon.camp.entity.CampSite;
 import site.campingon.campingon.common.entity.BaseEntity;
+import site.campingon.campingon.review.entity.Review;
 import site.campingon.campingon.user.entity.User;
 
 import java.time.LocalDate;
@@ -33,6 +34,9 @@ public class Reservation extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private CampSite campSite;
+
+    @OneToOne(mappedBy = "reservation", fetch = FetchType.EAGER)
+    private Review review;
 
     @Column(nullable = false, columnDefinition = "DATE")
     private LocalDate checkinDate;

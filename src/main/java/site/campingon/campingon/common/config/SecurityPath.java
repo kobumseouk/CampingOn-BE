@@ -17,7 +17,7 @@ public class SecurityPath {
 
     // hasRole("USER")
     public static final String[] USER_ENDPOINTS = {
-        "/api/camps/matched",
+        "/api/mongo/camps/matched",
         "/api/users/me/bookmarked",
         "/api/users/me/*",
         "/api/users/me",

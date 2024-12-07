@@ -7,8 +7,8 @@ import site.campingon.campingon.reservation.entity.CheckTime;
 
 import java.time.LocalTime;
 
+@ToString
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
