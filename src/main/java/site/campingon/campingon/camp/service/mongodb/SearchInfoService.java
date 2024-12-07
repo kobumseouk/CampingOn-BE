@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import site.campingon.campingon.bookmark.repository.BookmarkRepository;
 import site.campingon.campingon.camp.dto.CampListResponseDto;
+import site.campingon.campingon.camp.dto.mongodb.SearchResultDto;
 import site.campingon.campingon.camp.mapper.mongodb.SearchInfoMapper;
+import site.campingon.campingon.camp.repository.mongodb.MongoRecommendClient;
 import site.campingon.campingon.camp.repository.mongodb.MongoSearchClient;
 import site.campingon.campingon.user.service.UserService;
 
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 public class SearchInfoService {
     private final UserService userService;
     private final MongoSearchClient mongoSearchClient;
+    private final MongoRecommendClient mongoRecommendClient;
     private final BookmarkRepository bookmarkRepository;
     private final SearchInfoMapper searchInfoMapper;
 
@@ -39,8 +42,7 @@ public class SearchInfoService {
             new ArrayList<>();
 
         // 검색 수행 (결과와 전체 개수를 한 번에 조회)
-        MongoSearchClient.SearchResult searchResult =
-            mongoSearchClient.searchWithUserPreferences(searchTerm, userKeywords, city, pageable);
+        SearchResultDto searchResult = mongoSearchClient.searchWithUserPreferences(searchTerm, userKeywords, city, pageable);
 
         // 검색 결과가 없는 경우 빈 페이지 반환
         if (searchResult.getResults().isEmpty()) {
@@ -56,6 +58,39 @@ public class SearchInfoService {
                 if (userId != 0L) {
                     dto.setMarked(bookmarkRepository.existsByCampIdAndUserId(searchInfo.getCampId(), userId));
                 }
+                return dto;
+            })
+            .collect(Collectors.toList());
+
+        return new PageImpl<>(dtoList, pageable, searchResult.getTotal());
+    }
+
+
+    public Page<CampListResponseDto> getMatchedCampsByKeywords(
+        String username, Long userId, Pageable pageable) {
+        // 사용자 키워드 조회
+        List<String> userKeywords = userService.getKeywordsByUserId(userId);
+
+        if (userKeywords.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        // 매칭된 캠핑장 조회
+        SearchResultDto searchResult = mongoRecommendClient.getMatchedCamps(userKeywords, pageable);
+
+        if (searchResult.getResults().isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        // DTO 변환 및 Page 객체 생성
+        List<CampListResponseDto> dtoList = searchResult.getResults().stream()
+            .map(searchInfo -> {
+                CampListResponseDto dto = searchInfoMapper.toDto(searchInfo);
+                dto.setName(username);
+
+                // TODO: 찜관련 수정 필요
+                dto.setMarked(bookmarkRepository.existsByCampIdAndUserId(
+                    searchInfo.getCampId(), userId));
                 return dto;
             })
             .collect(Collectors.toList());
