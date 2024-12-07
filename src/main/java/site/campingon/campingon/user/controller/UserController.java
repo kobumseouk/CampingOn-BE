@@ -1,7 +1,6 @@
 package site.campingon.campingon.user.controller;
 
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -80,14 +79,6 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    // 개인 키워드 목록 조회
-    @GetMapping("/users/me/keywords")
-    public ResponseEntity<List<String>> getMyKeyword(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        Long userId = userDetails.getId();
-        return ResponseEntity.ok(userService.getKeywordsByUserId(userId));
-    }
 
-
-    // TODO: 회원 정보 조회(다른 사용자의 정보 조회)
 
 }
