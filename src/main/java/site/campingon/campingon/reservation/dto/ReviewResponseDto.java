@@ -10,5 +10,4 @@ import lombok.*;
 @AllArgsConstructor
 public class ReviewResponseDto {
     private Long reviewId;
-
 }
