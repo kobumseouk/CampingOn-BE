@@ -199,7 +199,7 @@ public class GoCampingService {
                     "contentId", campId.toString());
 
             log.debug("URI: {}", uri.toString());
-
+          
             goCampingDataDtoList.add(
                     restTemplate.getForObject(uri, GoCampingImageDto.class)); //API 호출
         }

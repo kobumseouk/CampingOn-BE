@@ -29,6 +29,7 @@ public enum ErrorCode {
     CAMP_NOT_FOUND(HttpStatus.NOT_FOUND, "CAMP-002", "캠핑장을 찾을 수 없습니다."),
 
     CAMPSITE_NOT_FOUND_BY_ID(HttpStatus.NOT_FOUND, "CAMPSITE-001", "캠핑지의 ID를 찾을 수 없습니다."),
+    REQUIRED_RESERVATION_DATE(HttpStatus.BAD_REQUEST, "CAMPSITE-002", "예약일자를 선택하지 않았습니다."),
 
     REVIEW_NOT_FOUND_BY_ID(HttpStatus.NOT_FOUND, "REVIEW-001", "해당 리뷰를 찾을 수 없습니다."),
     REVIEW_NOT_IN_CAMP(HttpStatus.NOT_FOUND, "REVIEW-002", "리뷰가 해당 캠프에 속하지 않습니다."),

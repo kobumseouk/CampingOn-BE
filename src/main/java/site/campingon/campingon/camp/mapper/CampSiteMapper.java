@@ -12,6 +12,11 @@ import site.campingon.campingon.camp.entity.CampSite;
 public interface CampSiteMapper {
 
     @Mapping(target = "siteId", source = "id")
+    @Mapping(target = "campSimpleDto.campId", source = "camp.id")
+    @Mapping(target = "campSimpleDto.campName", source = "camp.campName")
+    @Mapping(target = "campSimpleDto.city", source = "camp.campAddr.city")
+    @Mapping(target = "campSimpleDto.state", source = "camp.campAddr.state")
+    @Mapping(target = "campSimpleDto.streetAddr", source = "camp.campAddr.streetAddr")
     CampSiteResponseDto toCampSiteResponseDto(CampSite campSite);
 
     @Mapping(target = "siteId", source = "id")

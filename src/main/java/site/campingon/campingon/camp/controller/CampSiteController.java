@@ -9,6 +9,8 @@ import site.campingon.campingon.camp.dto.CampSiteListResponseDto;
 import site.campingon.campingon.camp.dto.CampSiteResponseDto;
 import site.campingon.campingon.camp.service.CampSiteReserveService;
 import site.campingon.campingon.camp.service.CampSiteService;
+import site.campingon.campingon.common.exception.ErrorCode;
+import site.campingon.campingon.common.exception.GlobalException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -35,13 +37,29 @@ public class CampSiteController {
                                                                                @DateTimeFormat(pattern = "yyyy-MM-dd")
                                                                                LocalDate checkout) {
 
+        if (checkin == null || checkout == null) {
+            throw new GlobalException(ErrorCode.REQUIRED_RESERVATION_DATE);
+        }
+
         return ResponseEntity.ok(campSiteReserveService.getAvailableCampSites(campId, checkin, checkout));
     }
 
-    // 특정 캠핑지 조회
+    // 예약확인을 위한 캠핑지 조회
     @GetMapping("/{campId}/sites/{siteId}")
     public ResponseEntity<CampSiteResponseDto> getCampSite(@PathVariable("campId") Long campId,
-                                                           @PathVariable("siteId") Long siteId) {
+                                                           @PathVariable("siteId") Long siteId,
+
+                                                           @RequestParam(value = "checkin")
+                                                           @DateTimeFormat(pattern = "yyyy-MM-dd")
+                                                           LocalDate checkin,
+
+                                                           @RequestParam(value = "checkout")
+                                                           @DateTimeFormat(pattern = "yyyy-MM-dd")
+                                                           LocalDate checkout) {
+
+        if (checkin == null || checkout == null) {
+            throw new GlobalException(ErrorCode.REQUIRED_RESERVATION_DATE);
+        }
 
         return ResponseEntity.ok(campSiteService.getCampSite(campId, siteId));
     }
