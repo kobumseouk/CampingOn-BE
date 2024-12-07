@@ -23,8 +23,9 @@ import static site.campingon.campingon.common.public_data.PublicDataConstants.*;
  * 2일 : 데이터 업데이트
  * 3일 : 데이터 삭제
  * 스케줄러 테스트해보고싶다면 다음 어노테이션 사용하기
+ *
  * @Scheduled(initialDelay = 10000)    //스케줄러에 등록되고 10초뒤에 메소드 실행 -> 최초에 한번 실행
- * */
+ */
 
 @RequiredArgsConstructor
 @Component
@@ -32,24 +33,29 @@ import static site.campingon.campingon.common.public_data.PublicDataConstants.*;
 public class GoCampingScheduler {
     private final GoCampingService goCampingService;
 
-    private static final Long NUM_OF_ROWS = 500L;   //while 문이 한번돌때 저장되는 개수
-    private static final Long IMAGE_CNT = 10L;  //Camp id 하나에 저장될 이미지 개수
+    private static final long NUM_OF_ROWS = 500L;   //while 문이 한번돌때 저장되는 개수
+    private static final long IMAGE_CNT = 10L;  //Camp id 하나에 저장될 이미지 개수
+    //todo totalCnt 불러와서 처리하기, 컨트롤러에서는 Exception 처리 ( 혹은 서비스에서 처리)
 
     //신규 데이터 저장
     @Scheduled(cron = "0 0 1 * * ?", zone = "Asia/Seoul")  //매달 1일 오전 00:00에 실행
     public void scheduleCampCreation() {
         try {
-            Long pageNo = 1L;      // 현재 페이지 번호
+            long pageNo = 1L;      // 현재 페이지 번호
+            long totalCount = 0L;   //전체 데이터 개수
 
             log.info("캠프 생성 스케줄러 실행");
             while (true) {
                 //고캠핑 API 호출하고 dto 로 변환(이미지)
                 GoCampingDataDto goCampingDataDto = goCampingService.getAndConvertToGoCampingDataDto(
                         GoCampingPath.BASED_SYNC_LIST,
-                        "numOfRows", NUM_OF_ROWS.toString(),
-                        "pageNo", pageNo.toString(),
+                        "numOfRows", Long.toString(NUM_OF_ROWS),
+                        "pageNo", Long.toString(pageNo),
                         "syncStatus", SYNC_STATUS_NEW
                 );
+
+                //공공 API 가져올 총 cnt 추출
+                totalCount = goCampingDataDto.getResponse().getBody().getTotalCount();
 
                 List<GoCampingParsedResponseDto> goCampingParsedResponseDtos =
                         goCampingService.createOrUpdateCampByGoCampingData(goCampingDataDto);
@@ -71,12 +77,13 @@ public class GoCampingScheduler {
 
                 log.info("캠프 이미지 데이터 신규 생성 성공: " + goCampingImageParsedResponseDtos.size() + "개");
 
-                pageNo++;   //페이지 번호 증가
-
-                //더이상 가져올 데이터(Row)가 없다면 break
-                if (goCampingDataDto.getResponse().getBody().getNumOfRows() == 0) {
+                //더이상 가져올 데이터(Row)가 없거나 페이지번호 * 현재페이지수가 totalCnt 보다 크면 break
+                if (goCampingDataDto.getResponse().getBody().getNumOfRows() == 0 ||
+                        NUM_OF_ROWS * pageNo >= totalCount) {
                     break;
                 }
+
+                pageNo++;   //페이지 번호 증가
             }
         } catch (URISyntaxException e) {
             log.error("캠프 데이터 생성 실패: " + e.getMessage());
@@ -86,7 +93,8 @@ public class GoCampingScheduler {
     //데이터 업데이트
     @Scheduled(cron = "0 0 0 2 * ?", zone = "Asia/Seoul")   //매월 2일 00:00 실행
     public void scheduleCampUpdate() {
-        Long pageNo = 1L;      // 현재 페이지 번호
+        long pageNo = 1L;      // 현재 페이지 번호
+        long totalCount = 0L;   //전체 데이터 개수
 
         log.info("캠프 업데이트 스케줄러 실행");
 
@@ -94,10 +102,12 @@ public class GoCampingScheduler {
             while (true) {
                 GoCampingDataDto goCampingDataDto = goCampingService.getAndConvertToGoCampingDataDto(
                         GoCampingPath.BASED_SYNC_LIST,
-                        "numOfRows", NUM_OF_ROWS.toString(),
-                        "pageNo", pageNo.toString(),
+                        "numOfRows", Long.toString(NUM_OF_ROWS),
+                        "pageNo", Long.toString(pageNo),
                         "syncStatus", SYNC_STATUS_UPDATE
                 );
+
+                totalCount = goCampingDataDto.getResponse().getBody().getTotalCount();
 
                 List<GoCampingParsedResponseDto> goCampingParsedResponseDtos =
                         goCampingService.createOrUpdateCampByGoCampingData(goCampingDataDto);
@@ -116,11 +126,12 @@ public class GoCampingScheduler {
 
                 log.info("캠프 이미지 데이터 업데이트 성공: " + goCampingImageParsedResponseDtos.size() + "개");
 
-                pageNo++;   //페이지 번호 증가
-
-                if (goCampingDataDto.getResponse().getBody().getNumOfRows() == 0) {
+                if (goCampingDataDto.getResponse().getBody().getNumOfRows() == 0 ||
+                        NUM_OF_ROWS * pageNo >= totalCount) {
                     break;
                 }
+
+                pageNo++;   //페이지 번호 증가
             }
         } catch (URISyntaxException e) {
             log.error("캠프 데이터 업데이트 실패: " + e.getMessage());
@@ -131,27 +142,32 @@ public class GoCampingScheduler {
     //불필요한 데이터 삭제
     @Scheduled(cron = "0 0 0 3 * ?", zone = "Asia/Seoul")   //매월 3일 00:00 실행
     public void scheduleCampDelete() {
-        Long pageNo = 1L;      // 현재 페이지 번호
+        long pageNo = 1L;      // 현재 페이지 번호
+        long totalCount = 0L;   //전체 데이터 개수
 
         log.info("캠프 삭제 스케줄러 실행");
         try {
             while (true) {
                 GoCampingDataDto goCampingDataDto = goCampingService.getAndConvertToGoCampingDataDto(
                         GoCampingPath.BASED_SYNC_LIST,
-                        "numOfRows", NUM_OF_ROWS.toString(),
-                        "pageNo", pageNo.toString(),
+                        "numOfRows", Long.toString(NUM_OF_ROWS),
+                        "pageNo", Long.toString(pageNo),
                         "syncStatus", SYNC_STATUS_DELETE
                 );
 
+                totalCount = goCampingDataDto.getResponse().getBody().getTotalCount();
                 int deleteCnt = goCampingService.deleteCampByGoCampingData(goCampingDataDto);
 
                 log.info("캠프 데이터 삭제 성공: " + deleteCnt + "개");
 
                 pageNo++;   //페이지 번호 증가
 
-                if (goCampingDataDto.getResponse().getBody().getNumOfRows() == 0) {
+                if (goCampingDataDto.getResponse().getBody().getNumOfRows() == 0 ||
+                        NUM_OF_ROWS * pageNo >= totalCount) {
                     break;
                 }
+
+                pageNo++;   //페이지 번호 증가
             }
         } catch (URISyntaxException e) {
             log.error("캠프 데이터 삭제 실패: " + e.getMessage());
