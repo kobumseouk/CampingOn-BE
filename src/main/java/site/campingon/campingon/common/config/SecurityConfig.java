@@ -21,7 +21,7 @@ import site.campingon.campingon.common.oauth.service.CustomOAuth2UserService;
 import site.campingon.campingon.common.jwt.CustomUserDetailsService;
 import site.campingon.campingon.common.jwt.JwtAuthenticationFilter;
 import site.campingon.campingon.common.jwt.JwtTokenProvider;
-import site.campingon.campingon.common.oauth.handler.CustomOAuthSuccessHandler;
+import site.campingon.campingon.common.oauth.handler.CustomOAuth2SuccessHandler;
 
 @Configuration
 @EnableWebSecurity
@@ -30,7 +30,7 @@ import site.campingon.campingon.common.oauth.handler.CustomOAuthSuccessHandler;
 public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
-    private final CustomOAuthSuccessHandler customOAuthSuccessHandler;
+    private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
     private final CustomOAuth2FailureHandler customOAuthFailureHandler;
     private final JwtTokenProvider jwtTokenProvider;
     private final ObjectMapper objectMapper;
@@ -55,7 +55,7 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
                                 .userService(customOAuth2UserService))
 //                        .defaultSuccessUrl("/oauth/success") // 로그인 성공시 이동할 URL
-                        .successHandler(customOAuthSuccessHandler)
+                        .successHandler(customOAuth2SuccessHandler)
 //                        .failureUrl("/oauth/fail") // 로그인 실패시 이동할 URL
                         .failureHandler(customOAuthFailureHandler))
                 .logout(logout -> logout.logoutSuccessUrl("/oauth/logout") // 로그아웃 성공시 해당 url로 이동
