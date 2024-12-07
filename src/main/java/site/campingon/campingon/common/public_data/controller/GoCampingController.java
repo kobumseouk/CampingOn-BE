@@ -15,8 +15,7 @@ import site.campingon.campingon.common.public_data.service.GoCampingService;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import static site.campingon.campingon.common.exception.ErrorCode.GO_CAMPING_BAD_REQUEST;
-import static site.campingon.campingon.common.exception.ErrorCode.GO_CAMPING_IMAGE_BAD_REQUEST;
+import static site.campingon.campingon.common.exception.ErrorCode.*;
 
 /**
  * https://www.data.go.kr/tcs/dss/selectApiDataDetailView.do?publicDataPk=15101933
@@ -62,21 +61,20 @@ public class GoCampingController {
     @PostMapping("/imageList")
     public ResponseEntity<List<List<GoCampingImageParsedResponseDto>>> createCampImageByGoCampingImageList(
             @RequestParam("imageCnt") long imageCnt)    //몇개의 이미지개수를 갖고올지
-    {
-        try {
-            //공공데이터를 조회하고 dto로 변환
-            List<GoCampingImageDto> goCampingImageDto = goCampingService.getAndConvertToAllGoCampingImageDataDto(imageCnt);
+            throws URISyntaxException {
 
-            //CampImage 를 생성하고 DB에 저장한다.
-            List<List<GoCampingImageParsedResponseDto>> goCampingParsedResponseDtos
-                    = goCampingService.createOrUpdateCampImageByGoCampingImageData(goCampingImageDto);
+        //공공데이터를 조회하고 dto로 변환
+        List<GoCampingImageDto> goCampingImageDto = goCampingService.getAndConvertToAllGoCampingImageDataDto(imageCnt);
 
-            return ResponseEntity.status(HttpStatus.OK).body(goCampingParsedResponseDtos);
-        } catch (Exception e) { //
-            log.error("고캠핑데이터 저장 실패, 고캠핑 API 파라미터나 서비스키를 다시 확인해주세요");
-            log.error("DB에 캠프데이터가 있는지 확인해주세요");
-            throw new GlobalException(GO_CAMPING_IMAGE_BAD_REQUEST);
+        //CampImage 를 생성하고 DB에 저장한다.
+        List<List<GoCampingImageParsedResponseDto>> goCampingParsedResponseDtos
+                = goCampingService.createOrUpdateCampImageByGoCampingImageData(goCampingImageDto);
+
+        if (goCampingParsedResponseDtos == null) {
+            throw new GlobalException(GO_CAMPING_DATA_NO_CONTENT);
         }
+
+        return ResponseEntity.status(HttpStatus.OK).body(goCampingParsedResponseDtos);
     }
 
 //    //위치기반정보 목록 조회

@@ -35,7 +35,7 @@ public class Camp{
   @Column(name = "line_intro", length = 255)
   private String lineIntro; // 요약
 
-  @Column(length = 100)
+  @Column(length = 255)
   private String homepage;
 
   @Column(name = "outdoor_facility", length = 255)

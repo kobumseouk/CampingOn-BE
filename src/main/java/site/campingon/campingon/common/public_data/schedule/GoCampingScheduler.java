@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import site.campingon.campingon.common.exception.ErrorCode;
+import site.campingon.campingon.common.exception.GlobalException;
 import site.campingon.campingon.common.public_data.GoCampingPath;
 import site.campingon.campingon.common.public_data.dto.GoCampingDataDto;
 import site.campingon.campingon.common.public_data.dto.GoCampingImageDto;
@@ -35,7 +37,6 @@ public class GoCampingScheduler {
 
     private static final long NUM_OF_ROWS = 500L;   //while 문이 한번돌때 저장되는 개수
     private static final long IMAGE_CNT = 10L;  //Camp id 하나에 저장될 이미지 개수
-    //todo totalCnt 불러와서 처리하기, 컨트롤러에서는 Exception 처리 ( 혹은 서비스에서 처리)
 
     //신규 데이터 저장
     @Scheduled(cron = "0 0 1 * * ?", zone = "Asia/Seoul")  //매달 1일 오전 00:00에 실행
@@ -53,6 +54,10 @@ public class GoCampingScheduler {
                         "pageNo", Long.toString(pageNo),
                         "syncStatus", SYNC_STATUS_NEW
                 );
+
+                if (goCampingDataDto == null) {
+                    throw new GlobalException(ErrorCode.GO_CAMPING_DATA_NO_CONTENT);
+                }
 
                 //공공 API 가져올 총 cnt 추출
                 totalCount = goCampingDataDto.getResponse().getBody().getTotalCount();
@@ -107,6 +112,10 @@ public class GoCampingScheduler {
                         "syncStatus", SYNC_STATUS_UPDATE
                 );
 
+                if (goCampingDataDto == null) {
+                    throw new GlobalException(ErrorCode.GO_CAMPING_DATA_NO_CONTENT);
+                }
+
                 totalCount = goCampingDataDto.getResponse().getBody().getTotalCount();
 
                 List<GoCampingParsedResponseDto> goCampingParsedResponseDtos =
@@ -154,6 +163,10 @@ public class GoCampingScheduler {
                         "pageNo", Long.toString(pageNo),
                         "syncStatus", SYNC_STATUS_DELETE
                 );
+
+                if (goCampingDataDto == null) {
+                    throw new GlobalException(ErrorCode.GO_CAMPING_DATA_NO_CONTENT);
+                }
 
                 totalCount = goCampingDataDto.getResponse().getBody().getTotalCount();
                 int deleteCnt = goCampingService.deleteCampByGoCampingData(goCampingDataDto);

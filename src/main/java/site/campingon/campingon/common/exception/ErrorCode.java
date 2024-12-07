@@ -64,7 +64,8 @@ public enum ErrorCode {
     KEYWORD_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "KEYWORD-001", "키워드는 최대 5개까지만 등록 가능합니다."),
   
     GO_CAMPING_BAD_REQUEST(HttpStatus.BAD_REQUEST, "GOCAMPING-001", "잘못된 고캠핑 데이터 요청입니다."),
-    GO_CAMPING_IMAGE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "GOCAMPING-002", "DB에 저장된 캠프가 없거나 잘못된 데이터 요청입니다.");
+    GO_CAMPING_IMAGE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "GOCAMPING-002", "DB에 저장된 캠프가 없거나 잘못된 데이터 요청입니다."),
+    GO_CAMPING_DATA_NO_CONTENT(HttpStatus.NO_CONTENT,"GOCAMPING-003","요청하신 응답은 데이터가 없습니다.");
 
 
     private final HttpStatus httpStatus;
