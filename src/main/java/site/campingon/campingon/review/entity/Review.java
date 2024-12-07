@@ -1,5 +1,6 @@
 package site.campingon.campingon.review.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import site.campingon.campingon.camp.entity.Camp;
@@ -37,8 +38,9 @@ public class Review {
     @JoinColumn(name = "camp_site_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private CampSite campSite;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reservation_id", nullable = false, columnDefinition = "INT UNSIGNED")
+    @JsonIgnore
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "reservation_id", unique = true, nullable = false, columnDefinition = "INT UNSIGNED")
     private Reservation reservation;
 
     @Column(length = 100, nullable = false)
