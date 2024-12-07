@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.UnknownContentTypeException;
 import site.campingon.campingon.camp.entity.*;
 import site.campingon.campingon.camp.repository.*;
 import site.campingon.campingon.common.exception.GlobalException;
@@ -43,6 +44,8 @@ public class GoCampingService {
     //Camp 관련 엔티티 생성 및 DB 저장 메서드
     @Transactional
     public List<GoCampingParsedResponseDto> createOrUpdateCampByGoCampingData(GoCampingDataDto goCampingDataDto) {
+        if(goCampingDataDto.getResponse()==null) return null; //값이 없다면 null
+
         List<GoCampingParsedResponseDto> goCampingParsedResponseDtoList = parseGoCampingData(goCampingDataDto);
 
         for (GoCampingParsedResponseDto data : goCampingParsedResponseDtoList) {
@@ -137,6 +140,8 @@ public class GoCampingService {
         List<List<GoCampingImageParsedResponseDto>> goCampingImageParsedResponseDtoList = new ArrayList<>();
 
         for (GoCampingImageDto goCampingDataDto : goCampingImageDto) {
+            if(goCampingDataDto.getResponse()==null) continue;  //image 데이터가 없다면 건너뛰기
+
             List<GoCampingImageDto.Item> item
                     = goCampingDataDto.getResponse().getBody().getItems().getItem();
 
@@ -179,7 +184,11 @@ public class GoCampingService {
     ) throws URISyntaxException {
         URI uri = goCampingProviderService.createUri(goCampingPath, params);
 
-        return restTemplate.getForObject(uri, GoCampingDataDto.class);  //API 호출
+        try {
+            return restTemplate.getForObject(uri, GoCampingDataDto.class);  //API 호출
+        } catch (Exception e) {
+            return new GoCampingDataDto();  //json 데이터가 비어있거나, 올바르지 않다면 빈객체 리턴
+        }
     }
 
     //공공데이터 이미지 API 조회하고 dto 변환(DB에 있는 모든 Camp 테이블의 이미지 조회)
@@ -198,10 +207,12 @@ public class GoCampingService {
                     "pageNo", IMAGE_PAGE_NO,  //몇번부터 시작할지
                     "contentId", campId.toString());
 
-            log.debug("URI: {}", uri.toString());
-
-            goCampingDataDtoList.add(
-                    restTemplate.getForObject(uri, GoCampingImageDto.class)); //API 호출
+            try {
+                goCampingDataDtoList.add(
+                        restTemplate.getForObject(uri, GoCampingImageDto.class)); //API 호출
+            } catch (Exception e) {
+                goCampingDataDtoList.add(new GoCampingImageDto());  //데이터가 없을때 빈객체 주입
+            }
         }
         return goCampingDataDtoList;
     }
@@ -219,8 +230,12 @@ public class GoCampingService {
                     "pageNo", IMAGE_PAGE_NO,  //몇번부터 시작할지
                     "contentId", campId.toString());
 
-            goCampingDataDtoList.add(
-                    restTemplate.getForObject(uri, GoCampingImageDto.class)); //API 호출
+            try {
+                goCampingDataDtoList.add(
+                        restTemplate.getForObject(uri, GoCampingImageDto.class)); //API 호출
+            } catch (Exception e) {
+                goCampingDataDtoList.add(new GoCampingImageDto());
+            }
         }
         return goCampingDataDtoList;
     }

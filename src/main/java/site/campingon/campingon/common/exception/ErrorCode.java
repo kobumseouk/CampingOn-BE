@@ -60,7 +60,8 @@ public enum ErrorCode {
     FILE_MOVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FILE-007", "파일 이동 중 오류가 발생했습니다."),
 
     GO_CAMPING_BAD_REQUEST(HttpStatus.BAD_REQUEST, "GOCAMPING-001", "잘못된 고캠핑 데이터 요청입니다."),
-    GO_CAMPING_IMAGE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "GOCAMPING-002", "DB에 저장된 캠프가 없거나 잘못된 데이터 요청입니다.");
+    GO_CAMPING_IMAGE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "GOCAMPING-002", "DB에 저장된 캠프가 없거나 잘못된 데이터 요청입니다."),
+    GO_CAMPING_DATA_NO_CONTENT(HttpStatus.NO_CONTENT,"GOCAMPING-003","요청하신 응답은 데이터가 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
