@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import site.campingon.campingon.common.exception.GlobalException;
 import site.campingon.campingon.common.public_data.GoCampingPath;
 import site.campingon.campingon.common.public_data.dto.GoCampingDataDto;
 import site.campingon.campingon.common.public_data.dto.GoCampingImageDto;
@@ -13,6 +14,9 @@ import site.campingon.campingon.common.public_data.service.GoCampingService;
 
 import java.net.URISyntaxException;
 import java.util.List;
+
+import static site.campingon.campingon.common.exception.ErrorCode.GO_CAMPING_BAD_REQUEST;
+import static site.campingon.campingon.common.exception.ErrorCode.GO_CAMPING_IMAGE_BAD_REQUEST;
 
 /**
  * https://www.data.go.kr/tcs/dss/selectApiDataDetailView.do?publicDataPk=15101933
@@ -28,40 +32,51 @@ public class GoCampingController {
 
     /**
      * 고캠핑데이터 DB 저장
-     * */
+     */
     @PostMapping("/basedList")
     public ResponseEntity<List<GoCampingParsedResponseDto>> createCampByGoCampingBasedList(
             @RequestParam("numOfRows") Long numOfRows,  //한 페이지 결과 수
             @RequestParam("pageNo") Long pageNo)    //현재 페이지 번호
-            throws URISyntaxException {
-        //공공데이터를 조회하고 반환
-        GoCampingDataDto goCampingDataDto = goCampingService.getAndConvertToGoCampingDataDto(
-                GoCampingPath.BASED_LIST,
-                "numOfRows", numOfRows.toString(),
-                "pageNo", pageNo.toString());
+    {
+        try {
+            //공공데이터를 조회하고 반환
+            GoCampingDataDto goCampingDataDto = goCampingService.getAndConvertToGoCampingDataDto(
+                    GoCampingPath.BASED_LIST,
+                    "numOfRows", numOfRows.toString(),
+                    "pageNo", pageNo.toString());
 
             //Camp 관련 엔티티를 생성하고 DB에 저장한다.
             List<GoCampingParsedResponseDto> goCampingParsedResponseDtos
                     = goCampingService.createOrUpdateCampByGoCampingData(goCampingDataDto);
 
-        return ResponseEntity.status(HttpStatus.OK).body(goCampingParsedResponseDtos);
+            return ResponseEntity.status(HttpStatus.OK).body(goCampingParsedResponseDtos);
+        } catch (Exception e) { //
+            log.error("고캠핑데이터 저장 실패, 고캠핑 API 파라미터나 서비스키를 다시 확인해주세요");
+            throw new GlobalException(GO_CAMPING_BAD_REQUEST);
+        }
     }
 
     /**
      * DB에 Camp Id를 가져와서 Id가 가지고있는 이미지를 호출 및 저장
-     * */
+     */
     @PostMapping("/imageList")
     public ResponseEntity<List<List<GoCampingImageParsedResponseDto>>> createCampImageByGoCampingImageList(
             @RequestParam("imageCnt") long imageCnt)    //몇개의 이미지개수를 갖고올지
-            throws URISyntaxException {
-        //공공데이터를 조회하고 dto로 변환
-        List<GoCampingImageDto> goCampingImageDto = goCampingService.getAndConvertToAllGoCampingImageDataDto(imageCnt);
+    {
+        try {
+            //공공데이터를 조회하고 dto로 변환
+            List<GoCampingImageDto> goCampingImageDto = goCampingService.getAndConvertToAllGoCampingImageDataDto(imageCnt);
 
-        //CampImage 를 생성하고 DB에 저장한다.
-        List<List<GoCampingImageParsedResponseDto>> goCampingParsedResponseDtos
-                = goCampingService.createOrUpdateCampImageByGoCampingImageData(goCampingImageDto);
+            //CampImage 를 생성하고 DB에 저장한다.
+            List<List<GoCampingImageParsedResponseDto>> goCampingParsedResponseDtos
+                    = goCampingService.createOrUpdateCampImageByGoCampingImageData(goCampingImageDto);
 
-        return ResponseEntity.status(HttpStatus.OK).body(goCampingParsedResponseDtos);
+            return ResponseEntity.status(HttpStatus.OK).body(goCampingParsedResponseDtos);
+        } catch (Exception e) { //
+            log.error("고캠핑데이터 저장 실패, 고캠핑 API 파라미터나 서비스키를 다시 확인해주세요");
+            log.error("DB에 캠프데이터가 있는지 확인해주세요");
+            throw new GlobalException(GO_CAMPING_IMAGE_BAD_REQUEST);
+        }
     }
 
 //    //위치기반정보 목록 조회
