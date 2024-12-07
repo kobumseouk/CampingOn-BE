@@ -198,6 +198,8 @@ public class GoCampingService {
                     "pageNo", IMAGE_PAGE_NO,  //몇번부터 시작할지
                     "contentId", campId.toString());
 
+            log.debug("URI: {}", uri.toString());
+          
             goCampingDataDtoList.add(
                     restTemplate.getForObject(uri, GoCampingImageDto.class)); //API 호출
         }
@@ -233,6 +235,7 @@ public class GoCampingService {
                 .homepage(data.getHomepage())
                 .outdoorFacility(data.getSbrsCl())
                 .thumbImage(data.getFirstImageUrl())
+                .animalAdmission(data.getAnimalCmgCl())
                 .createdAt(
                         LocalDateTime.parse(
                                 data.getCreatedtime()
