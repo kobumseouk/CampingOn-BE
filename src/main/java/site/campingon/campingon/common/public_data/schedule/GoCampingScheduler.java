@@ -32,7 +32,7 @@ import static site.campingon.campingon.common.public_data.PublicDataConstants.*;
 public class GoCampingScheduler {
     private final GoCampingService goCampingService;
 
-    private static final Long NUM_OF_ROWS = 10L;   //while 문이 한번돌때 저장되는 개수
+    private static final Long NUM_OF_ROWS = 500L;   //while 문이 한번돌때 저장되는 개수
     private static final Long IMAGE_CNT = 10L;  //Camp id 하나에 저장될 이미지 개수
 
     //신규 데이터 저장
@@ -56,13 +56,14 @@ public class GoCampingScheduler {
 
                 log.info("캠프 데이터 신규 생성 성공: " + goCampingParsedResponseDtos.size() + "개");
 
-
-                //todo 몇초 기다리기
-//                Thread.sleep(10000);  //일단보류
+                //캠프 아이디 추출
+                List<Long> campIdList = goCampingParsedResponseDtos.stream()
+                        .map(GoCampingParsedResponseDto::getContentId)
+                        .toList();
 
                 //고캠핑 API 호출하고 dto 로 변환(이미지)
                 List<GoCampingImageDto> goCampingImageDto
-                        = goCampingService.getAndConvertToGoCampingImageDataDto(IMAGE_CNT);
+                        = goCampingService.getAndConvertToGoCampingImageDataDto(campIdList, IMAGE_CNT);
 
                 //CampImage 를 생성하고 DB에 저장한다.
                 List<List<GoCampingImageParsedResponseDto>> goCampingImageParsedResponseDtos
@@ -76,8 +77,6 @@ public class GoCampingScheduler {
                 if (goCampingDataDto.getResponse().getBody().getNumOfRows() == 0) {
                     break;
                 }
-                //todo 기다리기 처리
-//                Thread.sleep(10000); //일단보류
             }
         } catch (URISyntaxException e) {
             log.error("캠프 데이터 생성 실패: " + e.getMessage());
@@ -103,9 +102,14 @@ public class GoCampingScheduler {
                 List<GoCampingParsedResponseDto> goCampingParsedResponseDtos =
                         goCampingService.createOrUpdateCampByGoCampingData(goCampingDataDto);
 
+                List<Long> campIdList = goCampingParsedResponseDtos.stream()
+                        .map(GoCampingParsedResponseDto::getContentId)
+                        .toList();
+
                 log.info("캠프 데이터 업데이트 성공: " + goCampingParsedResponseDtos.size() + "개");
 
-                List<GoCampingImageDto> goCampingImageDto = goCampingService.getAndConvertToGoCampingImageDataDto(IMAGE_CNT);
+                List<GoCampingImageDto> goCampingImageDto
+                        = goCampingService.getAndConvertToGoCampingImageDataDto(campIdList, IMAGE_CNT);
 
                 List<List<GoCampingImageParsedResponseDto>> goCampingImageParsedResponseDtos
                         = goCampingService.createOrUpdateCampImageByGoCampingImageData(goCampingImageDto);
@@ -117,8 +121,6 @@ public class GoCampingScheduler {
                 if (goCampingDataDto.getResponse().getBody().getNumOfRows() == 0) {
                     break;
                 }
-                //todo 몇초 기다리기
-//                Thread.sleep(10000);
             }
         } catch (URISyntaxException e) {
             log.error("캠프 데이터 업데이트 실패: " + e.getMessage());
@@ -150,8 +152,6 @@ public class GoCampingScheduler {
                 if (goCampingDataDto.getResponse().getBody().getNumOfRows() == 0) {
                     break;
                 }
-                //todo 몇초 기다리기
-//                Thread.sleep(10000);
             }
         } catch (URISyntaxException e) {
             log.error("캠프 데이터 삭제 실패: " + e.getMessage());

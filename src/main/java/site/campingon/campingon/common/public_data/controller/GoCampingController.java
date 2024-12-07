@@ -55,7 +55,7 @@ public class GoCampingController {
             @RequestParam("imageCnt") Long imageCnt)    //몇개의 이미지개수를 갖고올지
             throws URISyntaxException {
         //공공데이터를 조회하고 dto로 변환
-        List<GoCampingImageDto> goCampingImageDto = goCampingService.getAndConvertToGoCampingImageDataDto(imageCnt);
+        List<GoCampingImageDto> goCampingImageDto = goCampingService.getAndConvertToAllGoCampingImageDataDto(imageCnt);
 
         //CampImage 를 생성하고 DB에 저장한다.
         List<List<GoCampingImageParsedResponseDto>> goCampingParsedResponseDtos
