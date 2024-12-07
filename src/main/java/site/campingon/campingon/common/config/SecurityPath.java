@@ -11,8 +11,7 @@ public class SecurityPath {
         "/",
         "/api/mongo/camps/search",
         "/api/camps/*/available",
-        "/api/camps/*",
-        "/api/keywords"
+        "/api/camps/*"
     };
 
 
@@ -24,13 +23,14 @@ public class SecurityPath {
         "/api/users/me",
         "/api/reservations/**",
         "/api/camps/*/bookmarks",
-        "/api/logout"
+        "/api/logout",
+        "/api/keywords",
+        "/api/keywords/me"
     };
 
     // hasRole("ADMIN")
     public static final String[] ADMIN_ENDPOINTS = {
         "/api/admin/**",
-        "/api/keywords/**",
         "/api/basedList/**",
         "/api/imageList/**"
 

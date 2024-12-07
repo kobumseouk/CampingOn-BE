@@ -38,7 +38,7 @@ public class SearchInfoService {
 
         // 사용자 키워드 조회 (검색 조건이 있을 때만 사용됨)
         List<String> userKeywords = userId != 0L ?
-            userService.getKeywordsByUserId(userId) :
+            userService.getKeywordsByUserId(userId).getKeywords() :
             new ArrayList<>();
 
         // 검색 수행 (결과와 전체 개수를 한 번에 조회)
@@ -69,7 +69,7 @@ public class SearchInfoService {
     public Page<CampListResponseDto> getMatchedCampsByKeywords(
         String username, Long userId, Pageable pageable) {
         // 사용자 키워드 조회
-        List<String> userKeywords = userService.getKeywordsByUserId(userId);
+        List<String> userKeywords = userService.getKeywordsByUserId(userId).getKeywords();
 
         if (userKeywords.isEmpty()) {
             return Page.empty(pageable);

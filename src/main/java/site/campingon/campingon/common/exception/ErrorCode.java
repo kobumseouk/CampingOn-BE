@@ -57,7 +57,10 @@ public enum ErrorCode {
 
     FILE_NOT_FOUND(HttpStatus.NOT_FOUND, "FILE-005", "요청한 파일을 찾을 수 없습니다."),
     S3_OPERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FILE-006", "S3 작업 중 오류가 발생했습니다."),
-    FILE_MOVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FILE-007", "파일 이동 중 오류가 발생했습니다.");
+    FILE_MOVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FILE-007", "파일 이동 중 오류가 발생했습니다."),
+
+    // 키워드 찾을 수 없음
+    KEYWORD_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "KEYWORD-001", "키워드는 최대 5개까지만 등록 가능합니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
