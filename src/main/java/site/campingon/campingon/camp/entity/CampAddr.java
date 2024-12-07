@@ -37,7 +37,7 @@ public class CampAddr {
     @Column(columnDefinition = "POINT SRID 4326", nullable = false) // MySQL POINT 유형 및 SRID 지정
     private Point location;
 
-    @Column(name = "street_addr", length = 50)
+    @Column(name = "street_addr", length = 100)
     private String streetAddr;   // 기본 도로명 주소
 
     @Column(name = "detailed_addr", length = 50)
