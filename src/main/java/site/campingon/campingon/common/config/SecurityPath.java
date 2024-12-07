@@ -11,26 +11,26 @@ public class SecurityPath {
         "/",
         "/api/mongo/camps/search",
         "/api/camps/*/available",
-        "/api/camps/*",
-        "/api/keywords"
+        "/api/camps/*"
     };
 
 
     // hasRole("USER")
     public static final String[] USER_ENDPOINTS = {
-        "/api/camps/matched",
+        "/api/mongo/camps/matched",
         "/api/users/me/bookmarked",
         "/api/users/me/*",
         "/api/users/me",
         "/api/reservations/**",
         "/api/camps/*/bookmarks",
-        "/api/logout"
+        "/api/logout",
+        "/api/keywords",
+        "/api/keywords/me"
     };
 
     // hasRole("ADMIN")
     public static final String[] ADMIN_ENDPOINTS = {
         "/api/admin/**",
-        "/api/keywords/**",
         "/api/basedList/**",
         "/api/imageList/**"
 

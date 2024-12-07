@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 @Getter
 @ToString
-@Builder(toBuilder = true)
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReservationResponseDto {
@@ -34,5 +34,7 @@ public class ReservationResponseDto {
     private CampAddrResponseDto campAddrResponseDto;
 
     private CampSiteResponseDto campSiteResponseDto;
+
+    private ReviewResponseDto reviewResponseDto;
 
 }

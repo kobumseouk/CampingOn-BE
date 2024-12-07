@@ -5,7 +5,7 @@ import site.campingon.campingon.camp.entity.Induty;
 
 @Getter
 @ToString
-@Builder(toBuilder = true)
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class CampSiteResponseDto {

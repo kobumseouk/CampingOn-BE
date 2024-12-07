@@ -6,21 +6,22 @@ import site.campingon.campingon.reservation.entity.CheckTime;
 
 import java.time.LocalTime;
 
+@ToString
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Data
 public class CampSiteResponseDto {
     private Long siteId;
     private Integer maximumPeople;
     private Integer price;
-    private String indoorFacility;
     private Induty siteType;
-    private boolean isAvailable;
+    private String indoorFacility;
 
     @Builder.Default
     private CheckTime checkinTime = CheckTime.CHECKIN;
     @Builder.Default
     private CheckTime checkoutTime = CheckTime.CHECKOUT;
+
+    CampSimpleDto campSimpleDto;
 }
