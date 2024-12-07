@@ -5,14 +5,14 @@ services:
       dockerfile: Dockerfile
     image: camping-on:latest
     container_name: camping-on
-    env_file:
-      - .env # 환경 변수 파일 경로
     ports:
       - "8080:8080"
     restart: always
     environment:
-      SPRING_PROFILES_ACTIVE: prod,s3Bucket
+      SPRING_PROFILES_ACTIVE: dev,s3Bucket
       TZ: Asia/Seoul
+    volumes:
+      - ./logs:app/logs # 로그 마운트
     networks:
       - app-network
 
