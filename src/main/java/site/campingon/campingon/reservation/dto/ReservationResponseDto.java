@@ -35,4 +35,6 @@ public class ReservationResponseDto {
 
     private CampSiteResponseDto campSiteResponseDto;
 
+    private ReviewResponseDto reviewResponseDto;
+
 }
