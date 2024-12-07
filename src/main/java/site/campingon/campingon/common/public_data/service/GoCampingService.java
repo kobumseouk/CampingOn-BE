@@ -184,7 +184,7 @@ public class GoCampingService {
 
     //공공데이터 이미지 API 조회하고 dto 변환(DB에 있는 모든 Camp 테이블의 이미지 조회)
     public List<GoCampingImageDto> getAndConvertToAllGoCampingImageDataDto(
-            Long imageCnt)
+            long imageCnt)
             throws URISyntaxException {
         List<GoCampingImageDto> goCampingDataDtoList = new ArrayList<>();
 
@@ -194,7 +194,7 @@ public class GoCampingService {
 
         for (Long campId : campIdList) {
             URI uri = goCampingProviderService.createUri(GoCampingPath.IMAGE_LIST,
-                    "numOfRows", imageCnt.toString(),
+                    "numOfRows", Long.toString(imageCnt),
                     "pageNo", IMAGE_PAGE_NO,  //몇번부터 시작할지
                     "contentId", campId.toString());
 
@@ -206,14 +206,14 @@ public class GoCampingService {
 
     //공공데이터 이미지 API 조회 및 Dto 변환(campIdList 에 해당하는 id만 이미지 조회)
     public List<GoCampingImageDto> getAndConvertToGoCampingImageDataDto(
-            List<Long> campIdList, Long imageCnt)
+            List<Long> campIdList, long imageCnt)
             throws URISyntaxException {
         List<GoCampingImageDto> goCampingDataDtoList = new ArrayList<>();
 
 
         for (Long campId : campIdList) {
             URI uri = goCampingProviderService.createUri(GoCampingPath.IMAGE_LIST,
-                    "numOfRows", imageCnt.toString(),
+                    "numOfRows", Long.toString(imageCnt),
                     "pageNo", IMAGE_PAGE_NO,  //몇번부터 시작할지
                     "contentId", campId.toString());
 
