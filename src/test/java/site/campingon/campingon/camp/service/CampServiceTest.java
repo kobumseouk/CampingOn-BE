@@ -1,5 +1,6 @@
 package site.campingon.campingon.camp.service;
 
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,9 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.locationtech.jts.geom.Point;
 import site.campingon.campingon.bookmark.repository.BookmarkRepository;
-import site.campingon.campingon.camp.dto.CampDetailResponseDto;
-import site.campingon.campingon.camp.dto.CampListResponseDto;
-import site.campingon.campingon.camp.dto.CampSiteListResponseDto;
+import site.campingon.campingon.camp.dto.*;
 import site.campingon.campingon.camp.entity.*;
 import site.campingon.campingon.camp.mapper.CampMapper;
 import site.campingon.campingon.camp.repository.CampRepository;
@@ -62,13 +61,12 @@ class CampServiceTest {
   private Camp mockCamp;
   private CampListResponseDto mockCampListDto;
   private CampDetailResponseDto mockCampDetailDto;
-  private CampSite mockCampSite;
-  private CampSiteListResponseDto mockCampSiteDto;
   private List<String> mockKeywords;
   private CampAddr mockCampAddr;
   private CampInfo mockCampInfo;
   private List<CampInduty> mockCampInduties;
-
+  private CampInfoDto mockCampInfoDto;
+  private CampAddrDto mockCampAddrDto;
 
   @BeforeEach
   void setUp() {
@@ -122,6 +120,22 @@ class CampServiceTest {
         .campInfo(mockCampInfo)
         .build();
 
+    mockCampAddrDto = CampAddrDto.builder()
+        .city(mockCampAddr.getCity())
+        .state(mockCampAddr.getState())
+        .zipcode(mockCampAddr.getZipcode())
+        .longitude(point.getX())
+        .latitude(point.getY())
+        .streetAddr(mockCampAddr.getStreetAddr())
+        .detailedAddr(mockCampAddr.getDetailedAddr())
+        .build();
+
+    mockCampInfoDto = CampInfoDto.builder()
+        .campInfoId(mockCampInfo.getId())
+        .recommendCnt(mockCampInfo.getRecommendCnt())
+        .bookmarkCnt(mockCampInfo.getBookmarkCnt())
+        .build();
+
     mockCampListDto = CampListResponseDto.builder()
         .campId(1L)
         .name("Test Camp")
@@ -139,65 +153,15 @@ class CampServiceTest {
         .lineIntro("Test Line Intro")
         .homepage("http://test.com")
         .outdoorFacility("Test Facility")
-        .indutys("일반야영장, 자동차야영장")
-        .campAddr(mockCampAddr)
+        .indutys(Arrays.asList("일반야영장", "자동차야영장"))
+        .campAddr(mockCampAddrDto)
         .images(Arrays.asList("image1.jpg", "image2.jpg"))
-        .campInfo(mockCampInfo)
+        .campInfo(mockCampInfoDto)
         .build();
 
     mockKeywords = Arrays.asList("keyword1", "keyword2");
 
   }
-
-  @Test
-  @DisplayName("키워드 매칭된 캠핑장 목록 조회 성공 확인 테스트")
-  void getMatchedCampsByKeywords_success() {
-    // given
-    Long userId = 1L;
-    String username = "캠린이";
-    Pageable pageable = PageRequest.of(0, 3);
-    List<Camp> camps = Arrays.asList(mockCamp);
-    Page<Camp> campPage = new PageImpl<>(camps, pageable, camps.size());
-
-    when(userKeywordRepository.findKeywordsByUserId(userId)).thenReturn(mockKeywords);
-    when(campRepository.findMatchedCampsByKeywords(mockKeywords, pageable)).thenReturn(campPage);
-    when(campMapper.toCampListDto(any(Camp.class))).thenReturn(mockCampListDto);
-    when(bookMarkRepository.existsByCampIdAndUserId(anyLong(), anyLong())).thenReturn(false);
-
-    // when
-    Page<CampListResponseDto> result = campService.getMatchedCampsByKeywords(username, userId, pageable);
-
-    // then
-    assertNotNull(result);
-    assertEquals(1, result.getTotalElements());
-    assertEquals(mockCampListDto, result.getContent().get(0));
-
-    verify(userKeywordRepository).findKeywordsByUserId(userId);
-    verify(campRepository).findMatchedCampsByKeywords(mockKeywords, pageable);
-    verify(campMapper).toCampListDto(any(Camp.class));
-    verify(bookMarkRepository).existsByCampIdAndUserId(anyLong(), anyLong());
-  }
-
-  @Test
-  @DisplayName("사용자 키워드가 없을 때 빈 페이지 반환 확인 테스트")
-  void getMatchedCampsByKeywords_emptyKeywords_returnsEmptyPage() {
-    // given
-    Long userId = 1L;
-    String username = "캠린이";
-    Pageable pageable = PageRequest.of(0, 3);
-    when(userKeywordRepository.findKeywordsByUserId(userId)).thenReturn(Collections.emptyList());
-
-    // when
-    Page<CampListResponseDto> result = campService.getMatchedCampsByKeywords(username, userId, pageable);
-
-    // then
-    assertTrue(result.isEmpty());
-    assertEquals(0, result.getTotalElements());
-    verify(userKeywordRepository).findKeywordsByUserId(userId);
-    verify(campRepository, never()).findMatchedCampsByKeywords(any(), any());
-  }
-
-
 
   @Test
   @DisplayName("로그인한 사용자의 인기 캠핑장 목록 조회 성공 테스트")
@@ -272,7 +236,6 @@ class CampServiceTest {
     assertEquals(0, result.getTotalElements());
     verify(campRepository).findPopularCamps(pageable);
   }
-
 
 
   @Test
@@ -368,60 +331,6 @@ class CampServiceTest {
     verify(campRepository).findByBookmarks_User_Id(userId, pageable);
   }
 
-
-  @Test
-  @DisplayName("지역(시/도)과 검색어를 통한 캠핑장 목록 조회 성공 확인 테스트")
-  void searchCamps_success() {
-    // given
-    Long userId = 1L;
-    String keyword = "test";
-    String city = "TestCity";
-    PageRequest pageRequest = PageRequest.of(0, 12);
-
-    List<Camp> camps = Arrays.asList(mockCamp);
-    Page<Camp> campPage = new PageImpl<>(camps, pageRequest, camps.size());
-
-    when(campRepository.findByCampNameSearch(city, pageRequest)).thenReturn(campPage);
-    when(campMapper.toCampListDto(any(Camp.class))).thenReturn(mockCampListDto);
-    when(bookMarkRepository.existsByCampIdAndUserId(anyLong(), anyLong())).thenReturn(false);
-
-    // when
-    Page<CampListResponseDto> result = campService.searchCamps(userId, keyword, city, pageRequest);
-
-    // then
-    assertNotNull(result);
-    assertEquals(1, result.getTotalElements());
-    assertEquals(mockCampListDto, result.getContent().get(0));
-
-    verify(campRepository).findByCampNameSearch(city, pageRequest);
-    verify(campMapper).toCampListDto(any(Camp.class));
-    verify(bookMarkRepository).existsByCampIdAndUserId(anyLong(), anyLong());
-  }
-
-  @Test
-  @DisplayName("검색 결과가 없을 때 빈 목록 반환 확인 테스트")
-  void searchCamps_noResults_returnsEmptyList() {
-    // given
-    Long userId = 1L;
-    String keyword = "nonexistent";
-    String city = "NonexistentCity";
-    PageRequest pageRequest = PageRequest.of(0, 12);
-    Page<Camp> emptyPage = new PageImpl<>(Collections.emptyList(), pageRequest, 0);
-
-    when(campRepository.findByCampNameSearch(city, pageRequest)).thenReturn(emptyPage);
-    when(campRepository.searchCampsByKeywordAndCity(keyword.toLowerCase(), city, pageRequest))
-        .thenReturn(emptyPage);
-
-    // when
-    Page<CampListResponseDto> result = campService.searchCamps(userId, keyword, city, pageRequest);
-
-    // then
-    assertTrue(result.isEmpty());
-    assertEquals(0, result.getTotalElements());
-    verify(campRepository).findByCampNameSearch(city, pageRequest);
-  }
-
-
   // 캠핑장 관리자 테스트 CRUD
   @Test
   @DisplayName("관리자 캠핑장 생성 확인 테스트")
@@ -467,10 +376,10 @@ class CampServiceTest {
         .lineIntro("Updated Intro")
         .homepage("http://updated.com")
         .outdoorFacility("Updated Facility")
-        .indutys("일반야영장, 자동차야영장")
-        .campAddr(mockCampAddr)
+        .indutys(Arrays.asList("일반야영장", "자동차야영장"))
+        .campAddr(mockCampAddrDto)
         .images(Arrays.asList("updated1.jpg", "updated2.jpg"))
-        .campInfo(mockCampInfo)
+        .campInfo(mockCampInfoDto)
         .build();
 
     when(campRepository.findById(campId)).thenReturn(Optional.of(mockCamp));

@@ -1,7 +1,5 @@
 package site.campingon.campingon.camp.repository.mongodb;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.bson.Document;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +9,7 @@ import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import site.campingon.campingon.camp.dto.mongodb.SearchResultDto;
 import site.campingon.campingon.camp.entity.mongodb.SearchInfo;
 
 import java.util.ArrayList;
@@ -36,7 +35,7 @@ public class MongoSearchClient {
             "score: {$meta: 'searchScore'}" +
         "}}";
 
-    public SearchResult searchWithUserPreferences(String searchTerm, List<String> userKeywords, String city, Pageable pageable) {
+    public SearchResultDto searchWithUserPreferences(String searchTerm, List<String> userKeywords, String city, Pageable pageable) {
         String mustClause = "";
         if (StringUtils.hasText(city)) {
             List<String> cityVariants = getCityVariants(city);
@@ -92,7 +91,7 @@ public class MongoSearchClient {
         List<String> clauses = new ArrayList<>();
 
         if (StringUtils.hasText(searchTerm)) {
-            clauses.add("{text: {query: '" + searchTerm + "', path: 'name', score: {boost: {value: 5}}, fuzzy: {maxEdits: 1}}}");
+            clauses.add("{text: {query: '" + searchTerm + "', path: 'name', score: {boost: {value: 5}}, fuzzy: {maxEdits: 2}}}");
             clauses.add("{text: {query: '" + searchTerm + "', path: 'hashtags', score: {boost: {value: 4}}, fuzzy: {maxEdits: 1}}}");
             clauses.add("{text: {query: '" + searchTerm + "', path: 'address.state', score: {boost: {value: 3}}, fuzzy: {maxEdits: 1}}}");
             clauses.add("{text: {query: '" + searchTerm + "', path: 'address.city', score: {boost: {value: 2}}}}");
@@ -110,24 +109,18 @@ public class MongoSearchClient {
         return clauses.isEmpty() ? "[]" : "[" + String.join(",", clauses) + "]";
     }
 
-    @Getter
-    @AllArgsConstructor
-    public static class SearchResult {
-        private final List<SearchInfo> results;
-        private final long total;
-    }
 
-    private SearchResult processResults(AggregationResults<Document> results) {
+    private SearchResultDto processResults(AggregationResults<Document> results) {
         Document result = results.getUniqueMappedResult();
         if (result == null) {
-            return new SearchResult(Collections.emptyList(), 0L);
+            return new SearchResultDto(Collections.emptyList(), 0L);
         }
 
         List<Document> resultDocs = (List<Document>) result.get("results");
         List<Document> totalDocs = (List<Document>) result.get("total");
 
         if (resultDocs == null) {
-            return new SearchResult(Collections.emptyList(), 0L);
+            return new SearchResultDto(Collections.emptyList(), 0L);
         }
 
         List<SearchInfo> searchResults = resultDocs.stream()
@@ -143,7 +136,7 @@ public class MongoSearchClient {
             }
         }
 
-        return new SearchResult(searchResults, total);
+        return new SearchResultDto(searchResults, total);
     }
 
     private List<String> getCityVariants(String city) {
