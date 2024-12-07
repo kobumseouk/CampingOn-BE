@@ -102,13 +102,14 @@ public class S3BucketService {
     }
 
     // 허용되지 않는 문자 패턴 검사
-    String invalidChars = "[\\\\/:*?\"<>|]";
+    String invalidChars = "[\\\\:*?\"<>|]";
     if (trimmedPath.matches(".*" + invalidChars + ".*")) {
       throw new IllegalArgumentException("경로에 허용되지 않는 특수문자가 포함되어 있습니다.");
     }
 
-    // 경로 끝에 / 추가
-    return trimmedPath.endsWith("/") ? trimmedPath : trimmedPath + "/";
+    // 경로 시작과 끝의 '/' 처리
+    trimmedPath = trimmedPath.replaceAll("^/+|/+$", "");
+    return trimmedPath + "/";
   }
 
   // 파일 메타데이터 생성
