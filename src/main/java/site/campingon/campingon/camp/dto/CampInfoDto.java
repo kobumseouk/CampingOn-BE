@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CampInfoDto {
-    private Long campInfoId;      // 캠프 정보 ID
-    private Integer recommendCnt; // 추천 수
-    private Integer bookmarkCnt;  // 찜 수
+    private Long campInfoId;
+    private Integer recommendCnt;
+    private Integer bookmarkCnt;
 }
