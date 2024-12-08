@@ -17,5 +17,5 @@ public class ReviewResponseDto {
     private String title;  // 리뷰 제목
     private String content; // 리뷰 내용
     private boolean isRecommend; // 추천 여부
-    private List<ReviewImage> images;
+    private List<String> images;
 }

@@ -1,5 +1,6 @@
 package site.campingon.campingon.review.mapper;
 
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
@@ -26,7 +27,7 @@ public interface ReviewMapper {
     Review toEntity(ReviewCreateRequestDto requestDto, Camp camp, Reservation reservation);
 
     @Mapping(target = "reviewId", source = "id")
-    @Mapping(target = "images", source = "reviewImages")
+    @Mapping(target = "images", expression = "java(review.getReviewImages() != null ? review.getReviewImages().stream().map(image -> image.getImageUrl()).collect(Collectors.toList()) : new ArrayList<>())")
     ReviewResponseDto toResponseDto(Review review);
 
     // 리뷰 수정 매퍼
