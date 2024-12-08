@@ -35,7 +35,7 @@ public class Camp{
   @Column(name = "line_intro", length = 255)
   private String lineIntro; // 요약
 
-  @Column(length = 100)
+  @Column(length = 255)
   private String homepage;
 
   @Column(name = "outdoor_facility", length = 255)
@@ -43,6 +43,9 @@ public class Camp{
 
   @Column(name = "thumb_image", length = 255)
   private String thumbImage;  // 썸네일 이미지
+
+  @Column(name = "animal_admission", length = 50)
+  private String animalAdmission;
 
   @OneToMany(mappedBy = "camp", cascade = CascadeType.ALL, orphanRemoval = true)
   @Builder.Default
@@ -80,6 +83,7 @@ public class Camp{
     this.homepage = data.getHomepage();
     this.outdoorFacility = data.getSbrsCl();
     this.thumbImage = data.getFirstImageUrl();
+    this.animalAdmission = data.getAnimalCmgCl();
     this.createdAt = LocalDateTime.parse(
             data.getCreatedtime()
             , DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));

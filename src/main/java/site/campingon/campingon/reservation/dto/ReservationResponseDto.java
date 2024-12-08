@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 @Getter
 @ToString
-@Builder(toBuilder = true)
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReservationResponseDto {

@@ -13,7 +13,6 @@ import site.campingon.campingon.camp.dto.mongodb.SearchResultDto;
 import site.campingon.campingon.camp.entity.mongodb.SearchInfo;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -54,9 +53,10 @@ public class MongoRecommendClient {
         String matchCountStage = "{$addFields: {" +
             "matchCount: {" +
                 "$size: {" +
-                    "$setIntersection: [" +
-                        "$hashtags," +
-                        Arrays.toString(userKeywords.toArray()) +
+            "$setIntersection: [\"$hashtags\", " +
+                    "[" + userKeywords.stream()
+                    .map(keyword -> "\"" + keyword + "\"")
+                    .collect(Collectors.joining(", ")) + "]" +
                     "]" +
                 "}" +
             "}" +

@@ -29,6 +29,7 @@ public enum ErrorCode {
     CAMP_NOT_FOUND(HttpStatus.NOT_FOUND, "CAMP-002", "캠핑장을 찾을 수 없습니다."),
 
     CAMPSITE_NOT_FOUND_BY_ID(HttpStatus.NOT_FOUND, "CAMPSITE-001", "캠핑지의 ID를 찾을 수 없습니다."),
+    REQUIRED_RESERVATION_DATE(HttpStatus.BAD_REQUEST, "CAMPSITE-002", "예약일자를 선택하지 않았습니다."),
 
     REVIEW_NOT_FOUND_BY_ID(HttpStatus.NOT_FOUND, "REVIEW-001", "해당 리뷰를 찾을 수 없습니다."),
     REVIEW_NOT_IN_CAMP(HttpStatus.NOT_FOUND, "REVIEW-002", "리뷰가 해당 캠프에 속하지 않습니다."),
@@ -57,7 +58,15 @@ public enum ErrorCode {
 
     FILE_NOT_FOUND(HttpStatus.NOT_FOUND, "FILE-005", "요청한 파일을 찾을 수 없습니다."),
     S3_OPERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FILE-006", "S3 작업 중 오류가 발생했습니다."),
-    FILE_MOVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FILE-007", "파일 이동 중 오류가 발생했습니다.");
+    FILE_MOVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FILE-007", "파일 이동 중 오류가 발생했습니다."),
+  
+  // 키워드 찾을 수 없음
+    KEYWORD_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "KEYWORD-001", "키워드는 최대 5개까지만 등록 가능합니다."),
+  
+    GO_CAMPING_BAD_REQUEST(HttpStatus.BAD_REQUEST, "GOCAMPING-001", "잘못된 고캠핑 데이터 요청입니다."),
+    GO_CAMPING_IMAGE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "GOCAMPING-002", "DB에 저장된 캠프가 없거나 잘못된 데이터 요청입니다."),
+    GO_CAMPING_DATA_NO_CONTENT(HttpStatus.NO_CONTENT,"GOCAMPING-003","요청하신 응답은 데이터가 없습니다.");
+
 
     private final HttpStatus httpStatus;
     private final String code;
