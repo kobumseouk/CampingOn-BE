@@ -13,6 +13,7 @@ import site.campingon.campingon.review.repository.ReviewRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Component
@@ -32,15 +33,17 @@ public class ReviewScheduler {
         for (Review review : oldDeletedReviews) {
             List<ReviewImage> images = reviewImageRepository.findByReview(review);
 
-            for (ReviewImage image : images) {
+            // 이미지 URL들을 리스트로 모아서 한 번에 삭제 요청
+            List<String> imageUrls = images.stream()
+                .map(ReviewImage::getImageUrl)
+                .collect(Collectors.toList());
 
-                try {
-                    s3BucketService.remove(image.getImageUrl());
-                    reviewImageRepository.delete(image);
-                } catch (Exception e) {
-                    log.error("Failed to cleanup review image: reviewId={}, imageUrl={}",
-                        review.getId(), image.getImageUrl());
-                }
+            try {
+                s3BucketService.remove(imageUrls);
+                reviewImageRepository.deleteAll(images);
+            } catch (Exception e) {
+                log.error("Failed to cleanup review images: reviewId={}, imageUrls={}",
+                    review.getId(), imageUrls);
             }
         }
     }
