@@ -11,9 +11,19 @@ import site.campingon.campingon.review.dto.ReviewResponseDto;
 import site.campingon.campingon.review.dto.ReviewUpdateRequestDto;
 import site.campingon.campingon.review.entity.Review;
 
+// import site.campingon.campingon.review.entity.ReviewImage;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+
 import java.util.List;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(
+    componentModel = "spring",
+    unmappedTargetPolicy = ReportingPolicy.IGNORE,
+    imports = {
+        Collectors.class,
+        ArrayList.class
+    })
 public interface ReviewMapper {
 
     // 리뷰 생성 매퍼
@@ -27,6 +37,7 @@ public interface ReviewMapper {
     Review toEntity(ReviewCreateRequestDto requestDto, Camp camp, Reservation reservation);
 
     @Mapping(target = "reviewId", source = "id")
+    @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "images", expression = "java(review.getReviewImages() != null ? review.getReviewImages().stream().map(image -> image.getImageUrl()).collect(Collectors.toList()) : new ArrayList<>())")
     ReviewResponseDto toResponseDto(Review review);
 

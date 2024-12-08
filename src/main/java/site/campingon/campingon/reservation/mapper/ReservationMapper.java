@@ -10,7 +10,15 @@ import site.campingon.campingon.reservation.dto.ReviewResponseDto;
 import site.campingon.campingon.reservation.entity.Reservation;
 import site.campingon.campingon.review.entity.Review;
 
-@Mapper(componentModel = "spring")
+// import site.campingon.campingon.review.entity.ReviewImage;  // 추가
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+
+@Mapper(componentModel = "spring",
+    imports = {
+        Collectors.class,
+        ArrayList.class
+    })
 public interface ReservationMapper {
     @Mapping(source = "checkin", target = "checkinDate")
     @Mapping(source = "checkout", target = "checkoutDate")

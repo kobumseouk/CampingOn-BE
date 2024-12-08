@@ -51,19 +51,18 @@ public class ReviewController {
     }
 
     // 리뷰 상세 조회
-    @GetMapping("/{campId}/reviews/{reviewId}")
+    @GetMapping("/reviews/{reviewId}")
     public ResponseEntity<ReviewResponseDto> getReviewById(
-            @PathVariable("reviewId") Long reviewId
+        @PathVariable("reviewId") Long reviewId
     ) {
         ReviewResponseDto review = reviewService.getReviewById(reviewId);
-        log.debug("Review response: {}", review);
         return ResponseEntity.ok(review);
     }
 
     // 리뷰 삭제
     @DeleteMapping("/reviews/{reviewId}")
     public ResponseEntity<Void> deleteReview(
-            @PathVariable("reviewId") Long reviewId
+        @PathVariable("reviewId") Long reviewId
     ) {
         reviewService.deleteReview(reviewId);
         return ResponseEntity.noContent().build();
