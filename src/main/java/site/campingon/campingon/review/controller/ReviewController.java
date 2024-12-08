@@ -1,19 +1,18 @@
 package site.campingon.campingon.review.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import site.campingon.campingon.common.jwt.CustomUserDetails;
 import site.campingon.campingon.review.dto.ReviewCreateRequestDto;
 import site.campingon.campingon.review.dto.ReviewResponseDto;
 import site.campingon.campingon.review.dto.ReviewUpdateRequestDto;
 import site.campingon.campingon.review.service.ReviewService;
 
-import java.io.IOException;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/camps")
 @RequiredArgsConstructor
@@ -57,6 +56,7 @@ public class ReviewController {
             @PathVariable("reviewId") Long reviewId
     ) {
         ReviewResponseDto review = reviewService.getReviewById(reviewId);
+        log.debug("Review response: {}", review);
         return ResponseEntity.ok(review);
     }
 
