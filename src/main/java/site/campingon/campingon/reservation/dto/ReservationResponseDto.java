@@ -35,6 +35,6 @@ public class ReservationResponseDto {
 
     private CampSiteResponseDto campSiteResponseDto;
 
-    private ReviewResponseDto reviewResponseDto;
+    private ReviewResponseDto reviewDto;  // 리뷰 작성시 ReviewResponseDto명이 겹쳐서 변경
 
 }

@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import site.campingon.campingon.common.jwt.CustomUserDetails;
+import site.campingon.campingon.common.jwt.CustomUserPrincipal;
+import site.campingon.campingon.common.oauth.CustomOAuth2User;
+import site.campingon.campingon.common.oauth.service.CustomOAuth2UserService;
 import site.campingon.campingon.user.dto.UserResponseDto;
 import site.campingon.campingon.user.dto.UserSignUpRequestDto;
 import site.campingon.campingon.user.dto.UserSignUpResponseDto;
@@ -30,6 +33,7 @@ import site.campingon.campingon.user.service.UserService;
 public class UserController {
 
     private final UserService userService;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     // 회원 가입 api
     @PostMapping("/signup")
@@ -72,14 +76,17 @@ public class UserController {
     // 회원 탈퇴
     @DeleteMapping("/users/me")
     public ResponseEntity<Void> deleteUser(
-        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @AuthenticationPrincipal CustomUserPrincipal customUserPrincipal,
         @RequestBody String deleteReason,
         @CookieValue(name = "refreshToken", required = false) String refreshToken,
         @RequestHeader("Authorization") String authHeader
-        ) {
-        Long userId = userDetails.getId();
+    ) {
         String accessToken = authHeader.replace("Bearer ", "");
-        userService.deleteUser(userId, deleteReason, accessToken, refreshToken);
+        if (customUserPrincipal instanceof CustomOAuth2User oauthUser) {
+            customOAuth2UserService.deleteGoogleAccount(oauthUser);
+        } else if (customUserPrincipal instanceof CustomUserDetails customUserDetails) {
+            userService.deleteUser(customUserDetails.getId(), deleteReason, accessToken, refreshToken);
+        }
 
         return ResponseEntity.noContent().build();
     }

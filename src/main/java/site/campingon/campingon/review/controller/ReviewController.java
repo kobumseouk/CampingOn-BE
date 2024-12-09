@@ -1,19 +1,18 @@
 package site.campingon.campingon.review.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import site.campingon.campingon.common.jwt.CustomUserDetails;
 import site.campingon.campingon.review.dto.ReviewCreateRequestDto;
 import site.campingon.campingon.review.dto.ReviewResponseDto;
 import site.campingon.campingon.review.dto.ReviewUpdateRequestDto;
 import site.campingon.campingon.review.service.ReviewService;
 
-import java.io.IOException;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/camps")
 @RequiredArgsConstructor
@@ -32,7 +31,7 @@ public class ReviewController {
     }
 
 
-    // 리뷰 수정
+    /*// 리뷰 수정
     @PutMapping(value = "/{campId}/reviews/{reviewId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ReviewResponseDto> updateReview(
             @PathVariable("campId") Long campId,
@@ -40,7 +39,7 @@ public class ReviewController {
             @ModelAttribute ReviewUpdateRequestDto requestDto
     ) {
         return ResponseEntity.ok(reviewService.updateReview(campId, reviewId, requestDto));
-    }
+    }*/
 
     // 캠핑장 id로 리뷰 목록 조회
     @GetMapping("/{campId}/reviews")
@@ -52,20 +51,20 @@ public class ReviewController {
     }
 
     // 리뷰 상세 조회
-    @GetMapping("/{campId}/reviews/{reviewId}")
+    @GetMapping("/reviews/{reviewId}")
     public ResponseEntity<ReviewResponseDto> getReviewById(
-            @PathVariable("reviewId") Long reviewId
+        @PathVariable("reviewId") Long reviewId
     ) {
         ReviewResponseDto review = reviewService.getReviewById(reviewId);
         return ResponseEntity.ok(review);
     }
 
-    // 리뷰 삭제
+   /* // 리뷰 삭제
     @DeleteMapping("/reviews/{reviewId}")
     public ResponseEntity<Void> deleteReview(
-            @PathVariable("reviewId") Long reviewId
+        @PathVariable("reviewId") Long reviewId
     ) {
         reviewService.deleteReview(reviewId);
         return ResponseEntity.noContent().build();
-    }
+    }*/
 }
