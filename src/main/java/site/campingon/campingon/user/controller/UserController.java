@@ -75,20 +75,15 @@ public class UserController {
     // 회원 탈퇴
     @DeleteMapping("/users/me")
     public ResponseEntity<Void> deleteUser(
-        @AuthenticationPrincipal CustomUserDetails userDetails,
-        @RequestBody String deleteReason,
-        Authentication authentication
+            @AuthenticationPrincipal CustomUserPrincipal customUserPrincipal,
+            @RequestBody String deleteReason
     ) {
-        Long userId = userDetails.getId();
-
-        CustomUserPrincipal userPrincipal = (CustomUserPrincipal) authentication.getPrincipal();
-
-        // Google 유저인 경우
-        if (userPrincipal instanceof CustomOAuth2User oauthUser) {
+        // Google 유저인 경우와 일반 유저 분기 처리
+        if (customUserPrincipal instanceof CustomOAuth2User oauthUser) {
             customOAuth2UserService.deleteGoogleAccount(oauthUser);
+        } else if (customUserPrincipal instanceof CustomUserDetails customUserDetails) {
+            userService.deleteUser(customUserDetails.getId(), deleteReason);
         }
-
-        userService.deleteUser(userId, deleteReason);
 
         return ResponseEntity.noContent().build();
     }

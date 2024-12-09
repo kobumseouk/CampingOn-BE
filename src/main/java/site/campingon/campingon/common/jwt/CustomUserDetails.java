@@ -17,6 +17,7 @@ public class CustomUserDetails implements UserDetails, CustomUserPrincipal {
     private final Role role;
     private final String password;
     private final String name;
+    private final String oauthName = null;
 
     public CustomUserDetails(Long id, String email, String nickname, Role role, String password, String name) {
         this.id = id;

@@ -120,7 +120,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         try {
             restTemplate.exchange(url, HttpMethod.POST, null, String.class);
-            log.debug("Google account successfully revoked.");
+            log.debug("구글 연동 해제 완료");
 
             //DB 업데이트 - soft-delete, oauthName 삭제
             String oauthName = oauth2User.getOauthName();
@@ -131,7 +131,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .build();
             
             userRepository.save(updatedUser);
-            log.debug("User data successfully updated for deletion: {}", updatedUser);
 
         } catch (Exception e) {
             throw new OAuthException(ErrorCode.DELETE_USER_DENIED);
