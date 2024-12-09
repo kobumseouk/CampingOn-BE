@@ -1,11 +1,6 @@
 package site.campingon.campingon.common.jwt;
 
-import java.util.Optional;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.CrudRepository;
 
-public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
-    Optional<RefreshToken> findByToken(String token);
-    Optional<RefreshToken> findByEmail(String email);
-    void deleteByEmail(String email);
-
+public interface RefreshTokenRepository extends CrudRepository<RefreshToken, String> {
 }

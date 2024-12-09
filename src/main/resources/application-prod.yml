@@ -1,4 +1,7 @@
 spring:
+  data:
+    redis:
+      password: ${REDIS_PASSWORD}
   security:
     oauth2:
       client:

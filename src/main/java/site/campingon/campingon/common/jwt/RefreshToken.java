@@ -1,44 +1,28 @@
 package site.campingon.campingon.common.jwt;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import site.campingon.campingon.common.entity.BaseEntity;
+import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.redis.core.TimeToLive;
+import org.springframework.data.annotation.Id;
 
-@Entity
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "refresh_token")
-public class RefreshToken extends BaseEntity {
+@NoArgsConstructor
+@RedisHash("refreshToken")
+public class RefreshToken {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String refreshToken;
 
-    @Column(nullable = false, unique = true, length = 512)
-    private String token;
-
-    @Column(nullable = false, unique = true)
     private String email;
-
-    @Column(nullable = false)
-    private LocalDateTime exp;
+    private Long issuedAt;
 
 
-    // 토큰 업데이트
-    public void update(String refreshToken, LocalDateTime exp) {
-        this.token = refreshToken;
-        this.exp = exp;
-    }
-
+    // Time to live (TTL) 설정, Redis에 만료 시간을 설정
+    @TimeToLive
+    private Long ttl;
 }
