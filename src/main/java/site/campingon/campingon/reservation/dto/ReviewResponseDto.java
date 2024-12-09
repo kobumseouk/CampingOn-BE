@@ -18,6 +18,5 @@ public class ReviewResponseDto {
     private String content;
     private List<String> images;
 
-    @JsonProperty("isRecommend")
-    private boolean isRecommend;
+    private boolean recommended;
 }
