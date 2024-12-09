@@ -97,30 +97,37 @@ public class UserService {
         User user = userRepository.findByIdAndDeletedAtIsNull(userId)
             .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND_BY_ID));
 
-        // 현재 비밀번호 확인
-        if (!passwordEncoder.matches(userUpdateRequestDto.getCurrentPassword(),
-            user.getPassword())) {
-            throw new GlobalException(ErrorCode.PASSWORD_MISMATCH);
-        }
-
         // 닉네임 변경
-        if (userRepository.existsByNickname(userUpdateRequestDto.getNickname())) {
-            throw new GlobalException(ErrorCode.DUPLICATED_NICKNAME);
+        String newNickname = userUpdateRequestDto.getNickname();
+        if (newNickname != null && !newNickname.isBlank()) { // 닉네임이 null 또는 공백이 아닐 때만 처리
+            if (userRepository.existsByNickname(newNickname)) {
+                throw new GlobalException(ErrorCode.DUPLICATED_NICKNAME);
+            }
+            user.updateNickname(newNickname); // 닉네임 변경
         }
-        user.updateNickname(userUpdateRequestDto.getNickname());
 
-        // 새 비밀번호가 있는 경우에만 비밀번호 변경
-        if (userUpdateRequestDto.getNewPassword() != null && !userUpdateRequestDto.getNewPassword().isBlank()) {
+        // 비밀번호 변경
+        String currentPassword = userUpdateRequestDto.getCurrentPassword();
+        String newPassword = userUpdateRequestDto.getNewPassword();
 
-            // 현재 비밀번호와 새 비밀번호 비교
-            if (userUpdateRequestDto.getNewPassword().equals(userUpdateRequestDto.getCurrentPassword())) {
+        // 새 비밀번호가 있을 때만 비밀번호 변경 로직 실행
+        if (newPassword != null && !newPassword.isBlank()) {
+            // 현재 비밀번호가 입력되지 않았으면 에러 발생
+            if (currentPassword == null || currentPassword.isBlank()) {
+                throw new GlobalException(ErrorCode.CURRENT_PASSWORD_REQUIRED);
+            }
+
+            // 현재 비밀번호가 맞는지 확인
+            if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+                throw new GlobalException(ErrorCode.PASSWORD_MISMATCH);
+            }
+
+            // 새 비밀번호가 기존 비밀번호와 같으면 에러 발생
+            if (currentPassword.equals(newPassword)) {
                 throw new GlobalException(ErrorCode.PASSWORD_SAME_AS_OLD);
             }
 
-            if (!passwordEncoder.matches(userUpdateRequestDto.getCurrentPassword(), user.getPassword())) {
-                throw new GlobalException(ErrorCode.PASSWORD_MISMATCH);
-            }
-            user.updatePassword(passwordEncoder.encode(userUpdateRequestDto.getNewPassword()));
+            user.updatePassword(passwordEncoder.encode(newPassword)); // 비밀번호 변경
         }
 
         // 변경된 사용자 정보 저장
@@ -193,7 +200,7 @@ public class UserService {
             userKeywordRepository.save(newKeyword);
         }
 
-        log.info("회원 키워드 갱신 - 유저 ID: {}, 새 키워드 목록: {}", userId, keywords);
+        log.debug("회원 키워드 갱신 - 유저 ID: {}, 새 키워드 목록: {}", userId, keywords);
     }
 
 
