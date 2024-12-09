@@ -39,7 +39,7 @@ public class GoCampingScheduler {
     private static final long IMAGE_CNT = 10L;  //Camp id 하나에 저장될 이미지 개수
 
     //신규 데이터 저장
-    @Scheduled(cron = "0 0 1 * * ?", zone = "Asia/Seoul")  //매달 1일 오전 00:00에 실행
+    @Scheduled(cron = "0 0 0 1 * ?", zone = "Asia/Seoul")  //매달 1일 오전 00:00에 실행
     public void scheduleCampCreation() {
         try {
             long pageNo = 1L;      // 현재 페이지 번호
@@ -53,7 +53,7 @@ public class GoCampingScheduler {
                         "numOfRows", Long.toString(NUM_OF_ROWS),
                         "pageNo", Long.toString(pageNo),
                         "syncStatus", SYNC_STATUS_NEW
-                );
+                );  // api 호출 1번
 
                 if (goCampingDataDto == null) {
                     throw new GlobalException(ErrorCode.GO_CAMPING_DATA_NO_CONTENT);
@@ -63,7 +63,7 @@ public class GoCampingScheduler {
                 totalCount = goCampingDataDto.getResponse().getBody().getTotalCount();
 
                 List<GoCampingParsedResponseDto> goCampingParsedResponseDtos =
-                        goCampingService.upsertCampData(goCampingDataDto);
+                        goCampingService.upsertCampData(goCampingDataDto); // api 호출 NUM_OF_ROWS(500) 번
 
                 log.info("캠프 데이터 신규 생성 성공: " + goCampingParsedResponseDtos.size() + "개");
 

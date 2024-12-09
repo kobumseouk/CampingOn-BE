@@ -22,5 +22,7 @@ public class CampListResponseDto {
 
   private boolean isMarked;  // 찜 여부
   private String username;
+  private String city;
+  private String state;
 
 }
