@@ -57,7 +57,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String oauthName = oAuth2ResponseDto.getProvider() + " " + oAuth2ResponseDto.getProviderId();
 
         // DB에 존재하는 oauth 로그인 계정인지 확인
-        User existUser = userRepository.findByOauthName(oauthName);
+        User existUser = userRepository.findByOauthNameAndDeletedAtIsNull(oauthName);
 
         // attributes에 accessToken 추가 -> oauth 연동 해제를 위해 토큰값이 필요
         Map<String, Object> newAttributes = new HashMap<>(oAuth2User.getAttributes());
@@ -120,19 +120,17 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         try {
             restTemplate.exchange(url, HttpMethod.POST, null, String.class);
-            log.debug("Google account successfully revoked.");
+            log.debug("구글 연동 해제 완료");
 
             //DB 업데이트 - soft-delete, oauthName 삭제
             String oauthName = oauth2User.getOauthName();
-            User user = userRepository.findByOauthName(oauthName);
+            User user = userRepository.findByOauthNameAndDeletedAtIsNull(oauthName);
 
             User updatedUser = user.toBuilder()
-                    .oauthName(null)
                     .deletedAt(LocalDateTime.now())
                     .build();
             
             userRepository.save(updatedUser);
-            log.debug("User data successfully updated for deletion: {}", updatedUser);
 
         } catch (Exception e) {
             throw new OAuthException(ErrorCode.DELETE_USER_DENIED);
