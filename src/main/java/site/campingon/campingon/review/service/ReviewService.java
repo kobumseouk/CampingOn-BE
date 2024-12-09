@@ -70,7 +70,7 @@ public class ReviewService {
             throw new GlobalException(RESERVATION_NOT_COMPLETED_FOR_REVIEW);
         }
 
-        boolean hasReview = reviewRepository.existsByReservationIdAndDeletedAtIsNull(reservationId);
+        boolean hasReview = reviewRepository.existsByReservationId(reservationId);
         if (hasReview) {
             throw new GlobalException(REVIEW_ALREADY_SUBMITTED);
         }
@@ -191,13 +191,13 @@ public class ReviewService {
         Camp camp = campRepository.findById(campId)
                 .orElseThrow(() -> new GlobalException(CAMP_NOT_FOUND_BY_ID));
 
-        List<Review> reviews = reviewRepository.findActiveByCampId(camp.getId());
+        List<Review> reviews = reviewRepository.findByCampId(camp.getId());
         return reviewMapper.toResponseDtoList(reviews);
     }
 
     // 리뷰 상세 조회
     public ReviewResponseDto getReviewById(Long reviewId) {
-        Review review = reviewRepository.findActiveById(reviewId)
+        Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new GlobalException(REVIEW_NOT_FOUND_BY_ID));
         return reviewMapper.toResponseDto(review);
     }
