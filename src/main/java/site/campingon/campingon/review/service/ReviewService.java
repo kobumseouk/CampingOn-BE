@@ -24,13 +24,11 @@ import site.campingon.campingon.review.mapper.ReviewImageMapper;
 import site.campingon.campingon.review.mapper.ReviewMapper;
 import site.campingon.campingon.review.repository.ReviewImageRepository;
 import site.campingon.campingon.review.repository.ReviewRepository;
-import site.campingon.campingon.user.repository.UserRepository;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static site.campingon.campingon.common.exception.ErrorCode.*;
 import static site.campingon.campingon.common.exception.ErrorCode.REVIEW_ALREADY_SUBMITTED;
@@ -71,7 +69,8 @@ public class ReviewService {
         if (reservation.getStatus() != ReservationStatus.COMPLETED) {
             throw new GlobalException(RESERVATION_NOT_COMPLETED_FOR_REVIEW);
         }
-        boolean hasReview = reviewRepository.existsByReservationIdAndDeletedAtIsNull(reservationId);
+
+        boolean hasReview = reviewRepository.existsByReservationId(reservationId);
         if (hasReview) {
             throw new GlobalException(REVIEW_ALREADY_SUBMITTED);
         }
@@ -81,23 +80,34 @@ public class ReviewService {
         Review savedReview = reviewRepository.save(review);
 
         // 이미지가 있는 경우에만 처리
-        if (requestDto.getS3Images() != null && !requestDto.getS3Images().isEmpty()) {
-            // 이미지 파일의 타입, 크기, 개수 검증
-            validateImages(requestDto.getS3Images());
-            try {
-                List<String> uploadedUrls = s3BucketService.upload(requestDto.getS3Images(), "reviews/" + savedReview.getId());
-                List<ReviewImage> reviewImages = reviewImageMapper.toEntityList(uploadedUrls, savedReview);
-                reviewImageRepository.saveAll(reviewImages);
-            } catch (Exception e) {
-                throw new GlobalException(FILE_UPLOAD_FAILED);
-            }
+        List<ReviewImage> reviewImages = processReviewImages(requestDto.getS3Images(), savedReview);
+        if (!reviewImages.isEmpty()) {
+            reviewImageRepository.saveAll(reviewImages);
         }
 
         // 저장된 Review 엔티티를 ReviewResponseDto로 반환
         return reviewMapper.toResponseDto(savedReview);
     }
 
-    // 리뷰 수정
+    // 이미지 처리를 위한 private 메서드
+    private List<ReviewImage> processReviewImages(List<MultipartFile> images, Review review) {
+        if (images == null || images.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 이미지 유효성 검증
+        validateImages(images);
+
+        // 이미지 업로드 및 엔티티 변환
+        try {
+            List<String> uploadedUrls = s3BucketService.upload(images, "reviews/" + review.getId());
+            return reviewImageMapper.toEntityList(uploadedUrls, review);
+        } catch (Exception e) {
+            throw new GlobalException(FILE_UPLOAD_FAILED);
+        }
+    }
+
+    /*// 리뷰 수정
     @Transactional
     public ReviewResponseDto updateReview(Long campId, Long reviewId, ReviewUpdateRequestDto requestDto) {
         // 1. 기존 리뷰 조회
@@ -125,50 +135,21 @@ public class ReviewService {
     }
 
     private void updateReviewImages(Review review, List<MultipartFile> newImages) {
-        // 이미지가 없는 경우 기존 이미지만 삭제
-        if (newImages == null || newImages.isEmpty()) {
-            deleteExistingImages(review);
-            return;
-        }
-
-        validateImages(newImages);
-        List<String> uploadedUrls = new ArrayList<>();
-
-        try {
-            // 새 이미지 업로드
-            uploadedUrls = s3BucketService.upload(newImages, "reviews/" + review.getId());
-
-            // 기존 이미지 삭제
-            deleteExistingImages(review);
-
-            // 새 이미지 정보 저장
-            List<ReviewImage> newImageEntities = reviewImageMapper.toEntityList(uploadedUrls, review);
-            reviewImageRepository.saveAll(newImageEntities);
-
-        } catch (Exception e) {
-            // 실패시 업로드된 이미지 롤백
-            uploadedUrls.forEach(url -> {
-                try {
-                    s3BucketService.remove(url);
-                } catch (Exception ex) {
-                    log.error("업로드 롤백 실패: imageUrl={}", url);
-                }
-            });
-            throw new GlobalException(FILE_UPLOAD_FAILED);
-        }
-    }
-
-    private void deleteExistingImages(Review review) {
+        // 기존 이미지 처리
         List<ReviewImage> existingImages = reviewImageRepository.findByReview(review);
-        for (ReviewImage image : existingImages) {
-            try {
-                s3BucketService.remove(image.getImageUrl());
-            } catch (Exception e) {
-                log.error("이미지 삭제 실패: reviewId={}, imageUrl={}",
-                    review.getId(), image.getImageUrl());
-            }
+        if (existingImages != null && !existingImages.isEmpty()) {
+            List<String> existingUrls = existingImages.stream()
+                .map(ReviewImage::getImageUrl)
+                .collect(Collectors.toList());
+            s3BucketService.remove(existingUrls);
+            reviewImageRepository.deleteAll(existingImages);
         }
-        reviewImageRepository.deleteAll(existingImages);
+
+        // 새 이미지 처리 - processReviewImages
+        List<ReviewImage> newReviewImages = processReviewImages(newImages, review);
+        if (!newReviewImages.isEmpty()) {
+            reviewImageRepository.saveAll(newReviewImages);
+        }
     }
 
     // 리뷰 삭제
@@ -177,10 +158,21 @@ public class ReviewService {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new GlobalException(REVIEW_NOT_FOUND_BY_ID));
 
-        // soft Delete
+        try {
+            moveReviewImagesToDeletedFolder(review);
+        } catch (Exception e) {
+            log.error("Failed to move review images: reviewId={}", reviewId, e);
+            throw new GlobalException(FILE_MOVE_FAILED);
+        }
+
+        // 삭제일 등록
         review.softDelete();
 
-        // 이미지는 보존(6개월 후 삭제), deleted 폴더로 이동
+        reviewRepository.save(review);
+    }
+
+    // 이미지는 보존(6개월 후 삭제), deleted 폴더로 이동
+    private void moveReviewImagesToDeletedFolder(Review review) {
         List<ReviewImage> reviewImages = reviewImageRepository.findByReview(review);
         for (ReviewImage image : reviewImages) {
             String newUrl = "deleted/reviews/" + review.getId() + "/" +
@@ -192,20 +184,20 @@ public class ReviewService {
                 log.error("Failed to move image to deleted folder: {}", image.getImageUrl(), e);
             }
         }
-    }
+    }*/
 
     // 캠핑장 id로 리뷰 목록 조회
     public List<ReviewResponseDto> getReviewsByCampId(Long campId) {
         Camp camp = campRepository.findById(campId)
                 .orElseThrow(() -> new GlobalException(CAMP_NOT_FOUND_BY_ID));
 
-        List<Review> reviews = reviewRepository.findActiveByCampId(camp.getId());
+        List<Review> reviews = reviewRepository.findByCampId(camp.getId());
         return reviewMapper.toResponseDtoList(reviews);
     }
 
     // 리뷰 상세 조회
     public ReviewResponseDto getReviewById(Long reviewId) {
-        Review review = reviewRepository.findActiveById(reviewId)
+        Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new GlobalException(REVIEW_NOT_FOUND_BY_ID));
         return reviewMapper.toResponseDto(review);
     }
