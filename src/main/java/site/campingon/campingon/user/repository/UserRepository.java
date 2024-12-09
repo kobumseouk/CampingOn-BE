@@ -17,7 +17,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmailAndDeletedAtIsNull(String email);
 
     // user email로 중복유무 검색 - oauth 인증 절차
-    User findByOauthName(String oauthName);
+    User findByOauthNameAndDeletedAtIsNull(String oauthName);
 
     // 이메일 또는 닉네임 중복 여부 확인
     @Query("SELECT u FROM User u WHERE (u.email = :email OR u.nickname = :nickname) AND u.deletedAt IS NULL")
