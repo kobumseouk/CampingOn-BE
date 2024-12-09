@@ -17,6 +17,7 @@ public enum ErrorCode {
     INVALID_SECRET_KEY(HttpStatus.UNAUTHORIZED, "AUTH-007", "유효하지 않은 비밀 키입니다."),
     DELETE_USER_DENIED(HttpStatus.FORBIDDEN, "AUTH-008", "회원 탈퇴가 거부되었습니다."),
     ROLE_NOT_FOUND(HttpStatus.FORBIDDEN, "AUTH-009", "권한 정보가 없습니다."),
+    BLACKLIST_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH-010", "사용할 수 없는 액세스 토큰입니다."),
 
     DUPLICATED_EMAIL(HttpStatus.CONFLICT, "ACCOUNT-001", "이미 존재하는 이메일입니다."),
     USER_NOT_FOUND_BY_EMAIL(HttpStatus.NOT_FOUND, "ACCOUNT-002", "해당 이메일의 회원을 찾을 수 없습니다."),
@@ -24,6 +25,7 @@ public enum ErrorCode {
     DUPLICATED_NICKNAME(HttpStatus.CONFLICT, "ACCOUNT-004", "이미 사용 중인 닉네임입니다."),
     PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "ACCOUNT-005", "현재 비밀번호가 일치하지 않습니다."),
     PASSWORD_SAME_AS_OLD(HttpStatus.BAD_REQUEST, "ACCOUNT-006", "새로운 비밀번호는 현재 비밀번호와 달라야 합니다."),
+    CURRENT_PASSWORD_REQUIRED(HttpStatus.BAD_REQUEST, "ACCOUNT-007", "현재 비밀번호를 입력해야 합니다."),
 
     CAMP_NOT_FOUND_BY_ID(HttpStatus.NOT_FOUND, "CAMP-001", "캠핑장의 ID를 찾을 수 없습니다."),
     CAMP_NOT_FOUND(HttpStatus.NOT_FOUND, "CAMP-002", "캠핑장을 찾을 수 없습니다."),

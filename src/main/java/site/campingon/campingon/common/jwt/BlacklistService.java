@@ -1,5 +1,7 @@
 package site.campingon.campingon.common.jwt;
 
+import io.jsonwebtoken.Claims;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,13 +14,25 @@ import org.springframework.stereotype.Service;
 public class BlacklistService {
 
     private final RedisTemplate<String, Object> redisTemplate;
+    private final JwtTokenProvider jwtTokenProvider;
 
     private static final String ACCESS_TOKEN_BLACKLIST_PREFIX="blacklist:access:";
 
-    public void addToBlacklist(String jti, long expirationTime) {
-        String redisKey = ACCESS_TOKEN_BLACKLIST_PREFIX + jti;
-        redisTemplate.opsForValue().set(redisKey, "blacklisted", expirationTime, TimeUnit.SECONDS);
-        log.debug("Access Token 블랙리스트 추가 - JTI: {}, 만료 시간: {}초 후", jti, expirationTime);
+    public void addToBlacklist(String accessToken) {
+        // Access Token 만료 시간 계산
+        Claims claims = jwtTokenProvider.parseClaims(accessToken);
+        Date expiredDate = claims.getExpiration();
+        String jti = claims.getId();
+        long now = System.currentTimeMillis();
+        long timeToLive = (expiredDate.getTime() - now) / 1000;
+
+        if (timeToLive > 0) {
+            // Redis에 블랙리스트 등록
+            String redisKey = ACCESS_TOKEN_BLACKLIST_PREFIX + jti;
+            redisTemplate.opsForValue().set(redisKey, "blacklisted", timeToLive, TimeUnit.SECONDS);
+            log.debug("Access Token 블랙리스트 추가 - JTI: {}, 만료 시간: {}초 후", jti, timeToLive);
+        }
+
     }
 
 

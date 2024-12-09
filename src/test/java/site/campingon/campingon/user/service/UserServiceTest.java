@@ -164,11 +164,13 @@ class UserServiceTest {
             .nickname("nickname")
             .deleteReason(deleteReason)
             .build();
+        String refreshToken = "refreshToken";
+        String accessToken = "accessToken";
 
         when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user)); // 수정됨
 
         // When
-        userService.deleteUser(userId, deleteReason);
+        userService.deleteUser(userId, deleteReason, accessToken, refreshToken);
 
         // Then
         assertNotNull(user.getDeletedAt());
