@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import site.campingon.campingon.common.jwt.CustomUserDetails;
+import site.campingon.campingon.common.jwt.CustomUserPrincipal;
+import site.campingon.campingon.common.oauth.CustomOAuth2User;
+import site.campingon.campingon.common.oauth.service.CustomOAuth2UserService;
 import site.campingon.campingon.user.dto.UserResponseDto;
 import site.campingon.campingon.user.dto.UserSignUpRequestDto;
 import site.campingon.campingon.user.dto.UserSignUpResponseDto;
@@ -28,6 +32,7 @@ import site.campingon.campingon.user.service.UserService;
 public class UserController {
 
     private final UserService userService;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     // 회원 가입 api
     @PostMapping("/signup")
@@ -71,9 +76,18 @@ public class UserController {
     @DeleteMapping("/users/me")
     public ResponseEntity<Void> deleteUser(
         @AuthenticationPrincipal CustomUserDetails userDetails,
-        @RequestBody String deleteReason
+        @RequestBody String deleteReason,
+        Authentication authentication
     ) {
         Long userId = userDetails.getId();
+
+        CustomUserPrincipal userPrincipal = (CustomUserPrincipal) authentication.getPrincipal();
+
+        // Google 유저인 경우
+        if (userPrincipal instanceof CustomOAuth2User oauthUser) {
+            customOAuth2UserService.deleteGoogleAccount(oauthUser);
+        }
+
         userService.deleteUser(userId, deleteReason);
 
         return ResponseEntity.noContent().build();
