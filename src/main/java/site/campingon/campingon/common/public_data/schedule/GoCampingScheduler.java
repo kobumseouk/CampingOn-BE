@@ -48,7 +48,7 @@ public class GoCampingScheduler {
             log.info("캠프 생성 스케줄러 실행");
             while (true) {
                 //고캠핑 API 호출하고 dto 로 변환(이미지)
-                GoCampingDataDto goCampingDataDto = goCampingService.getAndConvertToGoCampingDataDto(
+                GoCampingDataDto goCampingDataDto = goCampingService.fetchCampData(
                         GoCampingPath.BASED_SYNC_LIST,
                         "numOfRows", Long.toString(NUM_OF_ROWS),
                         "pageNo", Long.toString(pageNo),
@@ -63,7 +63,7 @@ public class GoCampingScheduler {
                 totalCount = goCampingDataDto.getResponse().getBody().getTotalCount();
 
                 List<GoCampingParsedResponseDto> goCampingParsedResponseDtos =
-                        goCampingService.createOrUpdateCampByGoCampingData(goCampingDataDto);
+                        goCampingService.upsertCampData(goCampingDataDto);
 
                 log.info("캠프 데이터 신규 생성 성공: " + goCampingParsedResponseDtos.size() + "개");
 
@@ -74,11 +74,11 @@ public class GoCampingScheduler {
 
                 //고캠핑 API 호출하고 dto 로 변환(이미지)
                 List<GoCampingImageDto> goCampingImageDto
-                        = goCampingService.getAndConvertToGoCampingImageDataDto(campIdList, IMAGE_CNT);
+                        = goCampingService.fetchCampImageData(campIdList, IMAGE_CNT);
 
                 //CampImage 를 생성하고 DB에 저장한다.
                 List<List<GoCampingImageParsedResponseDto>> goCampingImageParsedResponseDtos
-                        = goCampingService.createOrUpdateCampImageByGoCampingImageData(goCampingImageDto);
+                        = goCampingService.upsertCampImageData(goCampingImageDto);
 
                 log.info("캠프 이미지 데이터 신규 생성 성공: " + goCampingImageParsedResponseDtos.size() + "개");
 
@@ -105,7 +105,7 @@ public class GoCampingScheduler {
 
         try {
             while (true) {
-                GoCampingDataDto goCampingDataDto = goCampingService.getAndConvertToGoCampingDataDto(
+                GoCampingDataDto goCampingDataDto = goCampingService.fetchCampData(
                         GoCampingPath.BASED_SYNC_LIST,
                         "numOfRows", Long.toString(NUM_OF_ROWS),
                         "pageNo", Long.toString(pageNo),
@@ -119,7 +119,7 @@ public class GoCampingScheduler {
                 totalCount = goCampingDataDto.getResponse().getBody().getTotalCount();
 
                 List<GoCampingParsedResponseDto> goCampingParsedResponseDtos =
-                        goCampingService.createOrUpdateCampByGoCampingData(goCampingDataDto);
+                        goCampingService.upsertCampData(goCampingDataDto);
 
                 List<Long> campIdList = goCampingParsedResponseDtos.stream()
                         .map(GoCampingParsedResponseDto::getContentId)
@@ -128,10 +128,10 @@ public class GoCampingScheduler {
                 log.info("캠프 데이터 업데이트 성공: " + goCampingParsedResponseDtos.size() + "개");
 
                 List<GoCampingImageDto> goCampingImageDto
-                        = goCampingService.getAndConvertToGoCampingImageDataDto(campIdList, IMAGE_CNT);
+                        = goCampingService.fetchCampImageData(campIdList, IMAGE_CNT);
 
                 List<List<GoCampingImageParsedResponseDto>> goCampingImageParsedResponseDtos
-                        = goCampingService.createOrUpdateCampImageByGoCampingImageData(goCampingImageDto);
+                        = goCampingService.upsertCampImageData(goCampingImageDto);
 
                 log.info("캠프 이미지 데이터 업데이트 성공: " + goCampingImageParsedResponseDtos.size() + "개");
 
@@ -157,7 +157,7 @@ public class GoCampingScheduler {
         log.info("캠프 삭제 스케줄러 실행");
         try {
             while (true) {
-                GoCampingDataDto goCampingDataDto = goCampingService.getAndConvertToGoCampingDataDto(
+                GoCampingDataDto goCampingDataDto = goCampingService.fetchCampData(
                         GoCampingPath.BASED_SYNC_LIST,
                         "numOfRows", Long.toString(NUM_OF_ROWS),
                         "pageNo", Long.toString(pageNo),
@@ -169,7 +169,7 @@ public class GoCampingScheduler {
                 }
 
                 totalCount = goCampingDataDto.getResponse().getBody().getTotalCount();
-                int deleteCnt = goCampingService.deleteCampByGoCampingData(goCampingDataDto);
+                int deleteCnt = goCampingService.deleteCamp(goCampingDataDto);
 
                 log.info("캠프 데이터 삭제 성공: " + deleteCnt + "개");
 
