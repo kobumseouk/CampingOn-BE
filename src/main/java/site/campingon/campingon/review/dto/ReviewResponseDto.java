@@ -23,5 +23,4 @@ public class ReviewResponseDto {
     private boolean isRecommend; // 추천 여부
     private List<String> images;
 
-    private LocalDateTime deletedAt;
 }

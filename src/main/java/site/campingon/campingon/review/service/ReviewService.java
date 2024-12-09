@@ -69,6 +69,7 @@ public class ReviewService {
         if (reservation.getStatus() != ReservationStatus.COMPLETED) {
             throw new GlobalException(RESERVATION_NOT_COMPLETED_FOR_REVIEW);
         }
+
         boolean hasReview = reviewRepository.existsByReservationIdAndDeletedAtIsNull(reservationId);
         if (hasReview) {
             throw new GlobalException(REVIEW_ALREADY_SUBMITTED);
@@ -106,7 +107,7 @@ public class ReviewService {
         }
     }
 
-    // 리뷰 수정
+    /*// 리뷰 수정
     @Transactional
     public ReviewResponseDto updateReview(Long campId, Long reviewId, ReviewUpdateRequestDto requestDto) {
         // 1. 기존 리뷰 조회
@@ -173,54 +174,17 @@ public class ReviewService {
     // 이미지는 보존(6개월 후 삭제), deleted 폴더로 이동
     private void moveReviewImagesToDeletedFolder(Review review) {
         List<ReviewImage> reviewImages = reviewImageRepository.findByReview(review);
-        if (reviewImages.isEmpty()) {
-            return;
-        }
-
-        List<ReviewImage> updatedImages = new ArrayList<>();
-        List<String> originalUrls = new ArrayList<>();  // 실패 시 복구 사용
-
-        try {
-            for (ReviewImage image : reviewImages) {
-                String originalUrl = image.getImageUrl();
-                originalUrls.add(originalUrl);
-
-                // 원본 파일명 유지하면서 새로운 경로 구성
-                String newUrl = "deleted/reviews/" + review.getId() + "/" +
-                    image.getImageUrl().substring(image.getImageUrl().lastIndexOf('/') + 1);
-
-                // 파일 이동
-                s3BucketService.moveObject(originalUrl, newUrl);
-
-                // 이미지 URL 업데이트
-                image.updateImageUrl(newUrl);
-                updatedImages.add(image);
+        for (ReviewImage image : reviewImages) {
+            String newUrl = "deleted/reviews/" + review.getId() + "/" +
+                image.getImageUrl().substring(image.getImageUrl().lastIndexOf('/') + 1);
+            try {
+                s3BucketService.moveObject(image.getImageUrl(), newUrl);
+                image.updateImageUrl(newUrl);  // ReviewImage에 새로운 메서드 필요
+            } catch (Exception e) {
+                log.error("Failed to move image to deleted folder: {}", image.getImageUrl(), e);
             }
-            // 모든 이미지 이동이 성공한 후에 한 번에 저장
-            reviewImageRepository.saveAll(updatedImages);
-
-        } catch (Exception e) {
-            // 실패한 경우 이동된 이미지들 원래 위치로 복구 시도
-            for (int i = 0; i < updatedImages.size(); i++) {
-                try {
-                    ReviewImage image = updatedImages.get(i);
-                    String originalUrl = originalUrls.get(i);
-                    String currentUrl = image.getImageUrl();
-
-                    // 현재 위치에서 원래 위치로 다시 이동
-                    String originalPath = "reviews/" + review.getId() + "/" +
-                        originalUrl.substring(originalUrl.lastIndexOf('/') + 1);
-
-                    s3BucketService.moveObject(currentUrl, originalPath);
-                    image.updateImageUrl(originalUrl);
-                } catch (Exception rollbackEx) {
-                    log.error("Failed to rollback image move: {}", originalUrls.get(i), rollbackEx);
-                }
-            }
-            // 상위로 예외 전파
-            throw new GlobalException(FILE_MOVE_FAILED);
         }
-    }
+    }*/
 
     // 캠핑장 id로 리뷰 목록 조회
     public List<ReviewResponseDto> getReviewsByCampId(Long campId) {

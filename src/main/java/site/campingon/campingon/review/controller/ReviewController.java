@@ -31,7 +31,7 @@ public class ReviewController {
     }
 
 
-    // 리뷰 수정
+    /*// 리뷰 수정
     @PutMapping(value = "/{campId}/reviews/{reviewId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ReviewResponseDto> updateReview(
             @PathVariable("campId") Long campId,
@@ -39,7 +39,7 @@ public class ReviewController {
             @ModelAttribute ReviewUpdateRequestDto requestDto
     ) {
         return ResponseEntity.ok(reviewService.updateReview(campId, reviewId, requestDto));
-    }
+    }*/
 
     // 캠핑장 id로 리뷰 목록 조회
     @GetMapping("/{campId}/reviews")
@@ -59,12 +59,12 @@ public class ReviewController {
         return ResponseEntity.ok(review);
     }
 
-    // 리뷰 삭제
+   /* // 리뷰 삭제
     @DeleteMapping("/reviews/{reviewId}")
     public ResponseEntity<Void> deleteReview(
         @PathVariable("reviewId") Long reviewId
     ) {
         reviewService.deleteReview(reviewId);
         return ResponseEntity.noContent().build();
-    }
+    }*/
 }

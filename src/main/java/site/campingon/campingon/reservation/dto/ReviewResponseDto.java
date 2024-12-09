@@ -20,6 +20,4 @@ public class ReviewResponseDto {
 
     @JsonProperty("isRecommend")
     private boolean isRecommend;
-
-    private LocalDateTime deletedAt;
 }

@@ -32,8 +32,6 @@ public interface ReviewMapper {
     @Mapping(target = "campSite", source = "reservation.campSite")
     @Mapping(target = "reservation", source = "reservation")
     @Mapping(target = "camp", source = "camp")
-    // @Mapping(target = "reviewImages", ignore = true)
-    // @Mapping(target = "deletedAt", ignore = true)
     Review toEntity(ReviewCreateRequestDto requestDto, Camp camp, Reservation reservation);
 
     @Mapping(target = "reviewId", source = "id")
@@ -41,10 +39,10 @@ public interface ReviewMapper {
     @Mapping(target = "images", expression = "java(review.getReviewImages() != null ? review.getReviewImages().stream().map(image -> image.getImageUrl()).collect(Collectors.toList()) : new ArrayList<>())")
     ReviewResponseDto toResponseDto(Review review);
 
-    // 리뷰 수정 매퍼
+    /*// 리뷰 수정 매퍼
     @Mapping(target = "title", source = "requestDto.title", defaultValue = "review.title")
     @Mapping(target = "content", source = "requestDto.content", defaultValue = "review.content")
-    Review updateFromRequest(Review review, ReviewUpdateRequestDto requestDto);
+    Review updateFromRequest(Review review, ReviewUpdateRequestDto requestDto);*/
 
     List<ReviewResponseDto> toResponseDtoList(List<Review> reviews);
 
