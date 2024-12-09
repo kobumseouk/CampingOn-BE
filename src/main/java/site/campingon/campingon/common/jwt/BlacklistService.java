@@ -14,13 +14,13 @@ import org.springframework.stereotype.Service;
 public class BlacklistService {
 
     private final RedisTemplate<String, Object> redisTemplate;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JwtTokenParser jwtTokenParser;
 
     private static final String ACCESS_TOKEN_BLACKLIST_PREFIX="blacklist:access:";
 
     public void addToBlacklist(String accessToken) {
         // Access Token 만료 시간 계산
-        Claims claims = jwtTokenProvider.parseClaims(accessToken);
+        Claims claims = jwtTokenParser.parseClaims(accessToken);
         Date expiredDate = claims.getExpiration();
         String jti = claims.getId();
         long now = System.currentTimeMillis();

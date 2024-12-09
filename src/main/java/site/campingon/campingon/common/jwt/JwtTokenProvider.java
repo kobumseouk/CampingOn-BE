@@ -44,6 +44,9 @@ public class JwtTokenProvider {
     private BlacklistService blackListService;
 
 
+    @Autowired
+    private JwtTokenParser jwtTokenParser;
+
     @Value("${jwt.access-expired}")
     private Long accessTokenExpired;
 
@@ -93,53 +96,11 @@ public class JwtTokenProvider {
 
     }
 
-/*
-
-    // OAuth2 사용자 토큰 생성 메서드
-    public JwtToken generateOAuth2Token(Authentication authentication) {
-
-        long now = (new Date()).getTime();
-        Date accessTokenExpiration = new Date(now + accessTokenExpired * 1000);
-        Date refreshTokenExpiration = new Date(now + refreshTokenExpired * 1000);
-
-        CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
-
-        // OAuth2 사용자 권한 정보를 문자열로 변환
-        String authorities = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
-
-        // Access Token 생성
-        String accessToken = Jwts.builder()
-                .setSubject(oAuth2User.getEmail())
-                .claim("nickname", oAuth2User.getNickname())
-                .claim("role", Role.ROLE_USER)
-                .claim("oauthName", oAuth2User.getOauthName())
-                .setExpiration(accessTokenExpiration)
-                .signWith(secretKey, SignatureAlgorithm.HS256)
-                .compact();
-
-        // Refresh Token 생성 (주로 만료 시간만 포함)
-        String refreshToken = Jwts.builder()
-                .setSubject(oAuth2User.getEmail())
-                .setExpiration(refreshTokenExpiration)
-                .signWith(secretKey, SignatureAlgorithm.HS256)
-                .compact();
-
-        // JWT Token 객체 반환
-        return JwtToken.builder()
-                .grantType("Bearer")
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
-    }
-
-*/
 
     // 토큰에서 유저 정보 추출
     public Authentication getAuthentication(String accessToken) {
         // 토큰에서 Claims 추출
-        Claims claims = parseClaims(accessToken);
+        Claims claims = jwtTokenParser.parseClaims(accessToken);
 
         // 권한 정보 확인
         if (claims.get("role") == null) {
@@ -201,25 +162,4 @@ public class JwtTokenProvider {
         return false;
     }
 
-    public Claims parseClaims(String accessToken) {
-        try {
-            return Jwts.parserBuilder()
-                .setSigningKey(secretKey)
-                .build()
-                .parseClaimsJws(accessToken)
-                .getBody();
-        } catch (ExpiredJwtException e) {
-            return e.getClaims();
-        }
-    }
-
-    // 토큰에서 이메일 정보 추출
-    public String getEmailFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-            .setSigningKey(secretKey)
-            .build()
-            .parseClaimsJws(token)
-            .getBody();
-        return claims.getSubject();
-    }
 }
