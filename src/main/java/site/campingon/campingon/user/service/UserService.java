@@ -128,7 +128,7 @@ public class UserService {
             user.updatePassword(passwordEncoder.encode(newPassword)); // 비밀번호 변경
         }
 
-        // 3️⃣ 변경된 사용자 정보 저장
+        // 변경된 사용자 정보 저장
         User updatedUser = userRepository.save(user);
         log.debug("회원 정보 업데이트 - 이메일: {}", updatedUser.getEmail());
         return userMapper.toResponseDto(updatedUser);
