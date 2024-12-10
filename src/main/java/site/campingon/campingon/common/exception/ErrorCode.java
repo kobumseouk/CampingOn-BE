@@ -63,7 +63,10 @@ public enum ErrorCode {
   
     GO_CAMPING_BAD_REQUEST(HttpStatus.BAD_REQUEST, "GOCAMPING-001", "잘못된 고캠핑 데이터 요청입니다."),
     GO_CAMPING_IMAGE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "GOCAMPING-002", "DB에 저장된 캠프가 없거나 잘못된 데이터 요청입니다."),
-    GO_CAMPING_DATA_NO_CONTENT(HttpStatus.NO_CONTENT,"GOCAMPING-003","요청하신 응답은 데이터가 없습니다.");
+    GO_CAMPING_DATA_NO_CONTENT(HttpStatus.NO_CONTENT,"GOCAMPING-003","요청하신 응답은 데이터가 없습니다."),
+    GO_CAMPING_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR,"GOCAMPING-004","고캠핑서비스에서 서버오류가발생했습니다."),
+    GO_CAMPING_DATA_MAPPING_ERROR(HttpStatus.BAD_REQUEST,"GOCAMPING-005","데이터의 Json 매핑이 잘못됐습니다."),
+    GO_CAMPING_NETWORK_ERROR(HttpStatus.BAD_REQUEST, "GOCAMPING-006", "고캠핑 네트워크 오류입니다.");
 
 
     private final HttpStatus httpStatus;
