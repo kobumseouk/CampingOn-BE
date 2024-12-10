@@ -18,7 +18,6 @@ import site.campingon.campingon.camp.dto.CampListResponseDto;
 import site.campingon.campingon.camp.service.mongodb.SearchInfoService;
 import site.campingon.campingon.common.jwt.CustomUserDetails;
 import site.campingon.campingon.common.util.AuthenticateUser;
-import site.campingon.campingon.user.service.UserService;
 
 
 @Slf4j

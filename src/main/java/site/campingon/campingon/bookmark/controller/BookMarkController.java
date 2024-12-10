@@ -4,11 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import site.campingon.campingon.bookmark.service.BookmarkService;
 import site.campingon.campingon.common.jwt.CustomUserDetails;
-import site.campingon.campingon.user.entity.User;
 
 @Slf4j
 @RestController
