@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 public class MongoSearchClient {
     private final MongoTemplate mongoTemplate;
     private static final String INDEX_NAME = "searchIndex";
+    private static final String AUTOCOMPLETE_INDEX = "autocompleteIndex";
     private static final String COLLECTION_NAME = "search_info";
 
     private static final String PROJECT_STAGE = "{" +
@@ -39,9 +40,17 @@ public class MongoSearchClient {
         String mustClause = "";
         if (StringUtils.hasText(city)) {
             List<String> cityVariants = getCityVariants(city);
-            List<String> phrases = cityVariants.stream()
+            List<String> phrases = new ArrayList<>();
+
+            // city 검색을 위한 phrases
+            phrases.addAll(cityVariants.stream()
                 .map(variant -> "{phrase: {query: '" + variant + "', path: 'address.city'}}")
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
+
+            //  state에서 제주시 추가 검색
+            if (city.equals("제주특별자치도")) {
+                phrases.add("{phrase: {query: '제주시', path: 'address.state'}}");
+            }
 
             mustClause = ", must: [{compound: {should: [" + String.join(",", phrases) + "]}}]";
         }
@@ -96,6 +105,9 @@ public class MongoSearchClient {
             clauses.add("{text: {query: '" + searchTerm + "', path: 'address.state', score: {boost: {value: 3}}, fuzzy: {maxEdits: 1}}}");
             clauses.add("{text: {query: '" + searchTerm + "', path: 'address.city', score: {boost: {value: 2}}}}");
             clauses.add("{text: {query: '" + searchTerm + "', path: 'intro', score: {boost: {value: 2}}}}");
+
+
+            //clauses.add("{regex: {query: '" + searchTerm + "', path: 'name', allowAnalyzedField: true, score: {boost: {value: 3.5}}}}");
         }
 
         if (userKeywords != null && !userKeywords.isEmpty()) {
@@ -170,11 +182,14 @@ public class MongoSearchClient {
             variants.add(base);        // 경기
         }
 
-        // 특별자치도 케이스 (제주)
+        // 특별자치도 케이스 (제주, 강원)
         else if (city.endsWith("특별자치도")) {
             String base = city.replace("특별자치도", "");
-            variants.add(base);        // 제주
-            variants.add(base + "도"); // 제주도
+            variants.add(base);         // 제주
+            variants.add(base + "도");  // 제주도
+            /*variants.add(base + "시");  // 제주시
+            variants.add(base + "특별시");  // 제주특별시
+            variants.add(base + "특별자치시");   // 제주특별자치시*/
         }
 
         return variants;
