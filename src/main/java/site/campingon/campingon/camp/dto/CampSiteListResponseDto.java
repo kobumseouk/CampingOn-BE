@@ -1,11 +1,10 @@
 package site.campingon.campingon.camp.dto;
 
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import site.campingon.campingon.camp.entity.Induty;
 
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @ToString
 @Getter
@@ -18,9 +17,12 @@ public class CampSiteListResponseDto {
   private Integer price;
   private Induty siteType;
   private String indoorFacility;
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
-  private LocalDateTime checkinTime;
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
-  private LocalDateTime checkoutTime;
 
+  @Builder.Default
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
+  private LocalTime checkinTime =  LocalTime.of(15, 0);
+
+  @Builder.Default
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
+  private LocalTime checkoutTime = LocalTime.of(11, 0);
 }
