@@ -18,6 +18,7 @@ public class CampDetailResponseDto {
   private String homepage;
   private String outdoorFacility;
   private List<String> indutys;
+  private String animalAdmission;
 
   private CampAddrDto campAddr;
 
