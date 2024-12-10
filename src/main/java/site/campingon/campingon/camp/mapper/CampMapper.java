@@ -64,6 +64,7 @@ public interface CampMapper {
   @Mapping(target = "images", source = "images", qualifiedByName = "imagesToUrlList")
   @Mapping(target = "campAddr", source = "campAddr", qualifiedByName = "toCampAddrDto")
   @Mapping(target = "campInfo", source = "campInfo", qualifiedByName = "toCampInfoDto")
+  @Mapping(target = "animalAdmission", source = "animalAdmission")
   CampDetailResponseDto toCampDetailDto(Camp camp);
 
   @Named("toCampAddrDto")
