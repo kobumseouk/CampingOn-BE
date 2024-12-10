@@ -289,4 +289,8 @@ public class GoCampingService {
         List<GoCampingDataDto.Item> items = goCampingDataDto.getResponse().getBody().getItems().getItem();
         return goCampingMapper.toGoCampingParsedResponseDtoList(items);
     }
+
+    public List<Long> findCampIdByCity(String city) {
+        return campAddrRepository.findCampIdsByCity(city);
+    }
 }

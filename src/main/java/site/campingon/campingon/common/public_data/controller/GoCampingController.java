@@ -80,6 +80,21 @@ public class GoCampingController {
         return ResponseEntity.status(HttpStatus.OK).body(goCampingParsedResponseDtos);
     }
 
+    @PostMapping("/imageList/city")
+    public ResponseEntity<List<List<GoCampingImageParsedResponseDto>>> createCampImageByCityKeyword(
+            @RequestParam("imageCnt") long imageCnt,
+            @RequestParam("city") String city
+    ) throws URISyntaxException {
+        List<Long> campIdList=goCampingService.findCampIdByCity(city);
+
+        List<GoCampingImageDto> goCampingImageDtos = goCampingService.fetchCampImageData(campIdList, imageCnt);
+
+        List<List<GoCampingImageParsedResponseDto>> campImageData
+                = goCampingService.upsertCampImageData(goCampingImageDtos);
+
+        return ResponseEntity.status(HttpStatus.OK).body(campImageData);
+    }
+
 //    //위치기반정보 목록 조회
 //    @GetMapping("/locationBasedList")
 //    public ResponseEntity<List<GoCampingParsedResponseDto>> GetGoCampingLocationBasedList(
