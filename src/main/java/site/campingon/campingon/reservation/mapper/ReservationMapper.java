@@ -20,8 +20,7 @@ import java.util.stream.Collectors;
         ArrayList.class
     })
 public interface ReservationMapper {
-    @Mapping(source = "checkin", target = "checkinDate")
-    @Mapping(source = "checkout", target = "checkoutDate")
+
     Reservation toEntity(ReservationCreateRequestDto reservationRequest);
 
     Reservation toEntity(ReservationCancelRequestDto reservationRequest);

@@ -23,6 +23,7 @@ public class ReservationValidate {
     private final CampSiteRepository campSiteRepository;
     private final CampRepository campRepository;
 
+    // REFACTOR: 쿼리최적화를 위해 발리데이션을 한번에 하는 방법?
     public Reservation validateReservationById(Long reservationId) {
 
         return reservationRepository.findById(reservationId)

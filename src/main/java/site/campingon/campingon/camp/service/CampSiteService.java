@@ -15,6 +15,7 @@ import site.campingon.campingon.camp.repository.CampSiteRepository;
 import site.campingon.campingon.common.exception.ErrorCode;
 import site.campingon.campingon.common.exception.GlobalException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -71,9 +72,23 @@ public class CampSiteService {
                 .toList();
     }
 
-    // 특정 캠핑지 조회
+    // 어드민을 위한 특정 캠핑지 조회
     @Transactional(readOnly = true)
     public CampSiteResponseDto getCampSite(Long campId, Long siteId) {
+
+        CampSite campSite = campSiteRepository.findByIdAndCampId(siteId, campId)
+                .orElseThrow(() -> new GlobalException(ErrorCode.CAMPSITE_NOT_FOUND_BY_ID));
+
+        return campSiteMapper.toCampSiteResponseDto(campSite);
+    }
+
+    // 예약가능한 특정 캠핑지 조회
+    @Transactional(readOnly = true)
+    public CampSiteResponseDto getCampSite(Long campId, Long siteId, LocalDateTime checkin, LocalDateTime checkout) {
+
+        if (checkin == null || checkout == null) {
+            throw new GlobalException(ErrorCode.REQUIRED_RESERVATION_DATE);
+        }
 
         CampSite campSite = campSiteRepository.findByIdAndCampId(siteId, campId)
                 .orElseThrow(() -> new GlobalException(ErrorCode.CAMPSITE_NOT_FOUND_BY_ID));

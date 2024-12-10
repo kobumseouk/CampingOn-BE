@@ -8,7 +8,8 @@ import site.campingon.campingon.common.entity.BaseEntity;
 import site.campingon.campingon.review.entity.Review;
 import site.campingon.campingon.user.entity.User;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @Entity
 @Getter
@@ -38,27 +39,18 @@ public class Reservation extends BaseEntity {
     @OneToOne(mappedBy = "reservation", fetch = FetchType.EAGER)
     private Review review;
 
-    @Column(nullable = false, columnDefinition = "DATE")
-    private LocalDate checkinDate;
+    @Column(nullable = false, columnDefinition = "DATETIME(0)")
+    private LocalDateTime checkin;
 
-    @Column(nullable = false, columnDefinition = "DATE")
-    private LocalDate checkoutDate;
-
-    @Builder.Default
-    @Column(nullable = false, columnDefinition = "TIME(0)")
-    private CheckTime checkinTime = CheckTime.CHECKIN;
-
-    @Builder.Default
-    @Column(nullable = false, columnDefinition = "TIME(0)")
-    private CheckTime checkoutTime = CheckTime.CHECKOUT;
+    @Column(nullable = false, columnDefinition = "DATETIME(0)")
+    private LocalDateTime checkout;
 
     @Column(nullable = false)
     private int guestCnt;
 
-    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, columnDefinition = "VARCHAR(20) DEFAULT 'RESERVED'")
-    private ReservationStatus status = ReservationStatus.RESERVED;
+    private ReservationStatus status;
 
     private String cancelReason;
 
@@ -68,6 +60,11 @@ public class Reservation extends BaseEntity {
     public void cancel(String reason) {
         this.status = ReservationStatus.CANCELED;
         this.cancelReason = reason;
+    }
+
+    public void setDefaultCheckTime(LocalDateTime checkinDate, LocalDateTime checkoutDate) {
+        this.checkin = checkinDate.withHour(15).truncatedTo(ChronoUnit.HOURS);
+        this.checkout = checkoutDate.withHour(11).truncatedTo(ChronoUnit.HOURS);
     }
 
 }
