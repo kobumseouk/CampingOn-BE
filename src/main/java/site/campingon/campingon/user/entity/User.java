@@ -15,8 +15,13 @@ import site.campingon.campingon.common.entity.BaseEntity;
 @NoArgsConstructor
 @Getter
 @Builder(toBuilder = true)
-@Table(uniqueConstraints = {
-    @UniqueConstraint(name = "up_email_deleted_at", columnNames = {"email", "deleted_at"})
+@Table(name = "user", uniqueConstraints = {
+        @UniqueConstraint(name = "up_email_deleted_at", columnNames = {"email", "deleted_at"})
+}, indexes = {
+        @Index(name = "idx_email", columnList = "email"),
+        @Index(name = "idx_oauth_name", columnList = "oauthName"),
+        @Index(name = "idx_nickname", columnList = "nickname"),
+        @Index(name = "idx_deleted_at", columnList = "deleted_at")
 })
 public class User extends BaseEntity {
 

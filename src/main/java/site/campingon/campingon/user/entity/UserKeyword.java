@@ -11,6 +11,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Getter
 @Builder
+@Table(indexes = {
+        @Index(name = "idx_keyword", columnList = "keyword")
+})
 public class UserKeyword {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

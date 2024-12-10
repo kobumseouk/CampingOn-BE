@@ -17,6 +17,11 @@ import java.time.temporal.ChronoUnit;
 @Builder(toBuilder = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "reservation", indexes = {
+        @Index(name = "idx_status", columnList = "status"),
+        @Index(name = "idx_checkin", columnList = "checkin"),
+        @Index(name = "idx_checkout", columnList = "checkout")
+})
 public class Reservation extends BaseEntity {
 
     @Id
