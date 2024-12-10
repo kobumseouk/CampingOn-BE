@@ -35,6 +35,7 @@ public class CampSiteReserveService {
             throw new GlobalException(ErrorCode.REQUIRED_RESERVATION_DATE);
         }
 
+        // LocalDate(JSON) -> LocalDateTime(DB)
         LocalDateTime checkin = checkinDate.atTime(15, 0);
         LocalDateTime checkout = checkoutDate.atTime(11, 0);
 

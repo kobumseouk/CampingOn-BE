@@ -16,10 +16,8 @@ public class ReservationCreateRequestDto {
 
     private Long campSiteId;
 
-//    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate checkin;
 
-//    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate checkout;
 
     private int guestCnt;

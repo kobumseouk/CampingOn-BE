@@ -69,6 +69,7 @@ public class ReservationServiceImpl implements ReservationService {
 
         Camp camp = reservationValidate.validateCampById(requestDto.getCampId());
 
+        // LocalDate(JSON) -> LocalDateTime(DB)
         LocalDateTime checkin = requestDto.getCheckin().atTime(15, 0);
         LocalDateTime checkout = requestDto.getCheckout().atTime(11, 0);
 
@@ -81,8 +82,6 @@ public class ReservationServiceImpl implements ReservationService {
                 .checkout(checkout)
                 .status(ReservationStatus.RESERVED)
                 .build();
-
-
 
         reservationRepository.save(reservation);
     }

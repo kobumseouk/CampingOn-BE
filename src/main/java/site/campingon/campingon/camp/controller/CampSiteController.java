@@ -43,11 +43,9 @@ public class CampSiteController {
                                                            @PathVariable("siteId") Long siteId,
                                                            @RequestParam(value = "checkin")
                                                            @DateTimeFormat(pattern = "yyyy-MM-dd")
-//                                                           @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
                                                            LocalDate checkin,
                                                            @RequestParam(value = "checkout")
                                                            @DateTimeFormat(pattern = "yyyy-MM-dd")
-//                                                           @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
                                                            LocalDate checkout) {
 
         return ResponseEntity.ok(campSiteService.getCampSite(campId, siteId, checkin, checkout));
