@@ -35,7 +35,7 @@ public class GoCampingProviderService {
 
     //CampInduty 데이터 삽입
     @Transactional
-    public void createOrUpdateCampInduty(Camp camp, GoCampingParsedResponseDto data) {
+    public void upsertCampInduty(Camp camp, GoCampingParsedResponseDto data) {
         //기존에 데이터가 있다면 삭제
         campIndutyRepository.deleteAllByCampId(data.getContentId());
 

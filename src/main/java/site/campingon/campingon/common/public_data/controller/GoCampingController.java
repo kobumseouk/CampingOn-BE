@@ -39,14 +39,14 @@ public class GoCampingController {
     {
         try {
             //공공데이터를 조회하고 반환
-            GoCampingDataDto goCampingDataDto = goCampingService.getAndConvertToGoCampingDataDto(
+            GoCampingDataDto goCampingDataDto = goCampingService.fetchCampData(
                     GoCampingPath.BASED_LIST,
                     "numOfRows", numOfRows.toString(),
                     "pageNo", pageNo.toString());
 
             //Camp 관련 엔티티를 생성하고 DB에 저장한다.
             List<GoCampingParsedResponseDto> goCampingParsedResponseDtos
-                    = goCampingService.createOrUpdateCampByGoCampingData(goCampingDataDto);
+                    = goCampingService.upsertCampData(goCampingDataDto);
 
             return ResponseEntity.status(HttpStatus.OK).body(goCampingParsedResponseDtos);
         } catch (Exception e) { //
@@ -64,11 +64,11 @@ public class GoCampingController {
             throws URISyntaxException {
 
         //공공데이터를 조회하고 dto로 변환
-        List<GoCampingImageDto> goCampingImageDto = goCampingService.getAndConvertToAllGoCampingImageDataDto(imageCnt);
+        List<GoCampingImageDto> goCampingImageDto = goCampingService.fetchAllCampImageData(imageCnt);
 
         //CampImage 를 생성하고 DB에 저장한다.
         List<List<GoCampingImageParsedResponseDto>> goCampingParsedResponseDtos
-                = goCampingService.createOrUpdateCampImageByGoCampingImageData(goCampingImageDto);
+                = goCampingService.upsertCampImageData(goCampingImageDto);
 
         if (goCampingParsedResponseDtos == null) {
             throw new GlobalException(GO_CAMPING_DATA_NO_CONTENT);

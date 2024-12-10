@@ -25,7 +25,8 @@ public class SecurityPath {
         "/api/camps/*/bookmarks",
         "/api/logout",
         "/api/keywords",
-        "/api/keywords/me"
+        "/api/keywords/me",
+        "/api/camps/bookmarked"
     };
 
     // hasRole("ADMIN")

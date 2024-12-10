@@ -6,27 +6,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.RestTemplate;
-import site.campingon.campingon.camp.entity.Camp;
-import site.campingon.campingon.camp.entity.CampAddr;
-import site.campingon.campingon.camp.entity.CampSite;
 import site.campingon.campingon.camp.repository.*;
-import site.campingon.campingon.common.exception.GlobalException;
 import site.campingon.campingon.common.public_data.GoCampingPath;
 import site.campingon.campingon.common.public_data.PublicDataConstants;
 import site.campingon.campingon.common.public_data.dto.GoCampingDataDto;
-import site.campingon.campingon.common.public_data.dto.GoCampingImageDto;
-import site.campingon.campingon.common.public_data.dto.GoCampingParsedResponseDto;
 import site.campingon.campingon.common.public_data.mapper.GoCampingMapper;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -114,7 +102,7 @@ class GoCampingServiceTest {
         doReturn(goCampingDataDto).when(restTemplate).getForObject(any(URI.class), eq(GoCampingDataDto.class));
 
         //when
-        GoCampingDataDto result = goCampingService.getAndConvertToGoCampingDataDto(GoCampingPath.BASED_LIST, "numOfRows", numOfRows, "pageNo", pageNo);
+        GoCampingDataDto result = goCampingService.fetchCampData(GoCampingPath.BASED_LIST, "numOfRows", numOfRows, "pageNo", pageNo);
 
         // then
         assertThat(result).isNotNull();

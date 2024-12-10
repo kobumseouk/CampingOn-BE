@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.client.UnknownContentTypeException;
 import site.campingon.campingon.camp.entity.*;
 import site.campingon.campingon.camp.repository.*;
 import site.campingon.campingon.common.exception.GlobalException;
@@ -43,7 +42,7 @@ public class GoCampingService {
 
     //Camp 관련 엔티티 생성 및 DB 저장 메서드
     @Transactional
-    public List<GoCampingParsedResponseDto> createOrUpdateCampByGoCampingData(GoCampingDataDto goCampingDataDto) {
+    public List<GoCampingParsedResponseDto> upsertCampData(GoCampingDataDto goCampingDataDto) {
         if(goCampingDataDto.getResponse()==null) return null; //값이 없다면 null
 
         List<GoCampingParsedResponseDto> goCampingParsedResponseDtoList = parseGoCampingData(goCampingDataDto);
@@ -67,7 +66,7 @@ public class GoCampingService {
                 Camp updateCamp = findCamp.orElseThrow(() -> new GlobalException(CAMP_NOT_FOUND_BY_ID))
                         .updateCamp(data);
 
-                goCampingProviderService.createOrUpdateCampInduty(updateCamp, data);
+                goCampingProviderService.upsertCampInduty(updateCamp, data);
 
                 campAddrRepository.updateWithPoint(
                         updateCamp.getId(),
@@ -101,7 +100,7 @@ public class GoCampingService {
 
                 campInfoRepository.save(CampInfo.builder().camp(createCamp).build());
 
-                goCampingProviderService.createOrUpdateCampInduty(createCamp, data);
+                goCampingProviderService.upsertCampInduty(createCamp, data);
 
                 campAddrRepository.saveWithPoint(
                         createCamp.getId(),
@@ -135,7 +134,7 @@ public class GoCampingService {
 
     //CampImage 를 생성 및 DB 저장 메서드
     @Transactional
-    public List<List<GoCampingImageParsedResponseDto>> createOrUpdateCampImageByGoCampingImageData(
+    public List<List<GoCampingImageParsedResponseDto>> upsertCampImageData(
             List<GoCampingImageDto> goCampingImageDto) {
         List<List<GoCampingImageParsedResponseDto>> goCampingImageParsedResponseDtoList = new ArrayList<>();
 
@@ -167,7 +166,7 @@ public class GoCampingService {
     }
 
     @Transactional
-    public int deleteCampByGoCampingData(GoCampingDataDto goCampingDataDto) {
+    public int deleteCamp(GoCampingDataDto goCampingDataDto) {
         List<GoCampingParsedResponseDto> goCampingParsedResponseDtoList = parseGoCampingData(goCampingDataDto);
 
         List<Long> idsToDelete = goCampingParsedResponseDtoList.stream()
@@ -178,7 +177,8 @@ public class GoCampingService {
     }
 
     //공공데이터 전체 API 조회하고 dto 변환
-    public GoCampingDataDto getAndConvertToGoCampingDataDto(
+    //메서드의 행위에 네이밍 짓기
+    public GoCampingDataDto fetchCampData(
             GoCampingPath goCampingPath,
             String... params
     ) throws URISyntaxException {
@@ -192,7 +192,7 @@ public class GoCampingService {
     }
 
     //공공데이터 이미지 API 조회하고 dto 변환(DB에 있는 모든 Camp 테이블의 이미지 조회)
-    public List<GoCampingImageDto> getAndConvertToAllGoCampingImageDataDto(
+    public List<GoCampingImageDto> fetchAllCampImageData(
             long imageCnt)
             throws URISyntaxException {
         List<GoCampingImageDto> goCampingDataDtoList = new ArrayList<>();
@@ -218,7 +218,7 @@ public class GoCampingService {
     }
 
     //공공데이터 이미지 API 조회 및 Dto 변환(campIdList 에 해당하는 id만 이미지 조회)
-    public List<GoCampingImageDto> getAndConvertToGoCampingImageDataDto(
+    public List<GoCampingImageDto> fetchCampImageData(
             List<Long> campIdList, long imageCnt)
             throws URISyntaxException {
         List<GoCampingImageDto> goCampingDataDtoList = new ArrayList<>();

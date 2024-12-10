@@ -17,6 +17,8 @@ public interface CampMapper {
   @Mapping(target = "name", source = "campName")
   @Mapping(target = "keywords", source = "keywords", qualifiedByName = "keywordsToStringList")
   @Mapping(target = "streetAddr", source = "campAddr.streetAddr")
+  @Mapping(target = "city", source = "campAddr.city")
+  @Mapping(target = "state", source = "campAddr.state")
   CampListResponseDto toCampListDto(Camp camp);
 
   @Named("keywordsToStringList")
