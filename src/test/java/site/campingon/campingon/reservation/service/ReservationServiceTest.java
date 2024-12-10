@@ -76,7 +76,6 @@ class ReservationServiceTest {
 
         mockReservation = Reservation.builder()
                 .id(1L)
-                .user(mockUser)
                 .camp(mockCamp)
                 .campSite(mockCampSite)
                 .checkinDate(LocalDate.from(LocalDateTime.now()))
@@ -87,23 +86,17 @@ class ReservationServiceTest {
                 .build();
 
         mockCampAddrDto = CampAddrResponseDto.builder()
-                .city("TestCity")
-                .state("TestState")
-                .zipcode("TestZipcode")
                 .streetAddr("Test Street")
-                .detailedAddr("Test detailedAddr")
                 .build();
 
         mockCampDto = CampResponseDto.builder()
-                .id(1L)
-                .name("Test Camp")
+                .campId(1L)
+                .campName("Test Camp")
                 .thumbImage("Test Image")
                 .build();
 
         mockReservationDto = ReservationResponseDto.builder()
                 .id(1L)
-                .userId(mockUser.getId())
-                .campSiteId(mockCampSite.getId())
                 .guestCnt(mockReservation.getGuestCnt())
                 .status(mockReservation.getStatus())
                 .totalPrice(mockReservation.getTotalPrice())
@@ -123,7 +116,7 @@ class ReservationServiceTest {
         List<Reservation> reservations = List.of(mockReservation);
         Page<Reservation> reservationPage = new PageImpl<>(reservations);
 
-        when(reservationRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable))
+        when(reservationRepository.findReservationsByUserId(userId, pageable))
             .thenReturn(reservationPage);
         when(reservationMapper.toResponse(mockReservation))
             .thenReturn(mockReservationDto);
@@ -135,7 +128,7 @@ class ReservationServiceTest {
         assertNotNull(result);
         assertTrue(result.hasContent());
         assertEquals(mockReservationDto, result.getContent().get(0));
-        verify(reservationRepository).findByUserIdOrderByCreatedAtDesc(userId, pageable);
+        verify(reservationRepository).findReservationsByUserId(userId, pageable);
     }
 
     @Test

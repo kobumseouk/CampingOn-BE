@@ -15,7 +15,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     // 유저의 모든 예약 조회
     @EntityGraph(attributePaths = {"review"})
-    Page<Reservation> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
+    @Query("SELECT r FROM Reservation r WHERE r.user.id = :userId " +
+            "ORDER BY CASE " +
+            "WHEN r.status = 'RESERVED' THEN 0 " +
+            "WHEN r.status = 'COMPLETED' THEN 1 " +
+            "ELSE 2 END, r.checkinDate ASC")
+    Page<Reservation> findReservationsByUserId(Long userId, Pageable pageable);
 
     // 특정 예약의 상세 정보 조회 (연관된 캠프, 주소 정보 포함)
     @EntityGraph(attributePaths = {"camp", "campSite"})

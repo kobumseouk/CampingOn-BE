@@ -26,9 +26,9 @@ public interface ReservationMapper {
 
     Reservation toEntity(ReservationCancelRequestDto reservationRequest);
 
-    @Mapping(source = "campSite", target = "campSiteResponseDto")
+    @Mapping(source = "campSite.id", target = "campSiteResponseDto.siteId")
     @Mapping(source = "camp.campAddr", target = "campAddrResponseDto")
-    @Mapping(source = "camp", target = "campResponseDto")
+    @Mapping(source = "camp.id", target = "campResponseDto.campId")
     @Mapping(source = "review", target = "reviewDto", qualifiedByName = "reviewToDto")
     ReservationResponseDto toResponse(Reservation reservation);
 
