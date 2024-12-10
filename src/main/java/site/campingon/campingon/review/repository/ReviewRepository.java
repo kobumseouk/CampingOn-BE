@@ -1,5 +1,7 @@
 package site.campingon.campingon.review.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,7 +17,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> findByCampSiteId(Long campSiteId);
 
     // 특정 캠핑장 하위 모든 리뷰 조회
-    List<Review> findByCampId(Long campId);
+    Page<Review> findByCampId(Long campId, Pageable pageable);
 
     boolean existsByReservationId(Long reservationId);
 

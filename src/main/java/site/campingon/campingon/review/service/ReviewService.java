@@ -2,6 +2,8 @@ package site.campingon.campingon.review.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -187,12 +189,9 @@ public class ReviewService {
     }*/
 
     // 캠핑장 id로 리뷰 목록 조회
-    public List<ReviewResponseDto> getReviewsByCampId(Long campId) {
-        Camp camp = campRepository.findById(campId)
-                .orElseThrow(() -> new GlobalException(CAMP_NOT_FOUND_BY_ID));
-
-        List<Review> reviews = reviewRepository.findByCampId(camp.getId());
-        return reviewMapper.toResponseDtoList(reviews);
+    public Page<ReviewResponseDto> getReviewsByCampId(Long campId, Pageable pageable) {
+        Page<Review> reviews = reviewRepository.findByCampId(campId, pageable);
+        return reviews.map(reviewMapper::toDto);
     }
 
     // 리뷰 상세 조회

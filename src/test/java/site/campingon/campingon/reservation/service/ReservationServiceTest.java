@@ -24,7 +24,6 @@ import site.campingon.campingon.reservation.repository.ReservationRepository;
 import site.campingon.campingon.reservation.utils.ReservationValidate;
 import site.campingon.campingon.user.entity.User;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -76,34 +75,27 @@ class ReservationServiceTest {
 
         mockReservation = Reservation.builder()
                 .id(1L)
-                .user(mockUser)
                 .camp(mockCamp)
                 .campSite(mockCampSite)
-                .checkinDate(LocalDate.from(LocalDateTime.now()))
-                .checkoutDate(LocalDate.from(LocalDateTime.now().plusDays(1)))
+                .checkin(LocalDateTime.from(LocalDateTime.now()))
+                .checkout(LocalDateTime.from(LocalDateTime.now().plusDays(1)))
                 .guestCnt(2)
                 .status(ReservationStatus.RESERVED)
                 .totalPrice(50000)
                 .build();
 
         mockCampAddrDto = CampAddrResponseDto.builder()
-                .city("TestCity")
-                .state("TestState")
-                .zipcode("TestZipcode")
                 .streetAddr("Test Street")
-                .detailedAddr("Test detailedAddr")
                 .build();
 
         mockCampDto = CampResponseDto.builder()
-                .id(1L)
-                .name("Test Camp")
+                .campId(1L)
+                .campName("Test Camp")
                 .thumbImage("Test Image")
                 .build();
 
         mockReservationDto = ReservationResponseDto.builder()
                 .id(1L)
-                .userId(mockUser.getId())
-                .campSiteId(mockCampSite.getId())
                 .guestCnt(mockReservation.getGuestCnt())
                 .status(mockReservation.getStatus())
                 .totalPrice(mockReservation.getTotalPrice())
@@ -123,7 +115,7 @@ class ReservationServiceTest {
         List<Reservation> reservations = List.of(mockReservation);
         Page<Reservation> reservationPage = new PageImpl<>(reservations);
 
-        when(reservationRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable))
+        when(reservationRepository.findReservationsByUserId(userId, pageable))
             .thenReturn(reservationPage);
         when(reservationMapper.toResponse(mockReservation))
             .thenReturn(mockReservationDto);
@@ -135,7 +127,7 @@ class ReservationServiceTest {
         assertNotNull(result);
         assertTrue(result.hasContent());
         assertEquals(mockReservationDto, result.getContent().get(0));
-        verify(reservationRepository).findByUserIdOrderByCreatedAtDesc(userId, pageable);
+        verify(reservationRepository).findReservationsByUserId(userId, pageable);
     }
 
     @Test
@@ -146,8 +138,8 @@ class ReservationServiceTest {
         ReservationCreateRequestDto requestDto = new ReservationCreateRequestDto(
             mockCamp.getId(),
             mockCampSite.getId(),
-            LocalDate.now(),
-            LocalDate.now().plusDays(1),
+            LocalDateTime.now(),
+            LocalDateTime.now().plusDays(1),
             2,
             50000
         );
@@ -197,8 +189,8 @@ class ReservationServiceTest {
         ReservationCreateRequestDto requestDto = new ReservationCreateRequestDto(
             mockCamp.getId(),
             mockCampSite.getId(),
-            LocalDate.now(),
-            LocalDate.now().plusDays(1),
+            LocalDateTime.now(),
+            LocalDateTime.now().plusDays(1),
             2,
             50000
         );
@@ -220,8 +212,8 @@ class ReservationServiceTest {
         ReservationCreateRequestDto requestDto = new ReservationCreateRequestDto(
             mockCamp.getId(),
             mockCampSite.getId(),
-            LocalDate.now(),
-            LocalDate.now().plusDays(1),
+            LocalDateTime.now(),
+            LocalDateTime.now().plusDays(1),
             2,
             50000
         );

@@ -8,7 +8,7 @@ import site.campingon.campingon.camp.entity.Camp;
 import site.campingon.campingon.camp.entity.CampSite;
 import site.campingon.campingon.camp.entity.Induty;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,10 +47,10 @@ public interface CampSiteRepository extends JpaRepository<CampSite, Long> {
           "WHERE cs.isAvailable = true " +
           "AND cs.camp.id = :campId " +
           "AND (r.id IS NULL OR " +
-          "     (r.status = 'CANCELED' AND r.checkinDate < :checkout AND r.checkoutDate > :checkin)) " +
+          "     (r.status = 'CANCELED' AND r.checkin < :checkout AND r.checkout > :checkin)) " +
           "ORDER BY cs.id ASC")
   List<CampSite> findAvailableCampSites(@Param("campId") Long campId,
-                                        @Param("checkin") LocalDate checkin,
-                                        @Param("checkout") LocalDate checkout);
+                                        @Param("checkin") LocalDateTime checkin,
+                                        @Param("checkout") LocalDateTime checkout);
 
 }

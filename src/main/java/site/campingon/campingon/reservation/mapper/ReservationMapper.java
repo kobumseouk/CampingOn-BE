@@ -20,15 +20,14 @@ import java.util.stream.Collectors;
         ArrayList.class
     })
 public interface ReservationMapper {
-    @Mapping(source = "checkin", target = "checkinDate")
-    @Mapping(source = "checkout", target = "checkoutDate")
+
     Reservation toEntity(ReservationCreateRequestDto reservationRequest);
 
     Reservation toEntity(ReservationCancelRequestDto reservationRequest);
 
-    @Mapping(source = "campSite", target = "campSiteResponseDto")
+    @Mapping(source = "campSite.id", target = "campSiteResponseDto.siteId")
     @Mapping(source = "camp.campAddr", target = "campAddrResponseDto")
-    @Mapping(source = "camp", target = "campResponseDto")
+    @Mapping(source = "camp.id", target = "campResponseDto.campId")
     @Mapping(source = "review", target = "reviewDto", qualifiedByName = "reviewToDto")
     ReservationResponseDto toResponse(Reservation reservation);
 

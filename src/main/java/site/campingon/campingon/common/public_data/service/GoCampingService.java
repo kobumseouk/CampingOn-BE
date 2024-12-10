@@ -1,9 +1,14 @@
 package site.campingon.campingon.common.public_data.service;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import site.campingon.campingon.camp.entity.*;
 import site.campingon.campingon.camp.repository.*;
@@ -24,7 +29,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static site.campingon.campingon.camp.entity.Induty.*;
-import static site.campingon.campingon.common.exception.ErrorCode.CAMP_NOT_FOUND_BY_ID;
+import static site.campingon.campingon.common.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -181,13 +186,24 @@ public class GoCampingService {
     public GoCampingDataDto fetchCampData(
             GoCampingPath goCampingPath,
             String... params
-    ) throws URISyntaxException {
+    ) throws InvalidFormatException, URISyntaxException {
         URI uri = goCampingProviderService.createUri(goCampingPath, params);
 
         try {
-            return restTemplate.getForObject(uri, GoCampingDataDto.class);  //API 호출
-        } catch (Exception e) {
-            return new GoCampingDataDto();  //json 데이터가 비어있거나, 올바르지 않다면 빈객체 리턴
+            return restTemplate.getForObject(uri, GoCampingDataDto.class);  // API 호출
+        } catch (HttpClientErrorException e) {
+            log.error("HTTP 요청 오류: {}", e.getMessage(), e);
+            throw new GlobalException(GO_CAMPING_BAD_REQUEST);  // 적절한 사용자 정의 예외 처리
+        } catch (HttpServerErrorException e) {
+            log.error("서버 오류: {}", e.getMessage(), e);
+            throw new GlobalException(GO_CAMPING_SERVER_ERROR);  // 서버 오류에 대한 처리
+        } catch (RestClientException e) {
+            if (e.getCause() instanceof JsonMappingException) {
+                log.error("JSON 매핑 오류: {}", e.getMessage(), e);
+                throw new GlobalException(GO_CAMPING_DATA_MAPPING_ERROR);  // 데이터 매핑 오류
+            }
+            log.error("RestTemplate 오류: {}", e.getMessage(), e);
+            throw new GlobalException(GO_CAMPING_NETWORK_ERROR);  // 네트워크 오류
         }
     }
 
@@ -272,5 +288,9 @@ public class GoCampingService {
     private List<GoCampingParsedResponseDto> parseGoCampingData(GoCampingDataDto goCampingDataDto) {
         List<GoCampingDataDto.Item> items = goCampingDataDto.getResponse().getBody().getItems().getItem();
         return goCampingMapper.toGoCampingParsedResponseDtoList(items);
+    }
+
+    public List<Long> findCampIdByCity(String city) {
+        return campAddrRepository.findCampIdsByCity(city);
     }
 }

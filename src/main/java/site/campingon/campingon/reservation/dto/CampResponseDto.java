@@ -9,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 public class CampResponseDto {
 
-    private Long id;
+    private Long campId;
 
     private String campName;
 

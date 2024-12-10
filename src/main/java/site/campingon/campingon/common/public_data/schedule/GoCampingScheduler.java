@@ -1,5 +1,6 @@
 package site.campingon.campingon.common.public_data.schedule;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -92,6 +93,8 @@ public class GoCampingScheduler {
             }
         } catch (URISyntaxException e) {
             log.error("캠프 데이터 생성 실패: " + e.getMessage());
+        } catch (InvalidFormatException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -144,6 +147,8 @@ public class GoCampingScheduler {
             }
         } catch (URISyntaxException e) {
             log.error("캠프 데이터 업데이트 실패: " + e.getMessage());
+        } catch (InvalidFormatException e) {
+            throw new RuntimeException(e);
         }
 
     }
@@ -184,6 +189,8 @@ public class GoCampingScheduler {
             }
         } catch (URISyntaxException e) {
             log.error("캠프 데이터 삭제 실패: " + e.getMessage());
+        } catch (InvalidFormatException e) {
+            throw new RuntimeException(e);
         }
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import site.campingon.campingon.camp.entity.CampAddr;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -37,4 +38,7 @@ public interface CampAddrRepository extends JpaRepository<CampAddr, Long> {
                          @Param("streetAddr") String streetAddr,
                          @Param("detailedAddr") String detailedAddr,
                          @Param("location") String location);
+
+    @Query("SELECT c.id FROM Camp c JOIN c.campAddr ad WHERE ad.city LIKE :city")
+    List<Long> findCampIdsByCity(@Param("city") String city);
 }
