@@ -49,9 +49,8 @@ public class Review {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
-    @Builder.Default
-    @Column(name = "is_recommend", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 1")
-    private boolean isRecommend = false;
+    @Column(name = "is_recommend", nullable = false)
+    private boolean isRecommend;
 
     @Builder.Default
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)

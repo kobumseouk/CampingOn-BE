@@ -32,10 +32,12 @@ public interface ReviewMapper {
     @Mapping(target = "campSite", source = "reservation.campSite")
     @Mapping(target = "reservation", source = "reservation")
     @Mapping(target = "camp", source = "camp")
+    @Mapping(target = "isRecommend", source = "requestDto.recommended")
     Review toEntity(ReviewCreateRequestDto requestDto, Camp camp, Reservation reservation);
 
     @Mapping(target = "reviewId", source = "id")
     @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "recommended", source = "recommend")
     @Mapping(target = "images", expression = "java(review.getReviewImages() != null ? review.getReviewImages().stream().map(image -> image.getImageUrl()).collect(Collectors.toList()) : new ArrayList<>())")
     ReviewResponseDto toResponseDto(Review review);
 

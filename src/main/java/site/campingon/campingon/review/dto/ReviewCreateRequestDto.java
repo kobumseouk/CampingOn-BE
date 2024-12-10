@@ -16,6 +16,6 @@ public class ReviewCreateRequestDto {
     private Long userId; // 작성자 ID
     private String title;  // 리뷰 제목
     private String content; // 리뷰 내용
-    private boolean isRecommend; // 추천 여부
+    private boolean recommended; // 추천 여부
     private List<MultipartFile> s3Images;  // 이미지 파일
 }
