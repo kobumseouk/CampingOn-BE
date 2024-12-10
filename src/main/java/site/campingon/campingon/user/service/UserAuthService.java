@@ -1,10 +1,6 @@
 package site.campingon.campingon.user.service;
 
-import io.jsonwebtoken.ExpiredJwtException;
-import java.time.LocalDateTime;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,11 +12,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.campingon.campingon.common.exception.ErrorCode;
 import site.campingon.campingon.common.exception.GlobalException;
+import site.campingon.campingon.common.jwt.BlacklistService;
 import site.campingon.campingon.common.jwt.CustomUserDetails;
 import site.campingon.campingon.common.jwt.JwtToken;
 import site.campingon.campingon.common.jwt.JwtTokenProvider;
 import site.campingon.campingon.common.jwt.RefreshToken;
 import site.campingon.campingon.common.jwt.RefreshTokenService;
+import site.campingon.campingon.common.util.CookieUtil;
 import site.campingon.campingon.user.dto.UserSignInRequestDto;
 import site.campingon.campingon.user.entity.User;
 
@@ -29,7 +27,6 @@ import site.campingon.campingon.user.entity.User;
 @Slf4j
 public class UserAuthService {
 
-    private final Map<String, ReentrantLock> locks = new ConcurrentHashMap<>();
 
 
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
@@ -37,6 +34,7 @@ public class UserAuthService {
     private final PasswordEncoder passwordEncoder;
     private final RefreshTokenService refreshTokenService;
     private final UserService userService;
+    private final BlacklistService blacklistService;
 
     @Value("${jwt.refresh-expired}")
     private Long refreshTokenExpired;
@@ -46,51 +44,34 @@ public class UserAuthService {
     public JwtToken login(UserSignInRequestDto signInRequestDto) {
         User user = validateUser(signInRequestDto);
         Authentication authentication = authenticateUser(user.getEmail(), signInRequestDto.getPassword());
-        JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
-
-        refreshTokenService.saveOrUpdateRefreshToken(user.getEmail(), jwtToken.getRefreshToken(), refreshTokenExpired);
-        return jwtToken;
+        return jwtTokenProvider.generateToken(authentication);
     }
 
     // 토큰 재발급
     @Transactional
     public JwtToken refresh(String refreshToken) {
-        ReentrantLock lock = locks.computeIfAbsent(refreshToken, key -> new ReentrantLock());
-        lock.lock();
 
-        try{
-            log.debug("Refresh Token을 사용한 Access Token 재발급");
+        RefreshToken tokenDetails = refreshTokenService.getRefreshToken(refreshToken)
+            .orElseThrow(() -> new GlobalException(ErrorCode.INVALID_TOKEN));
 
-            RefreshToken storedRefreshToken = refreshTokenService.getRefreshTokenByToken(refreshToken)
-                .orElseThrow(() -> new GlobalException(ErrorCode.NO_TOKEN));
+        String email = tokenDetails.getEmail();
 
-            if (storedRefreshToken.getExp().isBefore(LocalDateTime.now())) {
-                throw new GlobalException(ErrorCode.REFRESH_TOKEN_EXPIRED);
-            }
+        User user = userService.findUserByEmail(email);
+        Authentication authentication = createAuthentication(user);
 
-            User user = userService.findUserByEmail(storedRefreshToken.getEmail());
-            Authentication authentication = createAuthentication(user);
+        // 기존에 있던 리프레시 토큰은 DB에서 제거
+        refreshTokenService.deleteRefreshToken(refreshToken);
 
-            return jwtTokenProvider.generateToken(authentication);
-
-        } finally {
-            lock.unlock();
-            locks.remove(refreshToken);
-        }
+        return jwtTokenProvider.generateToken(authentication);
 
     }
 
     // 로그 아웃
     @Transactional
-    public void logout(String accessToken) {
-        try {
-            String email = jwtTokenProvider.getEmailFromToken(accessToken);
-            refreshTokenService.deleteRefreshTokenByEmail(email);
-        } catch (ExpiredJwtException e) {
-            refreshTokenService.deleteRefreshTokenByEmail(e.getClaims().getSubject());
-        } catch (Exception e) {
-            throw new RuntimeException("로그아웃 중 문제가 발생했습니다: " + e.getMessage());
-        }
+    public void logout(String accessToken, String refreshToken, HttpServletResponse response) {
+        blacklistService.addToBlacklist(accessToken);
+        refreshTokenService.deleteRefreshToken(refreshToken);
+        CookieUtil.deleteCookie(response, "refreshToken");
     }
 
     // email, password를 사용해서 유저 확인
@@ -119,5 +100,6 @@ public class UserAuthService {
 
         return new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
     }
+
 
 }

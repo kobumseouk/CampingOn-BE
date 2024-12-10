@@ -52,6 +52,7 @@ jobs:
             docker run -d \
             --env-file ${{ secrets.EC2_TARGET_PATH }}/.env \
             --name camping-on \
+            --network campingon-network \
             -p 8080:8080 \
             -v ${{ secrets.EC2_TARGET_PATH }}/logs:/app/logs \
             ${{ secrets.DOCKER_USERNAME }}/camping-on:latest

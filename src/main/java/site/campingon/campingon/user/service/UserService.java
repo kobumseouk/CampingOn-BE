@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.campingon.campingon.common.exception.ErrorCode;
 import site.campingon.campingon.common.exception.GlobalException;
+import site.campingon.campingon.common.jwt.BlacklistService;
 import site.campingon.campingon.common.jwt.RefreshTokenService;
 import site.campingon.campingon.user.dto.KeywordResponseDto;
 import site.campingon.campingon.user.dto.UserResponseDto;
@@ -33,6 +34,7 @@ public class UserService {
     private final UserMapper userMapper;
     private final UserKeywordRepository userKeywordRepository;
     private final RefreshTokenService refreshTokenService;
+    private final BlacklistService blacklistService;
 
 
     // 회원 가입
@@ -136,12 +138,15 @@ public class UserService {
 
     // 회원 탈퇴
     @Transactional
-    public void deleteUser(Long userId, String deleteReason) {
+    public void deleteUser(Long userId, String deleteReason, String accessToken, String refreshToken) {
         // 사용자 정보 조회
         User user = userRepository.findByIdAndDeletedAtIsNull(userId)
             .orElseThrow(() -> new GlobalException(ErrorCode.USER_NOT_FOUND_BY_ID));
 
-        refreshTokenService.deleteRefreshTokenByEmail(user.getEmail());
+        // redis에서 리프레시 토큰 삭제
+        refreshTokenService.deleteRefreshToken(refreshToken);
+        // access token 블랙리스트에 등록
+        blacklistService.addToBlacklist(accessToken);
 
         // 사용자 탈퇴 처리 (소프트 삭제)
         user.deleteUser(deleteReason);

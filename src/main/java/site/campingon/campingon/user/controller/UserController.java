@@ -5,13 +5,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -75,14 +76,16 @@ public class UserController {
     // 회원 탈퇴
     @DeleteMapping("/users/me")
     public ResponseEntity<Void> deleteUser(
-            @AuthenticationPrincipal CustomUserPrincipal customUserPrincipal,
-            @RequestBody String deleteReason
+        @AuthenticationPrincipal CustomUserPrincipal customUserPrincipal,
+        @RequestBody String deleteReason,
+        @CookieValue(name = "refreshToken", required = false) String refreshToken,
+        @RequestHeader("Authorization") String authHeader
     ) {
-        // Google 유저인 경우와 일반 유저 분기 처리
+        String accessToken = authHeader.replace("Bearer ", "");
         if (customUserPrincipal instanceof CustomOAuth2User oauthUser) {
             customOAuth2UserService.deleteGoogleAccount(oauthUser);
         } else if (customUserPrincipal instanceof CustomUserDetails customUserDetails) {
-            userService.deleteUser(customUserDetails.getId(), deleteReason);
+            userService.deleteUser(customUserDetails.getId(), deleteReason, accessToken, refreshToken);
         }
 
         return ResponseEntity.noContent().build();
