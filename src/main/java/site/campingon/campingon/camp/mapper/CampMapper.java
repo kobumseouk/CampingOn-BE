@@ -87,6 +87,7 @@ public interface CampMapper {
     return CampInfoDto.builder()
             .recommendCnt(campInfo.getRecommendCnt())
             .bookmarkCnt(campInfo.getBookmarkCnt())
+            .campInfoId(campInfo.getId())
             .build();
   }
 }
