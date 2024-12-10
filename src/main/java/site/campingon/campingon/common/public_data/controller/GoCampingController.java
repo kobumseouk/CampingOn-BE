@@ -1,5 +1,6 @@
 package site.campingon.campingon.common.public_data.controller;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
@@ -49,9 +50,11 @@ public class GoCampingController {
                     = goCampingService.upsertCampData(goCampingDataDto);
 
             return ResponseEntity.status(HttpStatus.OK).body(goCampingParsedResponseDtos);
-        } catch (Exception e) { //
+        } catch (InvalidFormatException e) { //
             log.error("고캠핑데이터 저장 실패, 고캠핑 API 파라미터나 서비스키를 다시 확인해주세요");
             throw new GlobalException(GO_CAMPING_BAD_REQUEST);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
         }
     }
 
