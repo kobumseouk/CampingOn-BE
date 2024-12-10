@@ -46,8 +46,16 @@ public interface ReviewMapper {
     @Mapping(target = "content", source = "requestDto.content", defaultValue = "review.content")
     Review updateFromRequest(Review review, ReviewUpdateRequestDto requestDto);*/
 
-    List<ReviewResponseDto> toResponseDtoList(List<Review> reviews);
+//    List<ReviewResponseDto> toResponseDtoList(List<Review> reviews);
 
     @Mapping(target = "isRecommend", expression = "java(!review.isRecommend())")
     Review toUpdatedReview(Review review);
+
+    @Mapping(target = "reviewId", source = "id")
+    @Mapping(target = "campId", source = "camp.id")
+    @Mapping(target = "reservationId", source = "reservation.id")
+    @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "recommended", source = "recommend")
+    @Mapping(target = "images", expression = "java(review.getReviewImages() != null ? review.getReviewImages().stream().map(image -> image.getImageUrl()).toList() : java.util.List.of())")
+    ReviewResponseDto toDto(Review review);
 }

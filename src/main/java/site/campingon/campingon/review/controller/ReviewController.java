@@ -2,6 +2,10 @@ package site.campingon.campingon.review.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,7 +14,6 @@ import site.campingon.campingon.review.dto.ReviewResponseDto;
 import site.campingon.campingon.review.dto.ReviewUpdateRequestDto;
 import site.campingon.campingon.review.service.ReviewService;
 
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -43,10 +46,11 @@ public class ReviewController {
 
     // 캠핑장 id로 리뷰 목록 조회
     @GetMapping("/{campId}/reviews")
-    public ResponseEntity<List<ReviewResponseDto>> getReviewsByCampId(
-            @PathVariable("campId") Long campId
+    public ResponseEntity<Page<ReviewResponseDto>> getReviewsByCampId(
+            @PathVariable("campId") Long campId,
+            @PageableDefault(size = 4, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        List<ReviewResponseDto> reviews = reviewService.getReviewsByCampId(campId);
+        Page<ReviewResponseDto> reviews = reviewService.getReviewsByCampId(campId, pageable);
         return ResponseEntity.ok(reviews);
     }
 
