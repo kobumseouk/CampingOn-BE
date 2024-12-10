@@ -9,17 +9,11 @@ import site.campingon.campingon.camp.entity.Camp;
 import site.campingon.campingon.camp.entity.CampSite;
 import site.campingon.campingon.camp.mapper.CampSiteMapper;
 import site.campingon.campingon.reservation.dto.*;
-import site.campingon.campingon.reservation.entity.ReservationStatus;
 import site.campingon.campingon.reservation.repository.ReservationRepository;
 import site.campingon.campingon.reservation.mapper.ReservationMapper;
 import site.campingon.campingon.reservation.entity.Reservation;
 import site.campingon.campingon.reservation.utils.ReservationValidate;
 import site.campingon.campingon.user.entity.User;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +29,7 @@ public class ReservationServiceImpl implements ReservationService {
 
         reservationValidate.validateUserById(userId);
 
-        Page<Reservation> reservations = reservationRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
+        Page<Reservation> reservations = reservationRepository.findReservationsByUserId(userId, pageable);
 
         return reservations.map(reservationMapper::toResponse);
     }
