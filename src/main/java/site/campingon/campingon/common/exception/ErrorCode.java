@@ -44,7 +44,6 @@ public enum ErrorCode {
     RESERVATION_ALREADY_CANCELED(HttpStatus.BAD_REQUEST, "RESERVATION-003", "이미 취소된 예약입니다."),
     RESERVATION_ALREADY_COMPLETE(HttpStatus.BAD_REQUEST, "RESERVATION-004", "이미 지난 예약입니다."),
     RESERVATION_NOT_COMPLETED_FOR_REVIEW(HttpStatus.BAD_REQUEST, "RESERVATION-005", "후기는 체크인이 완료된 상태에서만 작성할 수 있습니다."),
-    RESERVATION_INVALID_CHECKTIME(HttpStatus.BAD_REQUEST, "RESERVATION-006", "유효하지 않은 체크인/체크아웃 시간입니다."),
 
     BOOKMARK_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "BOOKMARK-001", "북유찾없"),
     FORBIDDEN_ACCESS(HttpStatus.FORBIDDEN, "미완", "잘못된 접근입니다."),

@@ -9,6 +9,7 @@ import site.campingon.campingon.camp.entity.Camp;
 import site.campingon.campingon.camp.entity.CampSite;
 import site.campingon.campingon.camp.mapper.CampSiteMapper;
 import site.campingon.campingon.reservation.dto.*;
+import site.campingon.campingon.reservation.entity.ReservationStatus;
 import site.campingon.campingon.reservation.repository.ReservationRepository;
 import site.campingon.campingon.reservation.mapper.ReservationMapper;
 import site.campingon.campingon.reservation.entity.Reservation;
@@ -71,7 +72,10 @@ public class ReservationServiceImpl implements ReservationService {
                 .user(user)
                 .camp(camp)
                 .campSite(campSite)
+                .status(ReservationStatus.RESERVED)
                 .build();
+
+        reservation.setDefaultCheckTime(requestDto.getCheckin(), requestDto.getCheckout());
 
         reservationRepository.save(reservation);
     }

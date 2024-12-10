@@ -24,7 +24,6 @@ import site.campingon.campingon.reservation.repository.ReservationRepository;
 import site.campingon.campingon.reservation.utils.ReservationValidate;
 import site.campingon.campingon.user.entity.User;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -78,8 +77,8 @@ class ReservationServiceTest {
                 .id(1L)
                 .camp(mockCamp)
                 .campSite(mockCampSite)
-                .checkinDate(LocalDate.from(LocalDateTime.now()))
-                .checkoutDate(LocalDate.from(LocalDateTime.now().plusDays(1)))
+                .checkin(LocalDateTime.from(LocalDateTime.now()))
+                .checkout(LocalDateTime.from(LocalDateTime.now().plusDays(1)))
                 .guestCnt(2)
                 .status(ReservationStatus.RESERVED)
                 .totalPrice(50000)
@@ -139,8 +138,8 @@ class ReservationServiceTest {
         ReservationCreateRequestDto requestDto = new ReservationCreateRequestDto(
             mockCamp.getId(),
             mockCampSite.getId(),
-            LocalDate.now(),
-            LocalDate.now().plusDays(1),
+            LocalDateTime.now(),
+            LocalDateTime.now().plusDays(1),
             2,
             50000
         );
@@ -190,8 +189,8 @@ class ReservationServiceTest {
         ReservationCreateRequestDto requestDto = new ReservationCreateRequestDto(
             mockCamp.getId(),
             mockCampSite.getId(),
-            LocalDate.now(),
-            LocalDate.now().plusDays(1),
+            LocalDateTime.now(),
+            LocalDateTime.now().plusDays(1),
             2,
             50000
         );
@@ -213,8 +212,8 @@ class ReservationServiceTest {
         ReservationCreateRequestDto requestDto = new ReservationCreateRequestDto(
             mockCamp.getId(),
             mockCampSite.getId(),
-            LocalDate.now(),
-            LocalDate.now().plusDays(1),
+            LocalDateTime.now(),
+            LocalDateTime.now().plusDays(1),
             2,
             50000
         );

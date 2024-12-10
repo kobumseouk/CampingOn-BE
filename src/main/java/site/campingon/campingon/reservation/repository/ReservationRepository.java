@@ -19,7 +19,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             "ORDER BY CASE " +
             "WHEN r.status = 'RESERVED' THEN 0 " +
             "WHEN r.status = 'COMPLETED' THEN 1 " +
-            "ELSE 2 END, r.checkinDate ASC")
+            "ELSE 2 END, r.checkin ASC")
     Page<Reservation> findReservationsByUserId(Long userId, Pageable pageable);
 
     // 특정 예약의 상세 정보 조회 (연관된 캠프, 주소 정보 포함)
@@ -27,7 +27,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     Optional<Reservation> findById(Long id);
 
     // 예약완료 상태 중 체크인일자가 가까운 예약 정보 조회
-    @Query("SELECT r FROM Reservation r WHERE r.user.id = :userId AND r.status = 'RESERVED' ORDER BY r.checkinDate ASC LIMIT 1")
+    @Query("SELECT r FROM Reservation r WHERE r.user.id = :userId AND r.status = 'RESERVED' ORDER BY r.checkin ASC LIMIT 1")
     Reservation findUpcomingReservationByUserId(Long userId);
 
 
