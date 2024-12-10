@@ -15,6 +15,7 @@ import site.campingon.campingon.camp.repository.CampSiteRepository;
 import site.campingon.campingon.common.exception.ErrorCode;
 import site.campingon.campingon.common.exception.GlobalException;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -84,7 +85,7 @@ public class CampSiteService {
 
     // 예약가능한 특정 캠핑지 조회
     @Transactional(readOnly = true)
-    public CampSiteResponseDto getCampSite(Long campId, Long siteId, LocalDateTime checkin, LocalDateTime checkout) {
+    public CampSiteResponseDto getCampSite(Long campId, Long siteId, LocalDate checkin, LocalDate checkout) {
 
         if (checkin == null || checkout == null) {
             throw new GlobalException(ErrorCode.REQUIRED_RESERVATION_DATE);

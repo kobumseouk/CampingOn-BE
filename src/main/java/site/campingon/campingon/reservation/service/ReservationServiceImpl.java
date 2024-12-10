@@ -16,6 +16,8 @@ import site.campingon.campingon.reservation.entity.Reservation;
 import site.campingon.campingon.reservation.utils.ReservationValidate;
 import site.campingon.campingon.user.entity.User;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class ReservationServiceImpl implements ReservationService {
@@ -67,15 +69,20 @@ public class ReservationServiceImpl implements ReservationService {
 
         Camp camp = reservationValidate.validateCampById(requestDto.getCampId());
 
+        LocalDateTime checkin = requestDto.getCheckin().atTime(15, 0);
+        LocalDateTime checkout = requestDto.getCheckout().atTime(11, 0);
+
         Reservation reservation = reservationMapper.toEntity(requestDto)
                 .toBuilder()
                 .user(user)
                 .camp(camp)
                 .campSite(campSite)
+                .checkin(checkin)
+                .checkout(checkout)
                 .status(ReservationStatus.RESERVED)
                 .build();
 
-        reservation.setDefaultCheckTime(requestDto.getCheckin(), requestDto.getCheckout());
+
 
         reservationRepository.save(reservation);
     }

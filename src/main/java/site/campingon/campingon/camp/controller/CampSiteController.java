@@ -3,6 +3,7 @@ package site.campingon.campingon.camp.controller;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import site.campingon.campingon.camp.dto.CampSiteListResponseDto;
@@ -10,7 +11,7 @@ import site.campingon.campingon.camp.dto.CampSiteResponseDto;
 import site.campingon.campingon.camp.service.CampSiteReserveService;
 import site.campingon.campingon.camp.service.CampSiteService;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -27,11 +28,11 @@ public class CampSiteController {
     @GetMapping("/{campId}/available")
     public ResponseEntity<List<CampSiteListResponseDto>> getAvailableCampSites(@PathVariable("campId") Long campId,
                                                                                @RequestParam(value = "checkin")
-                                                                               @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
-                                                                               LocalDateTime checkin,
+                                                                               @DateTimeFormat(pattern = "yyyy-MM-dd")
+                                                                               LocalDate checkin,
                                                                                @RequestParam(value = "checkout")
-                                                                               @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
-                                                                               LocalDateTime checkout) {
+                                                                               @DateTimeFormat(pattern = "yyyy-MM-dd")
+                                                                               LocalDate checkout) {
 
         return ResponseEntity.ok(campSiteReserveService.getAvailableCampSites(campId, checkin, checkout));
     }
@@ -41,11 +42,13 @@ public class CampSiteController {
     public ResponseEntity<CampSiteResponseDto> getCampSite(@PathVariable("campId") Long campId,
                                                            @PathVariable("siteId") Long siteId,
                                                            @RequestParam(value = "checkin")
-                                                           @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
-                                                           LocalDateTime checkin,
+                                                           @DateTimeFormat(pattern = "yyyy-MM-dd")
+//                                                           @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
+                                                           LocalDate checkin,
                                                            @RequestParam(value = "checkout")
-                                                           @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
-                                                           LocalDateTime checkout) {
+                                                           @DateTimeFormat(pattern = "yyyy-MM-dd")
+//                                                           @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
+                                                           LocalDate checkout) {
 
         return ResponseEntity.ok(campSiteService.getCampSite(campId, siteId, checkin, checkout));
     }
