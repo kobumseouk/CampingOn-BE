@@ -10,7 +10,7 @@ import site.campingon.campingon.camp.entity.Induty;
 @AllArgsConstructor
 public class CampSiteResponseDto {
 
-    private Long id;
+    private Long siteId;
 
     private String indoorFacility;
 
