@@ -28,11 +28,8 @@ import java.util.stream.Collectors;
 public class CampService {
 
   private final CampRepository campRepository;
-  private final MongoSearchClient searchInfoRepositoryImpl;
-  private final UserKeywordRepository userKeywordRepository;
   private final BookmarkRepository bookMarkRepository;
   private final CampMapper campMapper;
-
 
   // 인기 캠핑장 조회
   public Page<CampListResponseDto> getPopularCamps(Long userId, Pageable pageable) {

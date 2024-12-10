@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MongoSearchClient {
     private final MongoTemplate mongoTemplate;
-    private static final String INDEX_NAME = "searchIndex";
+    private static final String SEARCH_INDEX = "searchIndex";
     private static final String AUTOCOMPLETE_INDEX = "autocompleteIndex";
     private static final String COLLECTION_NAME = "search_info";
 
@@ -65,7 +65,7 @@ public class MongoSearchClient {
                         "%s" +  // must clause를 조건부로 추가
                     "}" +
                 "}}",
-            INDEX_NAME,
+            SEARCH_INDEX,
             createShouldClauses(searchTerm, userKeywords),
             mustClause
         );
@@ -193,5 +193,45 @@ public class MongoSearchClient {
         }
 
         return variants;
+    }
+
+
+    // 검색어 자동완성
+    public List<String> getAutocompleteResults(String word) {
+        String searchQuery = String.format(
+            "{$search: {" +
+                "index: '%s'," +
+                "autocomplete: {" +
+                    "query: '%s'," +
+                    "path: 'name'," +
+                    "fuzzy: {maxEdits: 1}" +
+                "}" +
+            "}}",
+            AUTOCOMPLETE_INDEX,
+            word
+        );
+
+        String projectStage = "{$project: {name: 1}}";  // 이름만
+        String limitStage = "{$limit: 8}";  // 자동 검색란은 6개까지만
+
+        AggregationOperation searchOperation = context -> Document.parse(searchQuery);
+        AggregationOperation projectOperation = context -> Document.parse(projectStage);
+        AggregationOperation limitOperation = context -> Document.parse(limitStage);
+
+        List<Document> results = mongoTemplate.aggregate(
+            Aggregation.newAggregation(
+                searchOperation,
+                projectOperation,
+                limitOperation
+            ),
+            COLLECTION_NAME,
+            Document.class
+        ).getMappedResults();
+
+        return results.stream()
+            .map(doc -> doc.getString("name"))
+            .distinct()
+            .collect(Collectors.toList());
+        
     }
 }
