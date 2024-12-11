@@ -30,4 +30,16 @@ public class CampInfo {
     @Builder.Default
     @Column(name = "bookmark_cnt")
     private Integer bookmarkCnt = 0;
+
+    public void updateBookmarkCntUp() {
+        bookmarkCnt++;
+    }
+
+    public void updateBookmarkCntDown() {
+        bookmarkCnt--;
+    }
+
+    public void updateRecommendCntUp() {
+        recommendCnt++;
+    }
 }

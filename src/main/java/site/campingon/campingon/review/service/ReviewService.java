@@ -4,14 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import site.campingon.campingon.camp.entity.Camp;
-import site.campingon.campingon.camp.entity.CampSite;
+import site.campingon.campingon.camp.entity.CampInfo;
+import site.campingon.campingon.camp.repository.CampInfoRepository;
 import site.campingon.campingon.camp.repository.CampRepository;
-import site.campingon.campingon.camp.repository.CampSiteRepository;
 import site.campingon.campingon.common.exception.GlobalException;
 import site.campingon.campingon.common.s3bucket.service.S3BucketService;
 import site.campingon.campingon.reservation.entity.Reservation;
@@ -19,7 +18,6 @@ import site.campingon.campingon.reservation.entity.ReservationStatus;
 import site.campingon.campingon.reservation.repository.ReservationRepository;
 import site.campingon.campingon.review.dto.ReviewCreateRequestDto;
 import site.campingon.campingon.review.dto.ReviewResponseDto;
-import site.campingon.campingon.review.dto.ReviewUpdateRequestDto;
 import site.campingon.campingon.review.entity.Review;
 import site.campingon.campingon.review.entity.ReviewImage;
 import site.campingon.campingon.review.mapper.ReviewImageMapper;
@@ -30,7 +28,6 @@ import site.campingon.campingon.review.repository.ReviewRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static site.campingon.campingon.common.exception.ErrorCode.*;
 import static site.campingon.campingon.common.exception.ErrorCode.REVIEW_ALREADY_SUBMITTED;
@@ -48,6 +45,7 @@ public class ReviewService {
     private final ReviewMapper reviewMapper;
     private final ReviewImageMapper reviewImageMapper;
     private final S3BucketService s3BucketService;
+    private final CampInfoRepository campInfoRepository;
 
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
     private static final int MAX_FILES_COUNT = 5; // 최대 파일 개수 제한
@@ -85,6 +83,13 @@ public class ReviewService {
         List<ReviewImage> reviewImages = processReviewImages(requestDto.getS3Images(), savedReview);
         if (!reviewImages.isEmpty()) {
             reviewImageRepository.saveAll(reviewImages);
+        }
+
+        //추천한다면 CampInfo 업데이트
+        CampInfo campInfo = campInfoRepository.findByCampId(campId)
+                .orElseThrow(() -> new GlobalException(CAMP_NOT_FOUND_BY_ID));
+        if (requestDto.isRecommended()) {
+            campInfo.updateRecommendCntUp();
         }
 
         // 저장된 Review 엔티티를 ReviewResponseDto로 반환
