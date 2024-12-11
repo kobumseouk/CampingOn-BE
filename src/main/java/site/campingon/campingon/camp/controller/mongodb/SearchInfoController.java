@@ -19,6 +19,8 @@ import site.campingon.campingon.camp.service.mongodb.SearchInfoService;
 import site.campingon.campingon.common.jwt.CustomUserDetails;
 import site.campingon.campingon.common.util.AuthenticateUser;
 
+import java.util.List;
+
 
 @Slf4j
 @Validated
@@ -59,4 +61,13 @@ public class SearchInfoController {
         userDetails.getName(), userDetails.getId(), PageRequest.of(page, size))
     );
   }
+
+  // 검색어 자동완성
+  @GetMapping("/autocomplete")
+  public ResponseEntity<List<String>> getAutocompleteResults(
+      @RequestParam(name = "word") String word
+  ) {
+    return ResponseEntity.ok(searchInfoService.getAutocompleteResults(word));
+  }
+
 }

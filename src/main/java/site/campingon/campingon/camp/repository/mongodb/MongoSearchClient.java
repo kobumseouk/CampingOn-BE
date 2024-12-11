@@ -21,7 +21,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MongoSearchClient {
     private final MongoTemplate mongoTemplate;
-    private static final String INDEX_NAME = "searchIndex";
+    private static final String SEARCH_INDEX = "searchIndex";
+    private static final String AUTOCOMPLETE_INDEX = "autocompleteIndex";
     private static final String COLLECTION_NAME = "search_info";
 
     private static final String PROJECT_STAGE = "{" +
@@ -39,9 +40,17 @@ public class MongoSearchClient {
         String mustClause = "";
         if (StringUtils.hasText(city)) {
             List<String> cityVariants = getCityVariants(city);
-            List<String> phrases = cityVariants.stream()
+            List<String> phrases = new ArrayList<>();
+
+            // city 검색을 위한 phrases
+            phrases.addAll(cityVariants.stream()
                 .map(variant -> "{phrase: {query: '" + variant + "', path: 'address.city'}}")
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
+
+            //  state에서 제주시 추가 검색
+            if (city.equals("제주특별자치도")) {
+                phrases.add("{phrase: {query: '제주시', path: 'address.state'}}");
+            }
 
             mustClause = ", must: [{compound: {should: [" + String.join(",", phrases) + "]}}]";
         }
@@ -56,7 +65,7 @@ public class MongoSearchClient {
                         "%s" +  // must clause를 조건부로 추가
                     "}" +
                 "}}",
-            INDEX_NAME,
+            SEARCH_INDEX,
             createShouldClauses(searchTerm, userKeywords),
             mustClause
         );
@@ -96,6 +105,9 @@ public class MongoSearchClient {
             clauses.add("{text: {query: '" + searchTerm + "', path: 'address.state', score: {boost: {value: 3}}, fuzzy: {maxEdits: 1}}}");
             clauses.add("{text: {query: '" + searchTerm + "', path: 'address.city', score: {boost: {value: 2}}}}");
             clauses.add("{text: {query: '" + searchTerm + "', path: 'intro', score: {boost: {value: 2}}}}");
+
+
+            //clauses.add("{regex: {query: '" + searchTerm + "', path: 'name', allowAnalyzedField: true, score: {boost: {value: 3.5}}}}");
         }
 
         if (userKeywords != null && !userKeywords.isEmpty()) {
@@ -170,13 +182,56 @@ public class MongoSearchClient {
             variants.add(base);        // 경기
         }
 
-        // 특별자치도 케이스 (제주)
+        // 특별자치도 케이스 (제주, 강원)
         else if (city.endsWith("특별자치도")) {
             String base = city.replace("특별자치도", "");
-            variants.add(base);        // 제주
-            variants.add(base + "도"); // 제주도
+            variants.add(base);         // 제주
+            variants.add(base + "도");  // 제주도
+            /*variants.add(base + "시");  // 제주시
+            variants.add(base + "특별시");  // 제주특별시
+            variants.add(base + "특별자치시");   // 제주특별자치시*/
         }
 
         return variants;
+    }
+
+
+    // 검색어 자동완성
+    public List<String> getAutocompleteResults(String word) {
+        String searchQuery = String.format(
+            "{$search: {" +
+                "index: '%s'," +
+                "autocomplete: {" +
+                    "query: '%s'," +
+                    "path: 'name'," +
+                    "fuzzy: {maxEdits: 1}" +
+                "}" +
+            "}}",
+            AUTOCOMPLETE_INDEX,
+            word
+        );
+
+        String projectStage = "{$project: {name: 1}}";  // 이름만
+        String limitStage = "{$limit: 8}";  // 자동 검색란은 6개까지만
+
+        AggregationOperation searchOperation = context -> Document.parse(searchQuery);
+        AggregationOperation projectOperation = context -> Document.parse(projectStage);
+        AggregationOperation limitOperation = context -> Document.parse(limitStage);
+
+        List<Document> results = mongoTemplate.aggregate(
+            Aggregation.newAggregation(
+                searchOperation,
+                projectOperation,
+                limitOperation
+            ),
+            COLLECTION_NAME,
+            Document.class
+        ).getMappedResults();
+
+        return results.stream()
+            .map(doc -> doc.getString("name"))
+            .distinct()
+            .collect(Collectors.toList());
+        
     }
 }
