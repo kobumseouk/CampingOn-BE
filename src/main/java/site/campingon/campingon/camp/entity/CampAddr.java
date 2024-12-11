@@ -13,7 +13,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "camp_addr")
+@Table(
+        name = "camp_addr",
+        indexes = {
+                @Index(name = "idx_camp_addr_city", columnList = "city"), // city 컬럼에 인덱스 추가
+                @Index(name = "idx_camp_addr_street_addr", columnList = "street_addr")
+        }
+)
 public class CampAddr {
 
     @Id

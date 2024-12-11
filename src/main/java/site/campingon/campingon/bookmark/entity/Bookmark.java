@@ -13,6 +13,13 @@ import site.campingon.campingon.user.entity.User;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(
+        indexes = {
+                @Index(name = "idx_id", columnList = "id"),
+                @Index(name = "idx_bookmark_camp_id", columnList = "camp_id"),
+                @Index(name = "idx_created_at", columnList = "createdAt")
+        }
+)
 public class Bookmark extends BaseEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
