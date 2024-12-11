@@ -69,20 +69,9 @@ public class Reservation extends BaseEntity {
         this.cancelReason = reason;
     }
 
-    // 체크인 체크아웃 시간 고정 설정
-    public void setDefaultCheckTime(LocalDateTime checkin, LocalDateTime checkout) {
-        this.checkin = checkin.withHour(15).truncatedTo(ChronoUnit.HOURS);
-        this.checkout = checkout.withHour(11).truncatedTo(ChronoUnit.HOURS);
-    }
-
-
-    // json 반환 시 파싱해서 반환
-    public String[] parseDateTime(LocalDateTime checkin, LocalDateTime checkout) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        return new String[] {
-                checkin.format(formatter),
-                checkout.format(formatter)
-        };
+    // 상태 변경
+    public void changeStatus(ReservationStatus status) {
+        this.status = status;
     }
 
 }

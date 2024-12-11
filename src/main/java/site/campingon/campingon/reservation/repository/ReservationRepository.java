@@ -9,6 +9,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import site.campingon.campingon.reservation.entity.Reservation;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -31,5 +33,5 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("SELECT r FROM Reservation r WHERE r.user.id = :userId AND r.status = 'RESERVED' ORDER BY r.checkin ASC LIMIT 1")
     Reservation findUpcomingReservationByUserId(@Param("userId")Long userId);
 
-
+    List<Reservation> findByCheckin(LocalDateTime targetTime);
 }
