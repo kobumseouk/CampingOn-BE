@@ -10,6 +10,7 @@ public class SecurityPath {
         "/api/users/check-duplicate",
         "/",
         "/api/mongo/camps/search",
+        "/api/mongo/camps/autocomplete",
         "/api/camps/*/available",
         "/api/camps/*"
     };
@@ -26,7 +27,10 @@ public class SecurityPath {
         "/api/logout",
         "/api/keywords",
         "/api/keywords/me",
-        "/api/camps/bookmarked"
+        "/api/camps/bookmarked",
+        "/api/camps/reviews/*",
+        "/api/camps/*/reviews",
+        "/api/camps/*/reviews/*"
     };
 
     // hasRole("ADMIN")
