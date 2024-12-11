@@ -41,23 +41,23 @@
 
 # 배포 환경
 ```
-	- 서버 환경
-	- 서버: AWS EC2 (Ubuntu 22.04.5 LTS, GNU/Linux 6.8.0-1019-aws x86_64)
-		- 애플리케이션 서버:
-			- Spring Boot (내장 서버 사용)
-			- Docker 컨테이너 환경 (멀티 스테이지 빌드)
-			- Java Runtime: openjdk version “21.0.4”
-	- 리버스 프록시:
-		- Nginx (v1.18.0) - EC2 인스턴스에 직접 설치 (TLSv1.2, TLSv1.3 지원)
-	- 데이터베이스:
-		- AWS RDS: MySQL Community (8.0.39)
-		- MongoDB: 특정 데이터 저장 용도 (검색 및 추천)
-		- Redis: Docker 컨테이너로 관리
-	- 파일 저장소: AWS S3 (이미지 파일 저장 용도)
-	- 도메인 및 DNS:
-		- 가비아에서 구매한 도메인 camping-on.site, AWS Route 53으로 관리
-		- EC2 인스턴스의 퍼블릭 IP에 도메인 연결
-		- HTTPS 통신 (Let’s Encrypt SSL/TLS 인증서 사용, auto-renewal 활성화)
+- 서버 환경
+- 서버: AWS EC2 (Ubuntu 22.04.5 LTS, GNU/Linux 6.8.0-1019-aws x86_64)
+	- 애플리케이션 서버:
+		- Spring Boot (내장 서버 사용)
+		- Docker 컨테이너 환경 (멀티 스테이지 빌드)
+		- Java Runtime: openjdk version “21.0.4”
+- 리버스 프록시:
+	- Nginx (v1.18.0) - EC2 인스턴스에 직접 설치 (TLSv1.2, TLSv1.3 지원)
+- 데이터베이스:
+	- AWS RDS: MySQL Community (8.0.39)
+	- MongoDB: 특정 데이터 저장 용도 (검색 및 추천)
+	- Redis: Docker 컨테이너로 관리
+- 파일 저장소: AWS S3 (이미지 파일 저장 용도)
+- 도메인 및 DNS:
+	- 가비아에서 구매한 도메인 camping-on.site, AWS Route 53으로 관리
+	- EC2 인스턴스의 퍼블릭 IP에 도메인 연결
+	- HTTPS 통신 (Let’s Encrypt SSL/TLS 인증서 사용, auto-renewal 활성화)
 ```
 
 
