@@ -37,6 +37,7 @@ public interface ReviewMapper {
 
     @Mapping(target = "reviewId", source = "id")
     @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "campId", source = "camp.id")
     @Mapping(target = "recommended", source = "recommend")
     @Mapping(target = "images", expression = "java(review.getReviewImages() != null ? review.getReviewImages().stream().map(image -> image.getImageUrl()).collect(Collectors.toList()) : new ArrayList<>())")
     ReviewResponseDto toResponseDto(Review review);
