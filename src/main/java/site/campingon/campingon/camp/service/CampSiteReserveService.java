@@ -13,6 +13,7 @@ import site.campingon.campingon.common.exception.ErrorCode;
 import site.campingon.campingon.common.exception.GlobalException;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,11 +29,15 @@ public class CampSiteReserveService {
 
     // 캠핑장의 예약 가능한 SiteType 별 캠핑지 조회
     @Transactional(readOnly = true)
-    public List<CampSiteListResponseDto> getAvailableCampSites(Long campId, LocalDateTime checkin, LocalDateTime checkout) {
+    public List<CampSiteListResponseDto> getAvailableCampSites(Long campId, LocalDate checkinDate, LocalDate checkoutDate) {
 
-        if (checkin == null || checkout == null) {
+        if (checkinDate == null || checkoutDate == null) {
             throw new GlobalException(ErrorCode.REQUIRED_RESERVATION_DATE);
         }
+
+        // LocalDate(JSON) -> LocalDateTime(DB)
+        LocalDateTime checkin = checkinDate.atTime(15, 0);
+        LocalDateTime checkout = checkoutDate.atTime(11, 0);
 
         campRepository.findById(campId)
                 .orElseThrow(() -> new GlobalException(ErrorCode.CAMP_NOT_FOUND_BY_ID));
