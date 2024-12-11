@@ -58,6 +58,7 @@ public class SearchInfoService {
                 if (userId != 0L) {
                     dto.setMarked(bookmarkRepository.existsByCampIdAndUserId(searchInfo.getCampId(), userId));
                 }
+
                 return dto;
             })
             .collect(Collectors.toList());
@@ -96,5 +97,13 @@ public class SearchInfoService {
             .collect(Collectors.toList());
 
         return new PageImpl<>(dtoList, pageable, searchResult.getTotal());
+    }
+
+    // 검색어 자동완성
+    public List<String> getAutocompleteResults(String word) {
+        if (!StringUtils.hasText(word) || word.length() < 3) {
+            return new ArrayList<>();
+        }
+        return mongoSearchClient.getAutocompleteResults(word);
     }
 }

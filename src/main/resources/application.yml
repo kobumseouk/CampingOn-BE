@@ -2,6 +2,7 @@ spring:
   data:
     mongodb:
       uri: mongodb+srv://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@${MONGODB_URL}/${MONGODB_NAME}?retryWrites=true&w=majority&appName=CampingOn
+      auto-index-creation: true
     redis:
       host: campingon-redis
       port: 6379
