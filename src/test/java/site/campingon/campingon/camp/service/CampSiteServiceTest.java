@@ -19,6 +19,7 @@ import site.campingon.campingon.camp.repository.CampRepository;
 import site.campingon.campingon.camp.repository.CampSiteRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Collections;
@@ -89,7 +90,10 @@ class CampSiteServiceTest {
     LocalDate checkout = LocalDate.of(2023, 10, 5);
     List<CampSite> availableCampSites = Arrays.asList(mockCampSite);
 
-    when(campSiteRepository.findAvailableCampSites(campId, checkin, checkout)).thenReturn(availableCampSites);
+    LocalDateTime newCheckin = LocalDateTime.of(2023, 10, 1,0,0);
+    LocalDateTime newCheckout = LocalDateTime.of(2023, 10, 5,0,0);
+
+    when(campSiteRepository.findAvailableCampSites(campId, newCheckin, newCheckout)).thenReturn(availableCampSites);
     when(campSiteMapper.toCampSiteListResponseDto(any(CampSite.class))).thenReturn(mockCampSiteListDto);
 
     // when
@@ -100,7 +104,7 @@ class CampSiteServiceTest {
     assertEquals(1, result.size());
     assertEquals(mockCampSiteListDto, result.get(0));
 
-    verify(campSiteRepository).findAvailableCampSites(campId, checkin, checkout);
+    verify(campSiteRepository).findAvailableCampSites(campId, newCheckin, newCheckout);
     verify(campSiteMapper).toCampSiteListResponseDto(any(CampSite.class));
 
   }
@@ -115,7 +119,10 @@ class CampSiteServiceTest {
     LocalDate checkout = LocalDate.of(2023, 10, 5);
     List<CampSite> emptyCampSites = Collections.emptyList();
 
-    when(campSiteRepository.findAvailableCampSites(campId, checkin, checkout)).thenReturn(emptyCampSites);
+    LocalDateTime newCheckin = LocalDateTime.of(2023, 10, 1,0,0);
+    LocalDateTime newCheckout = LocalDateTime.of(2023, 10, 5,0,0);
+
+    when(campSiteRepository.findAvailableCampSites(campId, newCheckin, newCheckout)).thenReturn(emptyCampSites);
 
     // when
     List<CampSiteListResponseDto> result = campSiteReserveService.getAvailableCampSites(campId, checkin, checkout);
@@ -124,7 +131,7 @@ class CampSiteServiceTest {
     assertNotNull(result);
     assertTrue(result.isEmpty());
 
-    verify(campSiteRepository).findAvailableCampSites(campId, checkin, checkout);
+    verify(campSiteRepository).findAvailableCampSites(campId, newCheckin, newCheckout);
     verify(campSiteMapper, never()).toCampSiteListResponseDto(any(CampSite.class));
   }
 
@@ -174,7 +181,6 @@ class CampSiteServiceTest {
             .price(campSite.getPrice())
             .maximumPeople(campSite.getMaximumPeople())
             .indoorFacility(campSite.getIndoorFacility())
-            .isAvailable(campSite.isAvailable())
             .build());
 
     // When
@@ -232,7 +238,6 @@ class CampSiteServiceTest {
             .price(updatedCampSite.getPrice())
             .maximumPeople(updatedCampSite.getMaximumPeople())
             .indoorFacility(updatedCampSite.getIndoorFacility())
-            .isAvailable(updatedCampSite.isAvailable())
             .build());
 
     // When

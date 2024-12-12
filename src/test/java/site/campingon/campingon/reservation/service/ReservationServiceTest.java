@@ -24,6 +24,7 @@ import site.campingon.campingon.reservation.repository.ReservationRepository;
 import site.campingon.campingon.reservation.utils.ReservationValidate;
 import site.campingon.campingon.user.entity.User;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -138,8 +139,8 @@ class ReservationServiceTest {
         ReservationCreateRequestDto requestDto = new ReservationCreateRequestDto(
             mockCamp.getId(),
             mockCampSite.getId(),
-            LocalDateTime.now(),
-            LocalDateTime.now().plusDays(1),
+            LocalDate.now(),
+            LocalDate.now().plusDays(1),
             2,
             50000
         );
@@ -189,8 +190,8 @@ class ReservationServiceTest {
         ReservationCreateRequestDto requestDto = new ReservationCreateRequestDto(
             mockCamp.getId(),
             mockCampSite.getId(),
-            LocalDateTime.now(),
-            LocalDateTime.now().plusDays(1),
+            LocalDate.now(),
+            LocalDate.now().plusDays(1),
             2,
             50000
         );
@@ -212,8 +213,8 @@ class ReservationServiceTest {
         ReservationCreateRequestDto requestDto = new ReservationCreateRequestDto(
             mockCamp.getId(),
             mockCampSite.getId(),
-            LocalDateTime.now(),
-            LocalDateTime.now().plusDays(1),
+            LocalDate.now(),
+            LocalDate.now().plusDays(1),
             2,
             50000
         );
