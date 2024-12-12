@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import site.campingon.campingon.common.jwt.JwtToken;
-import site.campingon.campingon.common.jwt.JwtTokenProvider;
 import site.campingon.campingon.common.util.CookieUtil;
 import site.campingon.campingon.user.dto.UserSignInRequestDto;
+import site.campingon.campingon.user.dto.UserTokenResponseDto;
 import site.campingon.campingon.user.service.UserAuthService;
 
 @Slf4j
@@ -28,7 +28,6 @@ import site.campingon.campingon.user.service.UserAuthService;
 @RequestMapping("/api")
 public class UserAuthController {
 
-    private final JwtTokenProvider jwtTokenProvider;
     @Value("${jwt.refresh-expired}")
     private Long refreshTokenExpired;
 
@@ -36,19 +35,19 @@ public class UserAuthController {
 
     // 로그인 처리
     @PostMapping("/login")
-    public ResponseEntity<JwtToken> login(@RequestBody UserSignInRequestDto userSignInRequestDto,
+    public ResponseEntity<UserTokenResponseDto> login(@RequestBody UserSignInRequestDto userSignInRequestDto,
         HttpServletResponse response) throws IOException {
 
         JwtToken jwtToken = userAuthService.login(userSignInRequestDto);
         CookieUtil.setCookie(response, "refreshToken", jwtToken.getRefreshToken(),refreshTokenExpired);
 
-        return ResponseEntity.ok(jwtToken);
+        return ResponseEntity.ok(new UserTokenResponseDto(jwtToken.getAccessToken()));
     }
 
 
     // 토큰 재발급
     @GetMapping("/token/refresh")
-    public ResponseEntity<JwtToken> refreshAccessToken(
+    public ResponseEntity<UserTokenResponseDto> refreshAccessToken(
         @CookieValue(name = "refreshToken", required = false) String refreshToken,
         HttpServletResponse response
     ) throws IOException {
@@ -61,7 +60,7 @@ public class UserAuthController {
         CookieUtil.setCookie(response, "refreshToken", jwtToken.getRefreshToken(), refreshTokenExpired);
 
         // JWT 토큰 정보 반환
-        return ResponseEntity.ok(jwtToken);
+        return ResponseEntity.ok(new UserTokenResponseDto(jwtToken.getAccessToken()));
     }
 
     // 로그아웃 API
