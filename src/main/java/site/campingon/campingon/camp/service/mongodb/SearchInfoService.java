@@ -101,7 +101,7 @@ public class SearchInfoService {
 
     // 검색어 자동완성
     public List<String> getAutocompleteResults(String word) {
-        if (!StringUtils.hasText(word) || word.length() < 3) {
+        if (!StringUtils.hasText(word) || word.length() < 2) {
             return new ArrayList<>();
         }
         return mongoSearchClient.getAutocompleteResults(word);

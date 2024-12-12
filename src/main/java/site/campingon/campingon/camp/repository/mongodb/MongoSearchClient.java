@@ -100,20 +100,21 @@ public class MongoSearchClient {
         List<String> clauses = new ArrayList<>();
 
         if (StringUtils.hasText(searchTerm)) {
-            clauses.add("{text: {query: '" + searchTerm + "', path: 'name', score: {boost: {value: 5}}, fuzzy: {maxEdits: 2}}}");
+            clauses.add("{text: {query: '" + searchTerm + "', path: 'name', score: {boost: {value: 5}}, fuzzy: {maxEdits: 1}}}");
+            clauses.add("{text: {query: '" + searchTerm + "', path: 'name', score: {boost: {value: 4.5}}, fuzzy: {maxEdits: 2}}}");
+
             clauses.add("{text: {query: '" + searchTerm + "', path: 'hashtags', score: {boost: {value: 4}}, fuzzy: {maxEdits: 1}}}");
             clauses.add("{text: {query: '" + searchTerm + "', path: 'address.state', score: {boost: {value: 3}}, fuzzy: {maxEdits: 1}}}");
-            clauses.add("{text: {query: '" + searchTerm + "', path: 'address.city', score: {boost: {value: 2}}}}");
-            clauses.add("{text: {query: '" + searchTerm + "', path: 'intro', score: {boost: {value: 2}}}}");
+            clauses.add("{text: {query: '" + searchTerm + "', path: 'address.city', score: {boost: {value: 2.5}}}}");
+            clauses.add("{text: {query: '" + searchTerm + "', path: 'intro', score: {boost: {value: 2.5}}}}");
 
-
-            //clauses.add("{regex: {query: '" + searchTerm + "', path: 'name', allowAnalyzedField: true, score: {boost: {value: 3.5}}}}");
+            clauses.add("{regex: {query: '" + searchTerm + ".*', path: 'name', allowAnalyzedField: true, score: {boost: {value: 4}}}}");
         }
 
         if (userKeywords != null && !userKeywords.isEmpty()) {
             for (String keyword : userKeywords) {
                 if (StringUtils.hasText(keyword)) {
-                    clauses.add("{text: {query: '" + keyword + "', path: 'hashtags', score: {boost: {value: 2.5}}}}");
+                    clauses.add("{text: {query: '" + keyword + "', path: 'hashtags', score: {boost: {value: 2}}}}");
                 }
             }
         }
