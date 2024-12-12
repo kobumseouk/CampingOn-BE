@@ -31,7 +31,7 @@ public class ReservationStatusUpdate {
         List<Reservation> reservations = reservationRepository.findByCheckin(targetTime);
 
         reservations.stream()
-                .filter(reservation -> reservation.getStatus() != ReservationStatus.NOTCANCELABLE)
+                .filter(reservation -> reservation.getStatus() != ReservationStatus.RESERVED)
                 .forEach(reservation -> reservation.changeStatus(ReservationStatus.NOTCANCELABLE));
 
         reservationRepository.saveAll(reservations);
@@ -43,14 +43,14 @@ public class ReservationStatusUpdate {
     @Scheduled(cron = "0 0 15 * * ?")
     public void updateStatusToCompleted() {
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
-        LocalDateTime targetDate = now.toLocalDate().atTime(15, 0);
+        LocalDateTime targetTime = now.toLocalDate().atTime(15, 0);
 
-        List<Reservation> reservations = reservationRepository.findByCheckin(targetDate);
-        for (Reservation reservation : reservations) {
-            if (reservation.getStatus() != ReservationStatus.COMPLETED) {
-                reservation.changeStatus(ReservationStatus.COMPLETED);
-            }
-        }
+        List<Reservation> reservations = reservationRepository.findByCheckin(targetTime);
+
+        reservations.stream()
+                .filter(reservation -> reservation.getStatus() == ReservationStatus.RESERVED)
+                .forEach(reservation -> reservation.changeStatus(ReservationStatus.COMPLETED));
+
         reservationRepository.saveAll(reservations);
 
         log.debug("체크인완료 업데이트 스케줄러가 실행되었습니다.");
