@@ -83,7 +83,7 @@
 		- Docker 컨테이너 환경 (멀티 스테이지 빌드)
 		- Java Runtime: openjdk version “21.0.4”
 - 리버스 프록시:
-	- Nginx (v1.18.0) - EC2 인스턴스에 직접 설치 (TLSv1.2, TLSv1.3 지원)
+	- Nginx (v1.18.0) - EC2 인스턴스에 직접 설치 (TSLv1.2, TSLv1.3 지원)
 - 데이터베이스:
 	- AWS RDS: MySQL Community (8.0.39)
 	- MongoDB: 특정 데이터 저장 용도 (검색 및 추천)
@@ -92,7 +92,7 @@
 - 도메인 및 DNS:
 	- 가비아에서 구매한 도메인 camping-on.site, AWS Route 53으로 관리
 	- EC2 인스턴스의 퍼블릭 IP에 도메인 연결
-	- HTTPS 통신 (Let’s Encrypt SSL/TLS 인증서 사용, auto-renewal 활성화)
+	- HTTPS 통신 (Let’s Encrypt SSL/TSL 인증서 사용, auto-renewal 활성화)
 ```
 
 
@@ -101,3 +101,10 @@
 ### [🎯 트러블 슈팅 ↗︎](https://elice-track.notion.site/camping-on-trouble-shooting?v=0ca8756809124d7cb88d4ca112bdabd4&pvs=4)
 
 # 팀원 소개
+
+<div align="center">
+  
+|[윤지현](https://github.com/jhYun505)|[고범석](https://github.com/kobumseouk)|[박유찬](https://github.com/ParkYuChan03)|[이은주](https://github.com/silverzoo)|[이찬진](https://github.com/chanjin23)
+|:---:|:---:|:---:|:---:|:---:|
+|<img src="https://avatars.githubusercontent.com/u/81208791?v=4" width="120">|<img src="https://avatars.githubusercontent.com/u/73152527?v=4" width="120">|<img src="https://avatars.githubusercontent.com/u/173863179?v=4" width="120">|<img src="https://avatars.githubusercontent.com/u/27897137?v=4" width="120">|<img src="https://avatars.githubusercontent.com/u/160113940?v=4" width="120">|
+|팀장|팀원|팀원|팀원|팀원|
