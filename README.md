@@ -104,7 +104,8 @@
 
 
 # ERD
-![캠핑온 ERD v.241211](https://github.com/user-attachments/assets/c6b15994-8dc8-474b-81ad-06807050f6ec)
+![ERD v241213](https://github.com/user-attachments/assets/72959991-0f7f-417a-9d11-73ad5ae44039)
+
 
 # 배포 환경
 ```
