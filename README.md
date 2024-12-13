@@ -32,16 +32,51 @@
 - **External API**: [고캠핑 공공데이터 API](https://www.data.go.kr/data/15101933/openapi.do), [Kakao 지도 API](https://apis.map.kakao.com/)
   
 # 기능 소개
+## 주요 기능
+- 키워드 기반 추천 서비스
+- 향상된 검색 서비스
+- 예약 서비스
+
+## 유저
+### 회원 가입
+![회원 가입](https://github.com/user-attachments/assets/f9602f1f-1df4-4a5e-96d3-df4c2f577538)
+- 중복 확인을 하지 않으면 회원 가입 버튼이 활성화 되지 않음
+- 이메일, 닉네임, 비밀번호 형식이 맞지 않을 경우 사용자에게 안내
+
+### 로그인
+- 일반 회원 로그인
+![일반로그인](https://github.com/user-attachments/assets/58fffab4-ae9d-4cf1-8464-1d1e1ba5a5f2)
+  - 처음 로그인을 한 경우 키워드 선택창으로 이동
+- 구글 소셜 로그인
+![구글로그인](https://github.com/user-attachments/assets/64d8d82b-fe08-4165-800c-d3d7fa474d96)
+
+
+### 회원 정보 수정
+- 닉네임 변경
+![닉네임변경](https://github.com/user-attachments/assets/990a5c6f-938b-4386-8a6e-e75ae8c032b8)
+  - 닉네임 중복확인을 하지 않으면 수정이 불가능함
+- 비밀번호 변경
+![비밀번호 변경](https://github.com/user-attachments/assets/b8624a4c-70eb-4f63-9eca-377ab7c567aa)
+  - 비밀번호 변경 시 보안을 위해 자동 로그아웃 됨
+  - 이전 비밀번호와 동일한 비밀번호는 사용할 수 없음
+
+### 키워드 선택
+![키워드변경](https://github.com/user-attachments/assets/4b8a8e5e-c2c6-492a-852c-41a5ceddebea)
+  - 마이페이지에서도 키워드 변경이 가능
+
+### 회원 탈퇴
+![회원탈퇴](https://github.com/user-attachments/assets/e799d909-19fc-4b58-96a9-30517de4e553)
+  - 탈퇴 사유 기록을 통한 서비스 피드백
 
 # 아키텍처
-![아키텍처 다이어그램](https://github.com/user-attachments/assets/24a17d92-9bd8-41f2-96bf-e874953415db)
+![아키텍처 다이어그램](https://github.com/user-attachments/assets/02a5b73b-b856-4df7-992d-7d1024193400)
+
 
 # ERD
 ![캠핑온 ERD v.241211](https://github.com/user-attachments/assets/c6b15994-8dc8-474b-81ad-06807050f6ec)
 
 # 배포 환경
 ```
-- 서버 환경
 - 서버: AWS EC2 (Ubuntu 22.04.5 LTS, GNU/Linux 6.8.0-1019-aws x86_64)
 	- 애플리케이션 서버:
 		- Spring Boot (내장 서버 사용)
