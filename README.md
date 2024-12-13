@@ -68,6 +68,13 @@
 ![회원탈퇴](https://github.com/user-attachments/assets/e799d909-19fc-4b58-96a9-30517de4e553)
   - 탈퇴 사유 기록을 통한 서비스 피드백
 
+## 검색
+![eFBFxOts7z](https://github.com/user-attachments/assets/90ea2918-a5f3-4175-aa9c-409c6305b770)
+  - 디바운스를 적용한 자동완성
+  - 지역 선택 시 지역명을 우선적으로 검색
+  - 키워드와 연관된 필드들을 가중값에 따라 우선순위를 매겨 검색
+
+
 # 아키텍처
 ![아키텍처 다이어그램](https://github.com/user-attachments/assets/02a5b73b-b856-4df7-992d-7d1024193400)
 
