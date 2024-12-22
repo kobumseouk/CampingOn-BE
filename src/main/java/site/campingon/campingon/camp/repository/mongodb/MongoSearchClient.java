@@ -25,16 +25,18 @@ public class MongoSearchClient {
     private static final String AUTOCOMPLETE_INDEX = "autocompleteIndex";
     private static final String COLLECTION_NAME = "search_info";
 
-    private static final String PROJECT_STAGE = "{" +
-        "$project: {" +
-            "camp_id: 1," +
-            "name: 1," +
-            "intro: 1," +
-            "image_url: 1," +
-            "address: 1," +
-            "hashtags: 1," +
-            "score: {$meta: 'searchScore'}" +
-        "}}";
+    private static final String PROJECT_STAGE = """
+        {
+            $project: {
+                camp_id: 1,
+                name: 1,
+                intro: 1,
+                image_url: 1,
+                address: 1,
+                hashtags: 1,
+                score: {$meta: 'searchScore'}
+            }
+        }""";
 
     public SearchResultDto searchWithUserPreferences(String searchTerm, List<String> userKeywords, String city, Pageable pageable) {
         String mustClause = "";
@@ -44,40 +46,48 @@ public class MongoSearchClient {
 
             // city 검색을 위한 phrases
             phrases.addAll(cityVariants.stream()
-                .map(variant -> "{phrase: {query: '" + variant + "', path: 'address.city'}}")
-                .collect(Collectors.toList()));
+                .map("""
+                    {phrase: {
+                        query: '%s',
+                        path: 'address.city'
+                    }}"""::formatted)
+                .toList());
 
             //  state에서 제주시 추가 검색
             if (city.equals("제주특별자치도")) {
-                phrases.add("{phrase: {query: '제주시', path: 'address.state'}}");
+                phrases.add("""
+                    {phrase: {
+                        query: '제주시',
+                        path: 'address.state'
+                    }}""");
             }
 
-            mustClause = ", must: [{compound: {should: [" + String.join(",", phrases) + "]}}]";
+            mustClause = """
+                , must: [{
+                    compound: {
+                        should: [%s]
+                    }
+                }]""".formatted(String.join(",", phrases));
         }
-        /*", must: [{text: {query: '" + city + "', path: 'address.city'}}]" :
-        "";*/
 
-        String searchQuery = String.format(
-            "{$search: {" +
-                "index: '%s'," +
-                "compound: {" +
-                    "should: %s" +
-                        "%s" +  // must clause를 조건부로 추가
-                    "}" +
-                "}}",
-            SEARCH_INDEX,
-            createShouldClauses(searchTerm, userKeywords),
-            mustClause
-        );
+        String searchQuery = """
+            {
+                $search: {
+                    index: '%s',
+                    compound: {
+                        should: %s
+                        %s
+                    }
+                }
+            }""".formatted(SEARCH_INDEX, createShouldClauses(searchTerm, userKeywords), mustClause);
 
-        String facetStage = String.format(
-            "{$facet: {" +
-                    "results: [{$skip: %d}, {$limit: %d}]," +
-                    "total: [{$count: 'count'}]" +
-                "}}",
-            pageable.getOffset(),
-            pageable.getPageSize()
-        );
+        String facetStage = """
+            {
+                $facet: {
+                    results: [{$skip: %d}, {$limit: %d}],
+                    total: [{$count: 'count'}]
+                }
+            }""".formatted(pageable.getOffset(), pageable.getPageSize());
 
         AggregationOperation searchOperation = context -> Document.parse(searchQuery);
         AggregationOperation projectOperation = context -> Document.parse(PROJECT_STAGE);
@@ -199,21 +209,20 @@ public class MongoSearchClient {
 
     // 검색어 자동완성
     public List<String> getAutocompleteResults(String word) {
-        String searchQuery = String.format(
-            "{$search: {" +
-                "index: '%s'," +
-                "autocomplete: {" +
-                    "query: '%s'," +
-                    "path: 'name'," +
-                    "fuzzy: {maxEdits: 1}" +
-                "}" +
-            "}}",
-            AUTOCOMPLETE_INDEX,
-            word
-        );
+        String searchQuery = """
+            {
+                $search: {
+                    index: '%s',
+                    autocomplete: {
+                        query: '%s',
+                        path: 'name',
+                        fuzzy: {maxEdits: 1}
+                    }
+                }
+            }""".formatted(AUTOCOMPLETE_INDEX, word);
 
-        String projectStage = "{$project: {name: 1}}";  // 이름만
-        String limitStage = "{$limit: 8}";  // 자동 검색란은 6개까지만
+        String projectStage = "{$project: {name: 1}}";  // 캠핑장 이름만
+        String limitStage = "{$limit: 8}";  // 자동 검색란은 8개까지만
 
         AggregationOperation searchOperation = context -> Document.parse(searchQuery);
         AggregationOperation projectOperation = context -> Document.parse(projectStage);
