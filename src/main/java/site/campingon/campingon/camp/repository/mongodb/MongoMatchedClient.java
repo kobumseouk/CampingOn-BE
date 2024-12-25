@@ -13,14 +13,13 @@ import site.campingon.campingon.camp.dto.mongodb.SearchResultDto;
 import site.campingon.campingon.camp.entity.mongodb.SearchInfo;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 
 @Component
 @RequiredArgsConstructor
-public class MongoRecommendClient {
+public class MongoMatchedClient {
     private final MongoTemplate mongoTemplate;
     private static final String INDEX_NAME = "searchIndex";
     private static final String COLLECTION_NAME = "search_info";
@@ -40,7 +39,7 @@ public class MongoRecommendClient {
         }""";
 
     public SearchResultDto getMatchedCamps(List<String> userKeywords, Pageable pageable) {
-        String searchQuery = """
+        /*String searchQuery = """
             {
                 $search: {
                     index: '%s',
@@ -94,8 +93,74 @@ public class MongoRecommendClient {
             Document.class
         );
 
-        return processResults(results);
+        return processResults(results);*/
+
+        List<AggregationOperation> operations = new ArrayList<>();
+        operations.add(context -> Document.parse(buildSearchQuery(userKeywords)));
+        operations.add(context -> Document.parse(buildMatchCountStage(userKeywords)));
+        operations.add(context -> Document.parse(buildFilterStage()));
+        operations.add(context -> Document.parse(buildSortStage()));
+        operations.add(context -> Document.parse(PROJECT_STAGE));
+        operations.add(context -> Document.parse(buildFacetStage(pageable)));
+
+        AggregationResults<Document> results = mongoTemplate.aggregate(
+            Aggregation.newAggregation(operations),
+            COLLECTION_NAME,
+            Document.class
+        );
+
+        return processResults(results, pageable);
     }
+
+    private String buildSearchQuery(List<String> userKeywords) {
+        return """
+            {
+                $search: {
+                    index: '%s',
+                    compound: {
+                        should: [%s]
+                    }
+                }
+            }""".formatted(INDEX_NAME, createKeywordMatchClauses(userKeywords));
+    }
+
+    private String buildMatchCountStage(List<String> userKeywords) {
+        String keywordArray = userKeywords.stream()
+            .map(keyword -> "\"" + keyword + "\"")
+            .collect(Collectors.joining(", "));
+
+        return """
+            {
+                $addFields: {
+                    matchCount: {
+                        $size: {
+                            $setIntersection: ["$hashtags", [%s]]
+                        }
+                    }
+                }
+            }""".formatted(keywordArray);
+    }
+
+    // 매칭된 키워드가 1개 이상인 것만 필터링
+    private String buildFilterStage() {
+        return "{$match: {matchCount: {$gt: 0}}}";
+    }
+    // 매칭 수와 검색 점수로 정렬
+    private String buildSortStage() {
+        return "{$sort: {matchCount: -1, score: -1}}";
+    }
+
+    // 페이지 카운트
+    private String buildFacetStage(Pageable pageable) {
+        return """
+            {
+                $facet: {
+                    results: [{$skip: %d}, {$limit: %d}],
+                    total: [{$count: 'count'}]
+                }
+            }""".formatted(pageable.getOffset(), pageable.getPageSize());
+    }
+
 
     private String createKeywordMatchClauses(List<String> userKeywords) {
         if (userKeywords == null || userKeywords.isEmpty()) {
@@ -105,13 +170,13 @@ public class MongoRecommendClient {
         List<String> clauses = new ArrayList<>();
 
         // 첫 번째 키워드 - 가장 높은 가중치
-        if (StringUtils.hasText(userKeywords.get(0))) {
+        if (StringUtils.hasText(userKeywords.getFirst())) {
             clauses.add("""
                 {text: {
                     query: '%s',
                     path: 'hashtags',
                     score: {boost: {value: 6.0}}
-                }}""".formatted(userKeywords.get(0)));
+                }}""".formatted(userKeywords.getFirst()));
         }
 
         // 두 번째 키워드
@@ -123,7 +188,6 @@ public class MongoRecommendClient {
                     score: {boost: {value: 5.0}}
                 }}""".formatted(userKeywords.get(1)));
         }
-
 
         // 기본 가중치
         if (userKeywords.size() > 2) {
@@ -144,33 +208,34 @@ public class MongoRecommendClient {
         return String.join(",", clauses);
     }
 
-    private SearchResultDto processResults(AggregationResults<Document> results) {
+
+    private SearchResultDto processResults(AggregationResults<Document> results, Pageable pageable) {
         Document result = results.getUniqueMappedResult();
         if (result == null) {
-            return new SearchResultDto(Collections.emptyList(), 0L);
+            return SearchResultDto.of(List.of(), 0L, pageable);
         }
 
-        List<Document> resultDocs = (List<Document>) result.get("results");
-        List<Document> totalDocs = (List<Document>) result.get("total");
+        /*List<Document> resultDocs = (List<Document>) result.get("results");
+        List<Document> totalDocs = (List<Document>) result.get("total");*/
+        List<Document> resultDocs = result.get("results", List.class);
+        List<Document> totalDocs = result.get("total", List.class);
 
         if (resultDocs == null) {
-            return new SearchResultDto(Collections.emptyList(), 0L);
+            return SearchResultDto.of(List.of(), 0L, pageable);
         }
 
         List<SearchInfo> searchResults = resultDocs.stream()
             .map(doc -> mongoTemplate.getConverter().read(SearchInfo.class, doc))
-            .collect(Collectors.toList());
+            .toList();
 
-        // Integer를 Long으로 안전하게 변환
         long total = 0L;
         if (totalDocs != null && !totalDocs.isEmpty()) {
-            Number count = totalDocs.get(0).get("count", Number.class);
-            if (count != null) {
-                total = count.longValue();
-            }
+            Number count = totalDocs.getFirst().get("count", Number.class);
+            total = count != null ? count.longValue() : 0L;
         }
 
-        return new SearchResultDto(searchResults, total);
+        // return new SearchResultDto(searchResults, total);
+        return SearchResultDto.of(searchResults, total, pageable);
     }
 
 }
