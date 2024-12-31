@@ -11,7 +11,6 @@ import site.campingon.campingon.bookmark.repository.BookmarkRepository;
 import site.campingon.campingon.camp.dto.CampListResponseDto;
 import site.campingon.campingon.camp.dto.mongodb.SearchCriteriaDto;
 import site.campingon.campingon.camp.dto.mongodb.SearchResultDto;
-import site.campingon.campingon.camp.entity.mongodb.CacheType;
 import site.campingon.campingon.camp.entity.mongodb.SearchInfo;
 import site.campingon.campingon.camp.mapper.mongodb.SearchInfoMapper;
 import site.campingon.campingon.camp.repository.mongodb.MongoSearchClient;
