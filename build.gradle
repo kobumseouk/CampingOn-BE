@@ -79,6 +79,10 @@ dependencies {
     implementation 'org.mongodb:mongodb-driver-sync'
     implementation 'org.mongodb:mongodb-driver-core'
 
+    // Caffeine
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'com.github.ben-manes.caffeine:caffeine'
+
     // redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 

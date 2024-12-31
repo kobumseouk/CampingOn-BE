@@ -28,9 +28,16 @@ public class BookmarkService {
   // 찜 기능 (토글활용)
   public void bookmarkCamp(Long campId, Long userId) {
     // 이미 찜 관계가 있는지 확인
-    Optional<Bookmark> existingBookmark = bookmarkRepository.findByCampIdAndUserId(campId, userId);
     CampInfo campInfo = campInfoRepository.findByCampId(campId)
             .orElseThrow(() -> new GlobalException(ErrorCode.CAMP_NOT_FOUND_BY_ID));
+
+    Camp camp = campRepository.findById(campId)
+        .orElseThrow(() -> new GlobalException(ErrorCode.CAMP_NOT_FOUND_BY_ID));
+
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new GlobalException(ErrorCode.BOOKMARK_USER_NOT_FOUND));
+
+    Optional<Bookmark> existingBookmark = bookmarkRepository.findByCampIdAndUserId(campId, userId);
 
     // 이미 찜 등록이 된경우
     if (existingBookmark.isPresent()) {
@@ -40,12 +47,7 @@ public class BookmarkService {
       return;  // 변경 후 반환
     }
 
-    // 새로운 찜 관계 생성
-    Camp camp = campRepository.findById(campId)
-        .orElseThrow(() -> new GlobalException(ErrorCode.CAMP_NOT_FOUND_BY_ID));
 
-    User user = userRepository.findById(userId)
-        .orElseThrow(() -> new GlobalException(ErrorCode.BOOKMARK_USER_NOT_FOUND));
 
     Bookmark bookmark = Bookmark.builder()
         .camp(camp)

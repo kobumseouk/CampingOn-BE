@@ -9,11 +9,11 @@ import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import site.campingon.campingon.camp.dto.mongodb.SearchCriteriaDto;
 import site.campingon.campingon.camp.dto.mongodb.SearchResultDto;
 import site.campingon.campingon.camp.entity.mongodb.SearchInfo;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,59 +25,88 @@ public class MongoSearchClient {
     private static final String AUTOCOMPLETE_INDEX = "autocompleteIndex";
     private static final String COLLECTION_NAME = "search_info";
 
-    private static final String PROJECT_STAGE = "{" +
-        "$project: {" +
-            "camp_id: 1," +
-            "name: 1," +
-            "intro: 1," +
-            "image_url: 1," +
-            "address: 1," +
-            "hashtags: 1," +
-            "score: {$meta: 'searchScore'}" +
-        "}}";
+    private static final String PROJECT_STAGE = """
+        {
+            $project: {
+                camp_id: 1,
+                name: 1,
+                intro: 1,
+                image_url: 1,
+                address: 1,
+                hashtags: 1,
+                score: {$meta: 'searchScore'}
+            }
+        }""";
 
-    public SearchResultDto searchWithUserPreferences(String searchTerm, List<String> userKeywords, String city, Pageable pageable) {
-        String mustClause = "";
+    public SearchResultDto search(SearchCriteriaDto criteria) {
+        List<AggregationOperation> operations = new ArrayList<>();
+
+        // Search Operation
+        operations.add(context -> Document.parse(buildSearchQuery(criteria)));
+
+        // Project Operation
+        operations.add(context -> Document.parse(PROJECT_STAGE));
+
+        // Facet Operation
+        operations.add(context -> Document.parse(buildFacetStage(criteria.getPageable())));
+
+        AggregationResults<Document> results = mongoTemplate.aggregate(
+            Aggregation.newAggregation(operations),
+            COLLECTION_NAME,
+            Document.class
+        );
+
+        return processResults(results, criteria.getPageable());
+
+        /*String mustClause = "";
         if (StringUtils.hasText(city)) {
             List<String> cityVariants = getCityVariants(city);
             List<String> phrases = new ArrayList<>();
 
             // city 검색을 위한 phrases
             phrases.addAll(cityVariants.stream()
-                .map(variant -> "{phrase: {query: '" + variant + "', path: 'address.city'}}")
-                .collect(Collectors.toList()));
+                .map("""
+                    {phrase: {
+                        query: '%s',
+                        path: 'address.city'
+                    }}"""::formatted)
+                .toList());
 
             //  state에서 제주시 추가 검색
             if (city.equals("제주특별자치도")) {
-                phrases.add("{phrase: {query: '제주시', path: 'address.state'}}");
+                phrases.add("""
+                    {phrase: {
+                        query: '제주시',
+                        path: 'address.state'
+                    }}""");
             }
 
-            mustClause = ", must: [{compound: {should: [" + String.join(",", phrases) + "]}}]";
+            mustClause = """
+                , must: [{
+                    compound: {
+                        should: [%s]
+                    }
+                }]""".formatted(String.join(",", phrases));
         }
-        /*", must: [{text: {query: '" + city + "', path: 'address.city'}}]" :
-        "";*/
 
-        String searchQuery = String.format(
-            "{$search: {" +
-                "index: '%s'," +
-                "compound: {" +
-                    "should: %s" +
-                        "%s" +  // must clause를 조건부로 추가
-                    "}" +
-                "}}",
-            SEARCH_INDEX,
-            createShouldClauses(searchTerm, userKeywords),
-            mustClause
-        );
+        String searchQuery = """
+            {
+                $search: {
+                    index: '%s',
+                    compound: {
+                        should: %s
+                        %s
+                    }
+                }
+            }""".formatted(SEARCH_INDEX, createShouldClauses(searchTerm, userKeywords), mustClause);
 
-        String facetStage = String.format(
-            "{$facet: {" +
-                    "results: [{$skip: %d}, {$limit: %d}]," +
-                    "total: [{$count: 'count'}]" +
-                "}}",
-            pageable.getOffset(),
-            pageable.getPageSize()
-        );
+        String facetStage = """
+            {
+                $facet: {
+                    results: [{$skip: %d}, {$limit: %d}],
+                    total: [{$count: 'count'}]
+                }
+            }""".formatted(pageable.getOffset(), pageable.getPageSize());
 
         AggregationOperation searchOperation = context -> Document.parse(searchQuery);
         AggregationOperation projectOperation = context -> Document.parse(PROJECT_STAGE);
@@ -93,63 +122,147 @@ public class MongoSearchClient {
             Document.class
         );
 
-        return processResults(results);
+        return processResults(results);*/
     }
 
-    private String createShouldClauses(String searchTerm, List<String> userKeywords) {
-        List<String> clauses = new ArrayList<>();
+    private String buildSearchQuery(SearchCriteriaDto criteria) {
+        String mustClause = buildMustClause(criteria.getCity());
+        String shouldClauses = buildShouldClauses(criteria.getSearchTerm(), criteria.getUserKeywords());
 
-        if (StringUtils.hasText(searchTerm)) {
-            clauses.add("{text: {query: '" + searchTerm + "', path: 'name', score: {boost: {value: 5}}, fuzzy: {maxEdits: 1}}}");
-            clauses.add("{text: {query: '" + searchTerm + "', path: 'name', score: {boost: {value: 4.5}}, fuzzy: {maxEdits: 2}}}");
+        return """
+            {
+                $search: {
+                    index: '%s',
+                    compound: {
+                        should: %s
+                        %s
+                    }
+                }
+            }""".formatted(SEARCH_INDEX, shouldClauses, mustClause);
+    }
 
-            clauses.add("{text: {query: '" + searchTerm + "', path: 'hashtags', score: {boost: {value: 4}}, fuzzy: {maxEdits: 1}}}");
-            clauses.add("{text: {query: '" + searchTerm + "', path: 'address.state', score: {boost: {value: 3}}, fuzzy: {maxEdits: 1}}}");
-            clauses.add("{text: {query: '" + searchTerm + "', path: 'address.city', score: {boost: {value: 2.5}}}}");
-            clauses.add("{text: {query: '" + searchTerm + "', path: 'intro', score: {boost: {value: 2.5}}}}");
-
-            clauses.add("{regex: {query: '" + searchTerm + ".*', path: 'name', allowAnalyzedField: true, score: {boost: {value: 4}}}}");
+    private String buildMustClause(String city) {
+        if (!StringUtils.hasText(city)) {
+            return "";
         }
 
-        if (userKeywords != null && !userKeywords.isEmpty()) {
-            for (String keyword : userKeywords) {
-                if (StringUtils.hasText(keyword)) {
-                    clauses.add("{text: {query: '" + keyword + "', path: 'hashtags', score: {boost: {value: 2}}}}");
+        List<String> cityVariants = getCityVariants(city);
+
+        // city 검색을 위한 phrases
+        List<String> phrases = new ArrayList<>(cityVariants.stream()
+            .map("""
+                {phrase: {
+                    query: '%s',
+                    path: 'address.city'
+                }}"""::formatted)
+            .toList());
+
+        // 제주특별자치도 특수 케이스
+        if (city.equals("제주특별자치도")) {
+            phrases.add("""
+                {phrase: {
+                    query: '제주시',
+                    path: 'address.state'
+                }}""");
+        }
+
+        return """
+            , must: [{
+                compound: {
+                    should: [%s]
                 }
-            }
+            }]""".formatted(String.join(",", phrases));
+    }
+
+    private String buildShouldClauses(String searchTerm, List<String> userKeywords) {
+        List<String> clauses = new ArrayList<>();
+
+        // 검색어 관련 조건
+        if (StringUtils.hasText(searchTerm)) {
+            addSearchTermClauses(clauses, searchTerm);
+        }
+
+        // 사용자 키워드 관련 조건
+        if (userKeywords != null && !userKeywords.isEmpty()) {
+            userKeywords.stream()
+                .filter(StringUtils::hasText)
+                .forEach(keyword -> clauses.add(createSearchClause("hashtags", keyword, 2.0f, 0)));
         }
 
         return clauses.isEmpty() ? "[]" : "[" + String.join(",", clauses) + "]";
     }
 
+    private void addSearchTermClauses(List<String> clauses, String searchTerm) {
+        clauses.add(createSearchClause("name", searchTerm, 5.0f, 1));
+        clauses.add(createSearchClause("name", searchTerm, 4.5f, 2));
+        clauses.add(createSearchClause("hashtags", searchTerm, 4.0f, 1));
+        clauses.add(createSearchClause("address.state", searchTerm, 3.0f, 1));
+        clauses.add(createSearchClause("address.city", searchTerm, 2.5f, 0));
+        clauses.add(createSearchClause("intro", searchTerm, 2.5f, 0));
 
-    private SearchResultDto processResults(AggregationResults<Document> results) {
+        // 정규식 전방 일치 검색
+        clauses.add("""
+            {regex: {
+                query: '%s.*',
+                path: 'name',
+                allowAnalyzedField: true,
+                score: {boost: {value: 4}}
+            }}""".formatted(searchTerm));
+    }
+
+    private String createSearchClause(String path, String query, float boost, int maxEdits) {
+        return """
+            {text: {
+                query: '%s',
+                path: '%s',
+                score: {boost: {value: %.1f}}%s
+            }}""".formatted(
+            query,
+            path,
+            boost,
+            maxEdits > 0 ? ", fuzzy: {maxEdits: " + maxEdits + "}" : ""
+        );
+    }
+
+
+    private String buildFacetStage(Pageable pageable) {
+        return """
+            {
+                $facet: {
+                    results: [{$skip: %d}, {$limit: %d}],
+                    total: [{$count: 'count'}]
+                }
+            }""".formatted(pageable.getOffset(), pageable.getPageSize());
+    }
+
+
+    private SearchResultDto processResults(AggregationResults<Document> results, Pageable pageable) {
         Document result = results.getUniqueMappedResult();
         if (result == null) {
-            return new SearchResultDto(Collections.emptyList(), 0L);
+            return SearchResultDto.of(List.of(), 0L, pageable);
         }
 
-        List<Document> resultDocs = (List<Document>) result.get("results");
-        List<Document> totalDocs = (List<Document>) result.get("total");
+        /*List<Document> resultDocs = (List<Document>) result.get("results");
+        List<Document> totalDocs = (List<Document>) result.get("total");*/
+        List<Document> resultDocs = result.get("results", List.class);
+        List<Document> totalDocs = result.get("total", List.class);
 
         if (resultDocs == null) {
-            return new SearchResultDto(Collections.emptyList(), 0L);
+            return SearchResultDto.of(List.of(), 0L, pageable);
         }
 
         List<SearchInfo> searchResults = resultDocs.stream()
             .map(doc -> mongoTemplate.getConverter().read(SearchInfo.class, doc))
-            .collect(Collectors.toList());
+            .toList();
 
-        // Integer를 Long으로 안전하게 변환
         long total = 0L;
         if (totalDocs != null && !totalDocs.isEmpty()) {
-            Number count = totalDocs.get(0).get("count", Number.class);
-            if (count != null) {
-                total = count.longValue();
-            }
+            Number count = totalDocs.getFirst().get("count", Number.class);
+            total = count != null ? count.longValue() : 0L;
         }
 
-        return new SearchResultDto(searchResults, total);
+        // return new SearchResultDto(searchResults, total);
+        return SearchResultDto.of(searchResults, total, pageable);
     }
 
     private List<String> getCityVariants(String city) {
@@ -199,40 +312,30 @@ public class MongoSearchClient {
 
     // 검색어 자동완성
     public List<String> getAutocompleteResults(String word) {
-        String searchQuery = String.format(
-            "{$search: {" +
-                "index: '%s'," +
-                "autocomplete: {" +
-                    "query: '%s'," +
-                    "path: 'name'," +
-                    "fuzzy: {maxEdits: 1}" +
-                "}" +
-            "}}",
-            AUTOCOMPLETE_INDEX,
-            word
-        );
-
-        String projectStage = "{$project: {name: 1}}";  // 이름만
-        String limitStage = "{$limit: 8}";  // 자동 검색란은 6개까지만
-
-        AggregationOperation searchOperation = context -> Document.parse(searchQuery);
-        AggregationOperation projectOperation = context -> Document.parse(projectStage);
-        AggregationOperation limitOperation = context -> Document.parse(limitStage);
-
-        List<Document> results = mongoTemplate.aggregate(
-            Aggregation.newAggregation(
-                searchOperation,
-                projectOperation,
-                limitOperation
-            ),
-            COLLECTION_NAME,
-            Document.class
-        ).getMappedResults();
-
-        return results.stream()
+        return mongoTemplate.aggregate(
+                Aggregation.newAggregation(
+                    context -> Document.parse("""
+                    {
+                        $search: {
+                            index: '%s',
+                            autocomplete: {
+                                query: '%s',
+                                path: 'name',
+                                fuzzy: {maxEdits: 1}
+                            }
+                        }
+                    }""".formatted(AUTOCOMPLETE_INDEX, word)),
+                    Aggregation.project("name"),
+                    Aggregation.limit(8)
+                ),
+                COLLECTION_NAME,
+                Document.class
+            )
+            .getMappedResults()
+            .stream()
             .map(doc -> doc.getString("name"))
             .distinct()
             .collect(Collectors.toList());
-        
     }
+
 }
