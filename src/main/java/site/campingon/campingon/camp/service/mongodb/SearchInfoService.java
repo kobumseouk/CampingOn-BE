@@ -1,6 +1,7 @@
 package site.campingon.campingon.camp.service.mongodb;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -10,6 +11,7 @@ import site.campingon.campingon.bookmark.repository.BookmarkRepository;
 import site.campingon.campingon.camp.dto.CampListResponseDto;
 import site.campingon.campingon.camp.dto.mongodb.SearchCriteriaDto;
 import site.campingon.campingon.camp.dto.mongodb.SearchResultDto;
+import site.campingon.campingon.camp.entity.mongodb.CacheType;
 import site.campingon.campingon.camp.entity.mongodb.SearchInfo;
 import site.campingon.campingon.camp.mapper.mongodb.SearchInfoMapper;
 import site.campingon.campingon.camp.repository.mongodb.MongoSearchClient;
@@ -108,6 +110,7 @@ public class SearchInfoService {
     }
 
     // 검색어 자동완성
+    @Cacheable(value = "autocomplete", key = "#word", unless = "#result.isEmpty()")
     public List<String> getAutocompleteResults(String word) {
         if (!StringUtils.hasText(word) || word.length() < 2) {
             return new ArrayList<>();
